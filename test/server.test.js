@@ -166,6 +166,87 @@ test('статика: index.html отдаётся с /', async () => {
 /* ---------- CORS ---------- */
 
 const SITE_ORIGIN = 'https://genkaok.github.io';
+const NEW_SITE_ORIGIN = 'https://haveibeenphpned.github.io';
+
+test('CORS: по умолчанию разрешены оба адреса сайта, ACAO эхом нужного origin', async () => {
+  const previous = process.env.ALLOWED_ORIGINS;
+  delete process.env.ALLOWED_ORIGINS;
+  const app = await startApp();
+  try {
+    for (const origin of [NEW_SITE_ORIGIN, SITE_ORIGIN]) {
+      const response = await fetch(`${app.url}/api/health`, { headers: { origin } });
+      assert.equal(response.status, 200);
+      assert.equal(
+        response.headers.get('access-control-allow-origin'),
+        origin,
+        `дефолтный CORS не разрешает ${origin}`,
+      );
+    }
+
+    const foreign = await fetch(`${app.url}/api/health`, {
+      headers: { origin: 'https://evil.example' },
+    });
+    assert.equal(foreign.headers.get('access-control-allow-origin'), null);
+  } finally {
+    await app.close();
+    if (previous === undefined) delete process.env.ALLOWED_ORIGINS;
+    else process.env.ALLOWED_ORIGINS = previous;
+  }
+});
+
+test('CORS preflight: новый origin получает 204 + ACAO и контрактные заголовки', async () => {
+  const previous = process.env.ALLOWED_ORIGINS;
+  delete process.env.ALLOWED_ORIGINS;
+  const app = await startApp();
+  try {
+    const response = await fetch(`${app.url}/api/check`, {
+      method: 'OPTIONS',
+      headers: {
+        origin: NEW_SITE_ORIGIN,
+        'access-control-request-method': 'POST',
+        'access-control-request-headers': 'content-type',
+      },
+    });
+    assert.equal(response.status, 204);
+    assert.equal(response.headers.get('access-control-allow-origin'), NEW_SITE_ORIGIN);
+    assert.equal(response.headers.get('access-control-allow-methods'), 'POST, GET, OPTIONS');
+    assert.equal(response.headers.get('access-control-allow-headers'), 'Content-Type');
+    assert.match(response.headers.get('vary') || '', /Origin/i);
+    assert.equal(await response.text(), '');
+  } finally {
+    await app.close();
+    if (previous === undefined) delete process.env.ALLOWED_ORIGINS;
+    else process.env.ALLOWED_ORIGINS = previous;
+  }
+});
+
+test('CORS: env ALLOWED_ORIGINS дополняет дефолты, а не заменяет их', async () => {
+  const previous = process.env.ALLOWED_ORIGINS;
+  process.env.ALLOWED_ORIGINS = 'https://env.example';
+  try {
+    const app = await startApp();
+    try {
+      for (const origin of ['https://env.example', NEW_SITE_ORIGIN, SITE_ORIGIN]) {
+        const response = await fetch(`${app.url}/api/health`, { headers: { origin } });
+        assert.equal(
+          response.headers.get('access-control-allow-origin'),
+          origin,
+          `env-список не должен перетирать дефолты: ${origin}`,
+        );
+      }
+
+      const foreign = await fetch(`${app.url}/api/health`, {
+        headers: { origin: 'https://evil.example' },
+      });
+      assert.equal(foreign.headers.get('access-control-allow-origin'), null);
+    } finally {
+      await app.close();
+    }
+  } finally {
+    if (previous === undefined) delete process.env.ALLOWED_ORIGINS;
+    else process.env.ALLOWED_ORIGINS = previous;
+  }
+});
 
 test('CORS preflight: OPTIONS /api/check с разрешённым origin → 204', async () => {
   const app = await startApp({ allowedOrigins: [SITE_ORIGIN] });
@@ -205,14 +286,16 @@ test('CORS preflight: чужой origin → 204 без Access-Control-Allow-Orig
   }
 });
 
-test('CORS: POST /api/check с разрешённым origin отдаёт allow-origin', async () => {
+test('CORS: POST /api/check с разрешённым origin отдаёт allow-origin (оба адреса)', async () => {
   const fixture = await startFixtureServer({ root: fixtures['php-8-4-27'] });
-  const app = await startApp({ allowedOrigins: [SITE_ORIGIN] });
+  const app = await startApp({ allowedOrigins: [NEW_SITE_ORIGIN, SITE_ORIGIN] });
   try {
-    const response = await postCheck(app.url, { url: fixture.url }, { origin: SITE_ORIGIN });
-    assert.equal(response.status, 200);
-    assert.equal(response.headers.get('access-control-allow-origin'), SITE_ORIGIN);
-    assert.match(response.headers.get('vary') || '', /Origin/i);
+    for (const origin of [NEW_SITE_ORIGIN, SITE_ORIGIN]) {
+      const response = await postCheck(app.url, { url: fixture.url }, { origin });
+      assert.equal(response.status, 200);
+      assert.equal(response.headers.get('access-control-allow-origin'), origin);
+      assert.match(response.headers.get('vary') || '', /Origin/i);
+    }
   } finally {
     await app.close();
     await fixture.close();
@@ -247,11 +330,11 @@ test('CORS: GET /api/health и ответы с ошибкой тоже соде�
   }
 });
 
-test('CORS: опция allowedOrigins важнее env, по умолчанию разрешён genkaok.github.io', async () => {
+test('CORS: опция allowedOrigins заменяет список (для тестов), env дополняет дефолты', async () => {
   const previous = process.env.ALLOWED_ORIGINS;
   process.env.ALLOWED_ORIGINS = 'https://env.example';
   try {
-    // Опция переопределяет env.
+    // Опция полностью заменяет список — так тесты изолируются от env.
     const fromOption = await startApp({ allowedOrigins: ['https://option.example'] });
     try {
       const allowed = await fetch(`${fromOption.url}/api/health`, {
@@ -267,25 +350,27 @@ test('CORS: опция allowedOrigins важнее env, по умолчанию 
       await fromOption.close();
     }
 
-    // Без опции список берётся из env.
+    // Без опции env-список объединяется с дефолтными адресами сайта.
     const fromEnvOnly = await startApp();
     try {
-      const allowed = await fetch(`${fromEnvOnly.url}/api/health`, {
-        headers: { origin: 'https://env.example' },
-      });
-      assert.equal(allowed.headers.get('access-control-allow-origin'), 'https://env.example');
+      for (const origin of ['https://env.example', NEW_SITE_ORIGIN, SITE_ORIGIN]) {
+        const allowed = await fetch(`${fromEnvOnly.url}/api/health`, { headers: { origin } });
+        assert.equal(allowed.headers.get('access-control-allow-origin'), origin);
+      }
     } finally {
       await fromEnvOnly.close();
     }
 
-    // Без env действует значение по умолчанию.
+    // Без env действуют значения по умолчанию.
     delete process.env.ALLOWED_ORIGINS;
     const byDefault = await startApp();
     try {
-      const allowed = await fetch(`${byDefault.url}/api/health`, {
-        headers: { origin: SITE_ORIGIN },
-      });
-      assert.equal(allowed.headers.get('access-control-allow-origin'), SITE_ORIGIN);
+      for (const origin of [NEW_SITE_ORIGIN, SITE_ORIGIN]) {
+        const allowed = await fetch(`${byDefault.url}/api/health`, {
+          headers: { origin },
+        });
+        assert.equal(allowed.headers.get('access-control-allow-origin'), origin);
+      }
 
       const foreign = await fetch(`${byDefault.url}/api/health`, {
         headers: { origin: 'https://evil.example' },

@@ -18,7 +18,9 @@ CVE-2026-109619  устаревшее состояние воркера межд
 ```
 
 - Репозиторий: <https://github.com/GenkaOk/haveibeenphpned>
-- Сайт (GitHub Pages): <https://genkaok.github.io/haveibeenphpned/>
+- Сайт (основной адрес, GitHub Pages):
+  <https://haveibeenphpned.github.io/> — зеркало
+  <https://genkaok.github.io/haveibeenphpned/> (старый адрес, работает)
 - API: размещается отдельно, адрес задаётся в `API_BASE` (см. «Деплой»).
 
 Первоисточники: [GHSA-w8hw-w9fx-j79w](https://github.com/advisories/GHSA-w8hw-w9fx-j79w),
@@ -60,8 +62,8 @@ PORT=8080 npm start
 - статика: `public/index.html`, `public/styles.css`, `public/app.js`,
   `public/i18n.js`, `public/config.js`;
 - все ссылки на ассеты относительные, поэтому один и тот же `public/`
-  работает и в корне (`http://localhost:8080/`), и в подкаталоге
-  (`https://genkaok.github.io/haveibeenphpned/`);
+  работает и в корне (`http://localhost:8080/`, `https://haveibeenphpned.github.io/`),
+  и в подкаталоге (`https://genkaok.github.io/haveibeenphpned/`);
 - без CDN, внешних шрифтов и аналитики — страница работает офлайн;
 - форма: адрес сервера и подтверждение владения (без него кнопка неактивна);
 - состояния: пустое, загрузка, ошибка человеческим текстом, результат;
@@ -94,13 +96,34 @@ PORT=8080 npm start
 
 ### 1. Страница на GitHub Pages
 
-Источник правды — `public/`. Pages в этом репозитории настроены на
-**Deploy from a branch → `main` / `/docs`**, поэтому публикуется
-сгенерированная копия:
+Основной адрес — **<https://haveibeenphpned.github.io/>**, старый
+**<https://genkaok.github.io/haveibeenphpned/>** остаётся зеркалом с тем же
+содержимым. Оба репозитория отдают **одну и ту же** сгенерированную папку
+`docs/` (Pages: **Deploy from a branch → `main` / `/docs`**):
+
+| Адрес | Репозиторий | Remote |
+| --- | --- | --- |
+| основной | `haveibeenphpned/haveibeenphpned.github.io` | `site` |
+| зеркало | `GenkaOk/haveibeenphpned` | `origin` |
+
+Источник правды — `public/`. Сборка и публикация:
 
 ```bash
-npm run build:pages        # public/ → docs/, API_BASE пуст
-API_BASE=https://php2shell-api.onrender.com npm run build:pages
+# 1. собрать docs/ из public/ — адрес API обязателен для Pages
+API_BASE=https://haveibeenphpned-api.onrender.com npm run build:pages
+# 2. закоммитить public/ + docs/
+git add public docs && git commit -m "…"
+# 3. опубликовать этот коммит в оба репозитория (origin и site)
+npm run deploy:site
+```
+
+`npm run deploy:site` (`scripts/publish-site.js`) пушит текущий коммит `main`
+в оба remote, поэтому оба адреса обновляются вместе. Перед push скрипт
+проверяет: ветка `main`, чистое рабочее дерево, `docs/` совпадает с `public/`
+и `docs/config.js` содержит непустой `API_BASE`. Второй remote добавляется один раз:
+
+```bash
+git remote add site git@github.com:haveibeenphpned/haveibeenphpned.github.io.git
 ```
 
 Скрипт `scripts/build-pages.js` очищает `docs/`, копирует `public/`, пишет
@@ -111,11 +134,16 @@ API_BASE=https://php2shell-api.onrender.com npm run build:pages
 запустить `npm run build:pages` и закоммитить результат вместе с `public/`.
 GitHub сам этот скрипт не запускает — сборка статики остаётся в репозитории.
 
-Разовая настройка репозитория:
+Разовая настройка каждого репозитория:
 
 1. **Settings → Pages → Build and deployment → Source: Deploy from a branch.**
 2. Branch: `main`, folder: `/docs`.
 3. Push в `main` — сайт пересобирается без Jekyll.
+
+`haveibeenphpned/haveibeenphpned.github.io` — user site, поэтому отдаётся
+из корня `https://haveibeenphpned.github.io/`; `GenkaOk/haveibeenphpned` —
+project site, поэтому подкаталог `/haveibeenphpned/`. Относительные пути в
+`public/` работают в обоих случаях.
 
 Адрес API: `API_BASE` при сборке (шаг выше) либо query-параметр
 `?api=https://…`. Без значения форма честно скажет, что API не подключён.
@@ -128,17 +156,20 @@ Source: GitHub Actions. При source=branch он не нужен.
 Проверка после деплоя:
 
 ```bash
-# 1. сайт отдаётся
+# 1. оба сайта отдаются
+curl -sI https://haveibeenphpned.github.io/ | head -1             # HTTP/2 200
 curl -sI https://genkaok.github.io/haveibeenphpned/ | head -1     # HTTP/2 200
-# 2. страница видит API: в исходнике config.js должен быть ваш адрес
+# 2. страницы видят API: в config.js должен быть адрес API
+curl -s https://haveibeenphpned.github.io/config.js
 curl -s https://genkaok.github.io/haveibeenphpned/config.js
-#    window.__PHP2SHELL_API__ = "https://php2shell-api.onrender.com";
-# 3. API жив и разрешает origin сайта
-curl -s https://php2shell-api.onrender.com/api/health            # {"ok":true}
-curl -sI -X OPTIONS https://php2shell-api.onrender.com/api/check \
-  -H 'Origin: https://genkaok.github.io' \
-  -H 'Access-Control-Request-Method: POST' | grep -i access-control
-#    access-control-allow-origin: https://genkaok.github.io
+#    window.__PHP2SHELL_API__ = "https://haveibeenphpned-api.onrender.com";
+# 3. API жив и разрешает origin обоих сайтов
+curl -s https://haveibeenphpned-api.onrender.com/api/health       # {"ok":true}
+for origin in https://haveibeenphpned.github.io https://genkaok.github.io; do
+  curl -sI -X OPTIONS https://haveibeenphpned-api.onrender.com/api/check \
+    -H "Origin: $origin" -H 'Access-Control-Request-Method: POST' | grep -i access-control
+done
+#    access-control-allow-origin: <запрошенный origin>
 ```
 
 Если в браузере вместо результата «API не подключён» — не задан `API_BASE`
@@ -148,16 +179,21 @@ API недоступен либо его `ALLOWED_ORIGINS` не содержит
 ### 2. Бэкенд
 
 Требования: Node.js >= 20, переменные `PORT` (по умолчанию `8080`) и
-`ALLOWED_ORIGINS` (по умолчанию `https://genkaok.github.io`). Порт должен быть
+`ALLOWED_ORIGINS` (по умолчанию оба адреса сайта:
+`https://haveibeenphpned.github.io,https://genkaok.github.io`). Порт должен быть
 публичным по HTTPS: страница на Pages работает по HTTPS, а браузер не пустит
 `http`-запрос с HTTPS-страницы.
+
+`ALLOWED_ORIGINS` **дополняет** дефолтный список, а не заменяет его: даже если
+на хостинге осталось старое значение `https://genkaok.github.io`, новый адрес
+получит CORS после ребилда.
 
 #### Docker
 
 ```bash
 docker build -t php2shell-api .
 docker run -d --name php2shell-api -p 8080:8080 \
-  -e ALLOWED_ORIGINS=https://genkaok.github.io \
+  -e ALLOWED_ORIGINS=https://haveibeenphpned.github.io,https://genkaok.github.io \
   --restart unless-stopped php2shell-api
 curl -s http://127.0.0.1:8080/api/health       # {"ok":true}
 ```
@@ -184,12 +220,17 @@ curl -s http://127.0.0.1:8080/api/health       # {"ok":true}
    ```
 
 Переменные из манифеста: `NODE_ENV=production` и
-`ALLOWED_ORIGINS=https://genkaok.github.io`. `PORT` Render передаёт сам —
-`src/server.js` читает `process.env.PORT`. Секретов в манифесте нет.
+`ALLOWED_ORIGINS=https://haveibeenphpned.github.io,https://genkaok.github.io`.
+`PORT` Render передаёт сам — `src/server.js` читает `process.env.PORT`.
+Секретов в манифесте нет.
 
 Если Blueprint не нужен, тот же сервис создаётся вручную:
 **New → Web Service**, runtime Docker, health check `/api/health`,
-`ALLOWED_ORIGINS=https://genkaok.github.io`.
+`ALLOWED_ORIGINS=https://haveibeenphpned.github.io,https://genkaok.github.io`.
+
+**Деплой API** — push в `main` репозитория `GenkaOk/haveibeenphpned`
+(`autoDeploy: true` в манифесте): Render пересобирает образ сам, настройки
+трогать не нужно. `npm run deploy:site` пушит туда же и обновляет сайт.
 
 **Free-план засыпает.** После ~15 минут без запросов инстанс останавливается,
 и первый запрос после сна идёт ~30–60 с. На сайте это выглядит как
@@ -201,7 +242,7 @@ curl -s http://127.0.0.1:8080/api/health       # {"ok":true}
 
 ```bash
 fly launch --no-deploy --name php2shell-api   # возьмёт Dockerfile
-fly secrets set ALLOWED_ORIGINS=https://genkaok.github.io
+fly secrets set ALLOWED_ORIGINS=https://haveibeenphpned.github.io,https://genkaok.github.io
 fly deploy
 curl -s https://php2shell-api.fly.dev/api/health
 ```
@@ -220,7 +261,7 @@ After=network.target
 WorkingDirectory=/opt/php2shell
 ExecStart=/usr/bin/node src/server.js
 Environment=PORT=8080
-Environment=ALLOWED_ORIGINS=https://genkaok.github.io
+Environment=ALLOWED_ORIGINS=https://haveibeenphpned.github.io,https://genkaok.github.io
 Environment=TRUST_PROXY=1
 Restart=always
 User=www-data
@@ -251,7 +292,7 @@ server {
 | --- | --- | --- |
 | `PORT` | `8080` | порт HTTP API |
 | `HOST` | `0.0.0.0` | адрес прослушивания |
-| `ALLOWED_ORIGINS` | `https://genkaok.github.io` | список origin через запятую, которым разрешены CORS-запросы |
+| `ALLOWED_ORIGINS` | `https://haveibeenphpned.github.io,https://genkaok.github.io` | список origin через запятую; **дополняет** дефолты, которым разрешены CORS-запросы |
 | `ALLOW_PRIVATE_TARGETS` | `0` | `1` — разрешить приватные/loopback-адреса (для своего интранета) |
 | `TRUST_PROXY` | `0` | `1` — брать IP клиента из `X-Forwarded-For` (только за своим прокси) |
 
@@ -313,10 +354,12 @@ server {
 ### CORS
 
 Браузеру на Pages нужно разрешение на кросс-доменный `POST`. Разрешены только
-origin из `ALLOWED_ORIGINS` (точное совпадение, без wildcard):
+origin из списка (точное совпадение, без wildcard): по умолчанию оба адреса
+сайта, `ALLOWED_ORIGINS` из env добавляется к ним. В ответе — ровно тот
+origin, который пришёл:
 
 ```
-Access-Control-Allow-Origin: https://genkaok.github.io
+Access-Control-Allow-Origin: https://haveibeenphpned.github.io
 Vary: Origin
 Access-Control-Allow-Methods: POST, GET, OPTIONS
 Access-Control-Allow-Headers: Content-Type
@@ -326,6 +369,7 @@ Access-Control-Max-Age: 600
 `OPTIONS /api/check` отвечает `204` без тела. Для чужого origin
 `Access-Control-Allow-Origin` не отдаётся — браузер сам заблокирует запрос.
 `Access-Control-Allow-Credentials` не включён: cookies и сессии не нужны.
+`Access-Control-Allow-Origin: *` не используется — список фиксированный.
 
 ## Метод проверки
 
@@ -551,20 +595,25 @@ npm start                   # site at / and API at :8080
 node cli.js example.com --json
 ```
 
-- **Site:** GitHub Pages serves `docs/`, a generated copy of `public/`
-  (https://genkaok.github.io/haveibeenphpned/). Pages source in this repo is
+- **Site:** primary address is https://haveibeenphpned.github.io/ (repo
+  `haveibeenphpned/haveibeenphpned.github.io`); https://genkaok.github.io/haveibeenphpned/
+  is a mirror. Both serve the same generated `docs/` with Pages source
   *Deploy from a branch → `main` / `/docs`*. After any change in `public/`, run
-  `npm run build:pages` and commit `docs/` — never edit it by hand. The script
-  also writes `docs/.nojekyll` so Pages skips Jekyll entirely.
+  `npm run build:pages`, commit `docs/` and run `npm run deploy:site` — it pushes
+  the commit to both remotes (`origin` and `site`). Never edit `docs/` by hand.
+  The script also writes `docs/.nojekyll` so Pages skips Jekyll entirely.
 - **API:** run the Docker image on any HTTPS host, set
-  `ALLOWED_ORIGINS=https://genkaok.github.io`, then rebuild the site with
+  `ALLOWED_ORIGINS=https://haveibeenphpned.github.io,https://genkaok.github.io`
+  (env adds to the built-in defaults), then rebuild the site with
   `API_BASE=https://your-api npm run build:pages` and commit `docs/`.
   `?api=https://…` overrides it per link. Empty value means same-origin, and on
   `*.github.io` the form then shows "API is not connected".
-- **CORS:** only listed origins get `Access-Control-Allow-Origin`; `OPTIONS`
-  preflight returns `204` with `POST, GET, OPTIONS` and `Content-Type`.
-- **Deploy:** push to `main`; Pages republishes `/docs`. `.github/workflows/pages.yml`
-  stays as a manual GitHub Actions fallback only. Backend:
-  `docker run -p 8080:8080 -e ALLOWED_ORIGINS=…`.
+- **CORS:** only listed origins get `Access-Control-Allow-Origin` (the exact
+  request origin, no wildcard); `OPTIONS` preflight returns `204` with
+  `POST, GET, OPTIONS` and `Content-Type`.
+- **Deploy:** push to `main` of `origin`; Render rebuilds the API and Pages
+  republishes `/docs`; `npm run deploy:site` also updates the mirror.
+  `.github/workflows/pages.yml` stays as a manual GitHub Actions fallback only.
+  Backend: `docker run -p 8080:8080 -e ALLOWED_ORIGINS=…`.
 
 Only check servers you own or are authorized to test.

@@ -22,9 +22,14 @@ const DEFAULT_PORT = 8080;
 const DEFAULT_HOST = '0.0.0.0';
 const MAX_REQUEST_BODY = 64 * 1024;
 const STATIC_DIR = path.join(__dirname, '..', 'public');
-// Origin страницы на GitHub Pages. Сайт и API живут на разных хостах,
+// Origin страниц на GitHub Pages. Сайт и API живут на разных хостах,
 // поэтому браузеру нужно явное разрешение на кросс-доменный POST.
-const DEFAULT_ALLOWED_ORIGINS = ['https://genkaok.github.io'];
+// Основной адрес — haveibeenphpned.github.io, старый genkaok.github.io
+// остаётся зеркалом и должен продолжать работать.
+const DEFAULT_ALLOWED_ORIGINS = [
+  'https://haveibeenphpned.github.io',
+  'https://genkaok.github.io',
+];
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
@@ -68,8 +73,10 @@ function createRateLimiter(options = {}) {
 }
 
 /**
- * Список origin: опция createApp важнее env, env важнее значения по умолчанию.
- * Пустые элементы отбрасываются, сравнение с Origin — точное.
+ * Список origin: опция createApp заменяет всё (нужна для тестов и встраивания),
+ * env `ALLOWED_ORIGINS` **дополняет** дефолтный список, а не перетирает его:
+ * так новый адрес сайта работает после ребилда без правки настроек хостинга.
+ * Пустые элементы отбрасываются, дубликаты схлопываются, сравнение — точное.
  * @param {{allowedOrigins?: string[]}} options
  * @returns {string[]}
  */
@@ -81,7 +88,7 @@ function resolveAllowedOrigins(options = {}) {
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
-  return fromEnv.length ? fromEnv : DEFAULT_ALLOWED_ORIGINS.slice();
+  return Array.from(new Set([...DEFAULT_ALLOWED_ORIGINS, ...fromEnv]));
 }
 
 function clientIp(req) {

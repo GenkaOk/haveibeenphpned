@@ -59,8 +59,8 @@ test('render.yaml: web-сервис на Docker, free, health check и env', () 
   assert.match(yaml, /-\s*key:\s*NODE_ENV\s*\n\s*value:\s*production\b/, 'render.yaml: нет NODE_ENV=production');
   assert.match(
     yaml,
-    /-\s*key:\s*ALLOWED_ORIGINS\s*\n\s*value:\s*https:\/\/genkaok\.github\.io\b/,
-    'render.yaml: нет ALLOWED_ORIGINS=https://genkaok.github.io',
+    /-\s*key:\s*ALLOWED_ORIGINS\s*\n\s*value:\s*https:\/\/haveibeenphpned\.github\.io,https:\/\/genkaok\.github\.io\b/,
+    'render.yaml: ALLOWED_ORIGINS должен содержать оба адреса сайта',
   );
   // Секретов в манифесте быть не должно: ни sync: false, ни values с токенами.
   assert.doesNotMatch(yaml, /sync:\s*false/, 'render.yaml: секрет не должен требовать ручного ввода');
@@ -94,6 +94,18 @@ test('build:pages: без API_BASE docs/config.js остаётся same-origin',
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test('deploy:site: npm-скрипт публикует в оба remote и проверяет docs/', () => {
+  const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
+  assert.equal(pkg.scripts['deploy:site'], 'node scripts/publish-site.js');
+
+  const script = fs.readFileSync(path.join(ROOT, 'scripts', 'publish-site.js'), 'utf8');
+  assert.match(script, /'site'/, 'publish-site.js: нет второго remote `site`');
+  assert.match(script, /'origin'/, 'publish-site.js: нет remote `origin`');
+  assert.match(script, /HEAD:main/, 'publish-site.js: должен пушить в main');
+  assert.match(script, /haveibeenphpned\.github\.io/, 'publish-site.js: нет адреса репозитория сайта');
+  assert.match(script, /build:pages/, 'publish-site.js: должен подсказывать про сборку docs/');
 });
 
 test('docs/: собран целиком и совпадает с public/, кроме config.js', () => {
