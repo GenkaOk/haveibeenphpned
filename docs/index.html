@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PHP2Shell</title>
+  <meta name="description" content="">
+  <meta name="color-scheme" content="light">
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M12%202.5%204.5%205.6v5.7c0%204.6%203.1%208.6%207.5%2010.2%204.4-1.6%207.5-5.6%207.5-10.2V5.6L12%202.5Z'%20fill='%231c4ed8'/%3E%3C/svg%3E">
+  <!-- config.js: API base (injected by the Pages workflow from API_BASE).
+       i18n.js is the single source of strings for ru/en/fr. Both load
+       synchronously so app.js sees them before the first paint. -->
+  <script src="./config.js"></script>
+  <script src="./i18n.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main" data-i18n="ui.skip"></a>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <span class="brand">
+        <svg class="brand-mark" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M12 2.5 4.5 5.6v5.7c0 4.6 3.1 8.6 7.5 10.2 4.4-1.6 7.5-5.6 7.5-10.2V5.6L12 2.5Z"
+                fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+          <path d="m8.6 11.9 2.3 2.4 4.5-4.9" fill="none" stroke="currentColor"
+                stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="brand-name">PHP2Shell</span>
+        <span class="brand-note" data-i18n="ui.brandNote"></span>
+      </span>
+
+      <div class="header-right">
+        <span class="header-cves">CVE-2026-109618 · CVE-2026-109619</span>
+        <div id="lang-switch" class="lang-switch" role="group" data-i18n-aria-label="ui.lang.label">
+          <button type="button" class="lang-btn" data-lang="ru" lang="ru" aria-pressed="false">RU</button>
+          <button type="button" class="lang-btn" data-lang="en" lang="en" aria-pressed="false">EN</button>
+          <button type="button" class="lang-btn" data-lang="fr" lang="fr" aria-pressed="false">FR</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+    <section class="hero" aria-labelledby="hero-title">
+      <h1 id="hero-title" data-i18n="ui.hero.title"></h1>
+      <p class="lede" id="hero-lede"></p>
+    </section>
+
+    <section class="checker" aria-labelledby="checker-title">
+      <h2 id="checker-title" class="visually-hidden" data-i18n="ui.checker.title"></h2>
+      <form id="check-form" novalidate>
+        <div class="field">
+          <label for="target-url" data-i18n="ui.form.label"></label>
+          <div class="input-row">
+            <input id="target-url" name="url" type="text" inputmode="url" autocomplete="url"
+                   spellcheck="false" autocapitalize="off"
+                   data-i18n-placeholder="ui.form.placeholder"
+                   aria-describedby="url-hint form-error">
+            <button id="check-button" type="submit" disabled data-i18n="ui.form.submit"></button>
+          </div>
+          <p id="url-hint" class="hint" data-i18n="ui.form.hint"></p>
+          <p id="link-hint" class="hint hint--link" hidden data-i18n="ui.form.linkHint"></p>
+        </div>
+
+        <label class="consent" for="consent">
+          <input id="consent" type="checkbox">
+          <span data-i18n="ui.form.consent"></span>
+        </label>
+
+        <p id="form-error" class="form-error" role="alert" hidden></p>
+      </form>
+    </section>
+
+    <section id="result" class="result" data-state="idle" aria-live="polite" aria-busy="false">
+      <div class="idle">
+        <h2 data-i18n="ui.idle.title"></h2>
+        <div class="idle-grid">
+          <div class="idle-item">
+            <svg class="idle-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M4 6.5h16M4 12h16M4 17.5h9" fill="none" stroke="currentColor"
+                    stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            <h3 data-i18n="ui.idle.php.title"></h3>
+            <p data-i18n-html="ui.idle.php.text"></p>
+          </div>
+          <div class="idle-item">
+            <svg class="idle-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12 3.2 21 19.2H3L12 3.2Z" fill="none" stroke="currentColor"
+                    stroke-width="1.8" stroke-linejoin="round"/>
+              <path d="M12 9.4v4.2M12 16.8v.1" fill="none" stroke="currentColor"
+                    stroke-width="1.9" stroke-linecap="round"/>
+            </svg>
+            <h3 data-i18n="ui.idle.cve.title"></h3>
+            <p data-i18n="ui.idle.cve.text"></p>
+          </div>
+          <div class="idle-item">
+            <svg class="idle-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12 4v10m0 0 4-4m-4 4-4-4M5 19h14" fill="none" stroke="currentColor"
+                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <h3 data-i18n="ui.idle.actions.title"></h3>
+            <p data-i18n="ui.idle.actions.text"></p>
+          </div>
+        </div>
+        <p class="idle-note" data-i18n="ui.idle.note"></p>
+      </div>
+    </section>
+
+    <div id="result-actions" class="result-actions" hidden>
+      <button id="check-again" class="btn btn--quiet" type="button" data-i18n="ui.actions.again"></button>
+      <button id="copy-link" class="btn btn--quiet" type="button" data-i18n="ui.actions.copy"></button>
+      <span id="copy-status" class="copy-status" role="status" aria-live="polite"></span>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p data-i18n="ui.footer.disclaimer"></p>
+      <p class="footer-meta" data-i18n="ui.footer.meta"></p>
+    </div>
+  </footer>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>

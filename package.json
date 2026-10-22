@@ -15,6 +15,7 @@
   "scripts": {
     "start": "node src/server.js",
     "test": "node --test test/*.test.js",
-    "check": "node cli.js"
+    "check": "node cli.js",
+    "build:pages": "node scripts/build-pages.js"
   }
 }

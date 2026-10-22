@@ -1,10 +1,14 @@
-# Публикация статической страницы (public/) на GitHub Pages.
+# Публикация статической страницы на GitHub Pages — ручной fallback.
 #
-# API на Pages не живёт: страница обращается к отдельно размещённому
-# бэкенду. Адрес задаётся repository variable API_BASE и подставляется
-# в public/config.js на этапе сборки артефакта.
+# Основной способ в этом репозитории: Settings → Pages → Source:
+# «Deploy from a branch», ветка main, папка /docs. Страницу отдаёт
+# сгенерированная папка docs/ (её собирает `npm run build:pages` из public/).
+# Этот workflow при source=branch не запускается и не нужен.
 #
-# Разовая настройка: Settings → Pages → Source: GitHub Actions.
+# Workflow оставлен на случай перехода на Source: GitHub Actions:
+# он собирает артефакт из public/ и подставляет API_BASE из repository
+# variable в config.js. Запускается только вручную (Actions → Run workflow).
+#
 # Автовключение Pages (enablement) работает только с токеном, отличным от
 # GITHUB_TOKEN: если добавить secret PAGES_TOKEN (PAT со scope `repo` или
 # правом Pages write), Pages включится сам при первом запуске.
@@ -12,8 +16,6 @@
 name: Deploy site to GitHub Pages
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:

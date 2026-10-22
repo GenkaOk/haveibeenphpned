@@ -93,23 +93,36 @@ PORT=8080 npm start
 
 ### 1. Страница на GitHub Pages
 
-Workflow — `.github/workflows/pages.yml`. Он собирает артефакт **только из
-`public/`**, подставляет адрес API в `config.js`, загружает артефакт и
-публикует его.
+Источник правды — `public/`. Pages в этом репозитории настроены на
+**Deploy from a branch → `main` / `/docs`**, поэтому публикуется
+сгенерированная копия:
+
+```bash
+npm run build:pages        # public/ → docs/, API_BASE пуст
+API_BASE=https://php2shell-api.onrender.com npm run build:pages
+```
+
+Скрипт `scripts/build-pages.js` очищает `docs/`, копирует `public/`, пишет
+`docs/.nojekyll` (отключает Jekyll целиком — иначе GitHub ищет
+`assets/css/style.scss` и падает) и `docs/config.js` со значением `API_BASE`.
+
+`docs/` генерируется, руками не править: после изменений в `public/`
+запустить `npm run build:pages` и закоммитить результат вместе с `public/`.
+GitHub сам этот скрипт не запускает — сборка статики остаётся в репозитории.
 
 Разовая настройка репозитория:
 
-1. **Settings → Pages → Build and deployment → Source: GitHub Actions.**
-2. **Settings → Secrets and variables → Actions → Variables → New variable**:
-   `API_BASE` = публичный адрес бэкенда, например
-   `https://php2shell-api.onrender.com` (без `/api`).
-   Переменная необязательна: без неё сайт откроется, но форма честно скажет,
-   что API не подключён.
-3. (Необязательно) **Secret `PAGES_TOKEN`** — PAT со scope `repo` или правом
-   Pages write. Если он добавлен, workflow сам включит Pages при первом запуске
-   (`enablement` в `actions/configure-pages` не работает с `GITHUB_TOKEN`).
-   Без секрета достаточно шага 1.
-4. Push в `main` (или **Actions → Deploy site to GitHub Pages → Run workflow**).
+1. **Settings → Pages → Build and deployment → Source: Deploy from a branch.**
+2. Branch: `main`, folder: `/docs`.
+3. Push в `main` — сайт пересобирается без Jekyll.
+
+Адрес API: `API_BASE` при сборке (шаг выше) либо query-параметр
+`?api=https://…`. Без значения форма честно скажет, что API не подключён.
+
+Необязательный fallback: `.github/workflows/pages.yml` умеет публиковать
+`public/` через GitHub Actions, но запускается только вручную
+(**Actions → Deploy site to GitHub Pages → Run workflow**) и требует
+Source: GitHub Actions. При source=branch он не нужен.
 
 Проверка после деплоя:
 
@@ -365,12 +378,14 @@ public/index.html       страница проверки
 public/styles.css       стили страницы, без внешних ресурсов
 public/app.js           валидация, запрос к API, рендер, переключатель языка
 public/i18n.js          единый словарь строк ru/en/fr (браузер и Node)
-public/config.js        адрес API (заполняется workflow из API_BASE)
+public/config.js        адрес API (пустой = same-origin)
 public/.nojekyll        отключает Jekyll на GitHub Pages
+docs/                   сгенерированная копия public/ — её отдаёт Pages
+scripts/build-pages.js  сборка docs/ (npm run build:pages)
 cli.js                  CLI
 test/                   тесты node:test + фикстуры заголовков
 Dockerfile              образ бэкенда (node:22-alpine)
-.github/workflows/pages.yml  публикация public/ на GitHub Pages
+.github/workflows/pages.yml  ручной fallback: публикация public/ через Actions
 ```
 
 ## Лицензия
@@ -389,16 +404,20 @@ npm start                   # site at / and API at :8080
 node cli.js example.com --json
 ```
 
-- **Site:** GitHub Pages serves `public/` via `.github/workflows/pages.yml`
-  (https://genkaok.github.io/haveibeenphpned/).
+- **Site:** GitHub Pages serves `docs/`, a generated copy of `public/`
+  (https://genkaok.github.io/haveibeenphpned/). Pages source in this repo is
+  *Deploy from a branch → `main` / `/docs`*. After any change in `public/`, run
+  `npm run build:pages` and commit `docs/` — never edit it by hand. The script
+  also writes `docs/.nojekyll` so Pages skips Jekyll entirely.
 - **API:** run the Docker image on any HTTPS host, set
-  `ALLOWED_ORIGINS=https://genkaok.github.io`, then set the repository variable
-  `API_BASE` to the API URL and redeploy. The workflow writes it into
-  `public/config.js`; `?api=https://…` overrides it per link. Empty value means
-  same-origin, and on `*.github.io` the form then shows "API is not connected".
+  `ALLOWED_ORIGINS=https://genkaok.github.io`, then rebuild the site with
+  `API_BASE=https://your-api npm run build:pages` and commit `docs/`.
+  `?api=https://…` overrides it per link. Empty value means same-origin, and on
+  `*.github.io` the form then shows "API is not connected".
 - **CORS:** only listed origins get `Access-Control-Allow-Origin`; `OPTIONS`
   preflight returns `204` with `POST, GET, OPTIONS` and `Content-Type`.
-- **Deploy:** enable Pages once (Settings → Pages → Source: GitHub Actions),
-  then push to `main`. Backend: `docker run -p 8080:8080 -e ALLOWED_ORIGINS=…`.
+- **Deploy:** push to `main`; Pages republishes `/docs`. `.github/workflows/pages.yml`
+  stays as a manual GitHub Actions fallback only. Backend:
+  `docker run -p 8080:8080 -e ALLOWED_ORIGINS=…`.
 
 Only check servers you own or are authorized to test.
