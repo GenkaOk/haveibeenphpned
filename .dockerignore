@@ -1,0 +1,12 @@
+node_modules
+tmp
+_site
+.git
+.github
+test
+*.log
+.env
+.env.*
+Dockerfile
+.dockerignore
+README.md
