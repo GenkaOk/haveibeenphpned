@@ -107,15 +107,15 @@ PORT=8080 npm start
 репозитория отдаёт **404**: GitHub не переносит URL Pages при transfer, а
 `genkaok.github.io/haveibeenphpned` — project site удалённого репозитория.
 Вернуть его можно, создав в аккаунте `GenkaOk` отдельный репозиторий-зеркало
-с тем же `docs/` (Pages: `main` / `/docs`) и добавив третий remote:
+с тем же `docs/` (Pages: `main` / `/docs`) и добавив remote:
 
 ```bash
-git remote add mirror git@github.com:GenkaOk/haveibeenphpned.git
+git remote add site git@github.com:GenkaOk/haveibeenphpned.git
 ```
 
-`npm run deploy:site` тогда будет пушить и в него (`SITE_REMOTE=mirror` или
-добавьте push вручную). CORS для `https://genkaok.github.io` уже разрешён,
-так что восстановленное зеркало заработает без правок API.
+`npm run deploy:site` тогда будет пушить и в него. CORS для
+`https://genkaok.github.io` уже разрешён, так что восстановленное зеркало
+заработает без правок API.
 
 Источник правды — `public/`. Сборка и публикация:
 
@@ -129,11 +129,9 @@ npm run deploy:site
 ```
 
 `npm run deploy:site` (`scripts/publish-site.js`) пушит текущий коммит `main`
-в оба remote — `origin` и `site`. После переноса репозитория оба адреса ведут
-в `HaveIbeenPHPned/haveibeenphpned.github.io` (у `origin` срабатывает
-редирект GitHub), поэтому оба push обновляют один и тот же репозиторий и одну
-и ту же страницу. Перед push скрипт проверяет: ветка `main`, чистое рабочее
-дерево, `docs/` совпадает с `public/` и `docs/config.js` содержит непустой
+в `origin` (он же Render и Pages), а если настроен remote `site` — ещё и в
+зеркало. Перед push скрипт проверяет: ветка `main`, чистое рабочее дерево,
+`docs/` совпадает с `public/` и `docs/config.js` содержит непустой
 `API_BASE`.
 
 Скрипт `scripts/build-pages.js` очищает `docs/`, копирует `public/`, пишет

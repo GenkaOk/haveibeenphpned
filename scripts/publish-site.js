@@ -1,15 +1,12 @@
 'use strict';
 
 /**
- * Публикация сайта в оба репозитория GitHub Pages.
+ * Публикация сайта/API из одного коммита.
  *
- * Сайт живёт на двух адресах, оба отдают одну и ту же папку `docs/`:
- *   • основной  — HaveIbeenPHPned/haveibeenphpned.github.io (remote `site`);
- *   • зеркало   — GenkaOk/haveibeenphpned (remote `origin`, ветка main).
- *
- * Render собирает API из `origin`/main, поэтому push в `origin` — это ещё и
- * деплой бэкенда. Скрипт пушит один и тот же текущий коммит в оба remote,
- * чтобы адреса не разъезжались.
+ * Основной адрес — HaveIbeenPHPned/haveibeenphpned.github.io (remote `origin`),
+ * он же источник для Render. Старое зеркало GenkaOk/haveibeenphpned после
+ * переноса репозитория отдаёт 404; если владелец аккаунта создаст отдельный
+ * репозиторий-зеркало и настроит remote `site`, скрипт запушит и туда.
  *
  * Перед push проверяется:
  *   1. ветка — `main` (Pages отдаёт `/docs` именно из неё);
@@ -18,7 +15,7 @@
  *      а не пустое значение (иначе на Pages форма скажет «API не подключён»).
  *
  * Запуск: `npm run deploy:site` (сборка docs — отдельно: `npm run build:pages`).
- * Переменные: SITE_REMOTE (по умолчанию `site`), API_REMOTE (`origin`).
+ * Переменные: API_REMOTE (`origin`), SITE_REMOTE (`site`, необязательное зеркало).
  */
 
 const { execFileSync } = require('node:child_process');
@@ -28,7 +25,7 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const SITE_REMOTE = process.env.SITE_REMOTE || 'site';
 const API_REMOTE = process.env.API_REMOTE || 'origin';
-const SITE_REMOTE_URL = 'git@github.com:HaveIbeenPHPned/haveibeenphpned.github.io.git';
+const SITE_REMOTE_URL = 'git@github.com:GenkaOk/haveibeenphpned.git';
 
 function fail(message) {
   console.error('deploy:site: ' + message);
@@ -76,15 +73,19 @@ function assertDocsFresh() {
   }
 }
 
-function assertRemote(name, urlHint) {
-  let remotes;
+function listRemotes() {
   try {
-    remotes = git(['remote']);
+    return git(['remote'])
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean);
   } catch {
     fail('это не git-репозиторий');
   }
-  const list = remotes.split('\n').map((line) => line.trim());
-  if (!list.includes(name)) {
+}
+
+function assertRemote(name, urlHint) {
+  if (!listRemotes().includes(name)) {
     fail('нет remote `' + name + '`. Добавьте: git remote add ' + name + ' ' + urlHint);
   }
 }
@@ -100,14 +101,25 @@ if (dirty) {
 }
 
 assertDocsFresh();
-assertRemote(API_REMOTE, 'git@github.com:GenkaOk/haveibeenphpned.git');
-assertRemote(SITE_REMOTE, SITE_REMOTE_URL);
+assertRemote(API_REMOTE, 'git@github.com:HaveIbeenPHPned/haveibeenphpned.github.io.git');
 
+const hasMirror = listRemotes().includes(SITE_REMOTE);
 const sha = git(['rev-parse', '--short', 'HEAD']);
-console.log('deploy:site: публикую ' + sha + ' в ' + API_REMOTE + '/main и ' + SITE_REMOTE + '/main');
+console.log(
+  'deploy:site: публикую ' + sha + ' в ' + API_REMOTE + '/main' +
+    (hasMirror ? ' и ' + SITE_REMOTE + '/main' : ''),
+);
 
 git(['push', API_REMOTE, 'HEAD:main'], { capture: false });
-git(['push', SITE_REMOTE, 'HEAD:main'], { capture: false });
+if (hasMirror) {
+  git(['push', SITE_REMOTE, 'HEAD:main'], { capture: false });
+} else {
+  console.log(
+    'deploy:site: remote `' + SITE_REMOTE + '` не настроен — зеркало не обновляется.\n' +
+      'deploy:site: чтобы вернуть старый адрес, создайте репозиторий-зеркало и добавьте:\n' +
+      'deploy:site:   git remote add ' + SITE_REMOTE + ' ' + SITE_REMOTE_URL,
+  );
+}
 
 console.log('deploy:site: готово. API пересоберётся из ' + API_REMOTE +
-  '/main, оба адреса Pages обновятся из /docs.');
+  '/main, Pages обновятся из /docs.');
