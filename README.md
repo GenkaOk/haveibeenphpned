@@ -103,7 +103,7 @@ PORT=8080 npm start
 
 | Адрес | Репозиторий | Remote |
 | --- | --- | --- |
-| основной | `haveibeenphpned/haveibeenphpned.github.io` | `site` |
+| основной | `HaveIbeenPHPned/haveibeenphpned.github.io` | `site` |
 | зеркало | `GenkaOk/haveibeenphpned` | `origin` |
 
 Источник правды — `public/`. Сборка и публикация:
@@ -123,7 +123,7 @@ npm run deploy:site
 и `docs/config.js` содержит непустой `API_BASE`. Второй remote добавляется один раз:
 
 ```bash
-git remote add site git@github.com:haveibeenphpned/haveibeenphpned.github.io.git
+git remote add site git@github.com:HaveIbeenPHPned/haveibeenphpned.github.io.git
 ```
 
 Скрипт `scripts/build-pages.js` очищает `docs/`, копирует `public/`, пишет
@@ -140,7 +140,7 @@ GitHub сам этот скрипт не запускает — сборка с�
 2. Branch: `main`, folder: `/docs`.
 3. Push в `main` — сайт пересобирается без Jekyll.
 
-`haveibeenphpned/haveibeenphpned.github.io` — user site, поэтому отдаётся
+`HaveIbeenPHPned/haveibeenphpned.github.io` — user site, поэтому отдаётся
 из корня `https://haveibeenphpned.github.io/`; `GenkaOk/haveibeenphpned` —
 project site, поэтому подкаталог `/haveibeenphpned/`. Относительные пути в
 `public/` работают в обоих случаях.
@@ -596,7 +596,7 @@ node cli.js example.com --json
 ```
 
 - **Site:** primary address is https://haveibeenphpned.github.io/ (repo
-  `haveibeenphpned/haveibeenphpned.github.io`); https://genkaok.github.io/haveibeenphpned/
+  `HaveIbeenPHPned/haveibeenphpned.github.io`); https://genkaok.github.io/haveibeenphpned/
   is a mirror. Both serve the same generated `docs/` with Pages source
   *Deploy from a branch → `main` / `/docs`*. After any change in `public/`, run
   `npm run build:pages`, commit `docs/` and run `npm run deploy:site` — it pushes

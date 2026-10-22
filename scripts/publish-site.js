@@ -4,7 +4,7 @@
  * Публикация сайта в оба репозитория GitHub Pages.
  *
  * Сайт живёт на двух адресах, оба отдают одну и ту же папку `docs/`:
- *   • основной  — haveibeenphpned/haveibeenphpned.github.io (remote `site`);
+ *   • основной  — HaveIbeenPHPned/haveibeenphpned.github.io (remote `site`);
  *   • зеркало   — GenkaOk/haveibeenphpned (remote `origin`, ветка main).
  *
  * Render собирает API из `origin`/main, поэтому push в `origin` — это ещё и
@@ -28,7 +28,7 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const SITE_REMOTE = process.env.SITE_REMOTE || 'site';
 const API_REMOTE = process.env.API_REMOTE || 'origin';
-const SITE_REMOTE_URL = 'git@github.com:haveibeenphpned/haveibeenphpned.github.io.git';
+const SITE_REMOTE_URL = 'git@github.com:HaveIbeenPHPned/haveibeenphpned.github.io.git';
 
 function fail(message) {
   console.error('deploy:site: ' + message);
@@ -36,11 +36,13 @@ function fail(message) {
 }
 
 function git(args, options = {}) {
-  return execFileSync('git', args, {
+  const output = execFileSync('git', args, {
     cwd: root,
     encoding: 'utf8',
     stdio: options.capture === false ? 'inherit' : ['ignore', 'pipe', 'pipe'],
-  }).trim();
+  });
+  // При stdio: 'inherit' execFileSync возвращает null — trim() не вызываем.
+  return output ? output.trim() : '';
 }
 
 function assertDocsFresh() {
