@@ -370,6 +370,8 @@
     const versionGroup = el('div');
     versionGroup.append(el('dt', null, t('ui.php.version')));
     const versionValue = el('dd');
+    const bound = isObject(php.versionBound) ? php.versionBound : null;
+    const boundMin = bound && bound.min ? bound.min : php.versionMin || null;
     if (php.version) {
       versionValue.append(el('span', 'version', php.version));
       versionValue.append(
@@ -380,8 +382,8 @@
       versionValue.append(
         el('div', 'source-note', t('ui.php.source', { source: versionSourceLabel('easter-egg') })),
       );
-    } else if (php.versionMin) {
-      versionValue.append(el('span', 'version', `≥ ${php.versionMin}`));
+    } else if (boundMin) {
+      versionValue.append(el('span', 'version', `≥ ${boundMin}`));
       versionValue.append(
         el(
           'div',
@@ -446,6 +448,16 @@
     }
 
     panel.append(dl);
+
+    const lowerBoundUnknown =
+      boundMin &&
+      !php.version &&
+      asArray(report.cves).some(
+        (cve) => isObject(cve) && cve.status === 'unknown' && cve.lowerBoundOnly === true,
+      );
+    if (lowerBoundUnknown) {
+      panel.append(el('p', 'callout', t('ui.php.lowerBoundUnknown', { min: boundMin })));
+    }
 
     const evidence = asArray(php.evidence);
     if (evidence.length) {

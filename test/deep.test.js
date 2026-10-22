@@ -178,7 +178,7 @@ test('пасхалка-логотип (GIF) распознаётся как lega
   }
 });
 
-test('WordPress generator → versionMin 7.2.24 и likely_vulnerable', async () => {
+test('WordPress generator → versionMin 7.2.24 и unknown (нижняя граница не вердикт)', async () => {
   const srv = await startFixtureServer({
     root: {
       status: 200,
@@ -192,22 +192,27 @@ test('WordPress generator → versionMin 7.2.24 и likely_vulnerable', async () 
     assert.equal(report.php.version, null);
     assert.equal(report.php.versionMin, '7.2.24');
     assert.equal(report.php.versionMinSource, 'app-fingerprint');
+    assert.deepEqual(report.php.versionBound, { min: '7.2.24', source: 'app-fingerprint' });
     assert.equal(report.php.versionSource, 'app-fingerprint');
     assert.equal(report.php.app.name, 'WordPress');
     assert.equal(report.php.app.version, '6.6.3');
     assert.equal(report.php.requests, 1, 'фингерпринт пассивный, лишних запросов нет');
     for (const cve of report.cves) {
-      assert.equal(cve.status, 'likely_vulnerable');
-      assert.equal(cve.confidence, 'medium');
+      // Нижняя граница 7.2.24 ниже исправленной версии: фактическая версия
+      // может быть 8.4.x, поэтому подверженность не доказана.
+      assert.equal(cve.status, 'unknown');
+      assert.equal(cve.confidence, 'low');
+      assert.equal(cve.lowerBoundOnly, true);
       assert.match(cve.reason, /7\.2\.24/);
+      assert.match(cve.reason, /нижняя граница/i);
     }
-    assert.equal(report.summary.status, 'likely_vulnerable');
+    assert.equal(report.summary.status, 'unknown');
   } finally {
     await srv.close();
   }
 });
 
-test('Drupal 11 generator → versionMin 8.3.0 (ниже фикса 8.3.36)', async () => {
+test('Drupal 11 generator → versionMin 8.3.0 (ниже фикса 8.3.36) даёт unknown', async () => {
   const srv = await startFixtureServer({
     root: {
       status: 200,
@@ -218,10 +223,13 @@ test('Drupal 11 generator → versionMin 8.3.0 (ниже фикса 8.3.36)', as
   try {
     const report = await scan(srv.url, PRIVATE);
     assert.equal(report.php.versionMin, '8.3.0');
+    assert.deepEqual(report.php.versionBound, { min: '8.3.0', source: 'app-fingerprint' });
     assert.equal(report.php.app.name, 'Drupal');
     for (const cve of report.cves) {
-      assert.equal(cve.status, 'likely_vulnerable');
+      assert.equal(cve.status, 'unknown');
+      assert.equal(cve.confidence, 'low');
       assert.match(cve.reason, /8\.3\.0/);
+      assert.match(cve.reason, /8\.3\.36/);
     }
   } finally {
     await srv.close();

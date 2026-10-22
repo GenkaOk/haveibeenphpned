@@ -388,6 +388,8 @@
         'До 10 последовательных запросов только по allowlist: /phpinfo.php, /info.php, /test.php, /php.php, /?phpinfo=1, /status?full, /ping и 3 пасхалки PHP. Только для серверов, которыми вы владеете.',
       'ui.php.versionMin': 'Нижняя граница версии PHP',
       'ui.php.lowerBoundNote': 'Нижняя граница по приложению {app}; это не точная версия.',
+      'ui.php.lowerBoundUnknown':
+        'Версия PHP не раскрыта. Известно только, что она не ниже {min} — этого недостаточно для вердикта.',
       'ui.php.legacy': 'PHP 5.x (legacy)',
       'ui.php.app': 'Приложение',
       'ui.php.sourcePhpinfo': 'из phpinfo()',
@@ -426,13 +428,13 @@
       'server.reason.legacyPhp5':
         'Пасхалка PHP отвечает: сервер работает на PHP 5.x (legacy, ≤ 5.4). Ветка 5.x не получала исправлений — обе CVE затрагивают все её версии.',
       'server.reason.lowerBound':
-        'Точная версия PHP не раскрыта, но {app} требует PHP ≥ {min} (нижняя граница). Это ниже исправленной {fix} для ветки {branch}; проверьте фактическую версию.',
+        'Точная версия PHP не раскрыта: {app} требует PHP ≥ {min}, то есть известна только нижняя граница. Она ниже исправленной {fix} для ветки {branch}, но фактическая версия может быть исправлена — проверьте `php -v` на сервере.',
       'server.reason.lowerBoundEol':
-        'Точная версия PHP не раскрыта, но {app} требует PHP ≥ {min} (нижняя граница). Ветка {branch} исправлений не получила — вероятно подвержен.',
+        'Точная версия PHP не раскрыта: {app} требует PHP ≥ {min}, то есть известна только нижняя граница. Ветка {branch} исправлений не получила, но фактическая версия может быть новее — проверьте `php -v` на сервере.',
       'server.reason.lowerBoundFixed':
-        'Точная версия PHP не раскрыта, но {app} требует PHP ≥ {min}. Это не ниже исправленной {fix} для ветки {branch} — по нижней границе версия исправлена.',
+        'Точная версия PHP не раскрыта: {app} требует PHP ≥ {min}. Нижняя граница не ниже исправленной {fix} для ветки {branch} — фактическая версия гарантированно исправлена.',
       'server.reason.lowerBoundNewer':
-        'Точная версия PHP не раскрыта, но {app} требует PHP ≥ {min}. Это новее самой новой исправленной ветки {newest} — по нижней границе версия исправлена.',
+        'Точная версия PHP не раскрыта: {app} требует PHP ≥ {min}. Нижняя граница новее самой новой исправленной ветки {newest} — фактическая версия гарантированно исправлена.',
       'server.reason.unknownApp': 'приложение',
       'server.rec.verifyVersion':
         'Проверьте фактическую версию PHP: автоматически определена только нижняя граница ≥ {min}.',
@@ -814,6 +816,8 @@
         'Up to 10 sequential requests to an allowlist only: /phpinfo.php, /info.php, /test.php, /php.php, /?phpinfo=1, /status?full, /ping and 3 PHP easter eggs. Only for servers you own.',
       'ui.php.versionMin': 'PHP version lower bound',
       'ui.php.lowerBoundNote': 'Lower bound from {app}; this is not an exact version.',
+      'ui.php.lowerBoundUnknown':
+        'The PHP version is not disclosed. All we know is that it is not lower than {min} — this is not enough for a verdict.',
       'ui.php.legacy': 'PHP 5.x (legacy)',
       'ui.php.app': 'Application',
       'ui.php.sourcePhpinfo': 'from phpinfo()',
@@ -852,13 +856,13 @@
       'server.reason.legacyPhp5':
         'A PHP easter egg responds: the server runs PHP 5.x (legacy, ≤ 5.4). The 5.x branch received no fixes — both CVEs affect every version in it.',
       'server.reason.lowerBound':
-        'The exact PHP version is not disclosed, but {app} requires PHP ≥ {min} (lower bound). This is below the fixed {fix} for branch {branch}; verify the actual version.',
+        'The exact PHP version is not disclosed: {app} requires PHP ≥ {min}, so only a lower bound is known. It is below the fixed {fix} for branch {branch}, but the actual version may already be fixed — check `php -v` on the server.',
       'server.reason.lowerBoundEol':
-        'The exact PHP version is not disclosed, but {app} requires PHP ≥ {min} (lower bound). Branch {branch} received no fixes — likely affected.',
+        'The exact PHP version is not disclosed: {app} requires PHP ≥ {min}, so only a lower bound is known. Branch {branch} received no fixes, but the actual version may be newer — check `php -v` on the server.',
       'server.reason.lowerBoundFixed':
-        'The exact PHP version is not disclosed, but {app} requires PHP ≥ {min}. This is not below the fixed {fix} for branch {branch} — the lower bound is fixed.',
+        'The exact PHP version is not disclosed: {app} requires PHP ≥ {min}. The lower bound is not below the fixed {fix} for branch {branch} — the actual version is guaranteed to be fixed.',
       'server.reason.lowerBoundNewer':
-        'The exact PHP version is not disclosed, but {app} requires PHP ≥ {min}. This is newer than the newest fixed branch {newest} — the lower bound is fixed.',
+        'The exact PHP version is not disclosed: {app} requires PHP ≥ {min}. The lower bound is newer than the newest fixed branch {newest} — the actual version is guaranteed to be fixed.',
       'server.reason.unknownApp': 'the application',
       'server.rec.verifyVersion':
         'Verify the actual PHP version: only the lower bound ≥ {min} was detected automatically.',
@@ -1252,6 +1256,8 @@
         'Jusqu’à 10 requêtes séquentielles, uniquement sur une liste blanche : /phpinfo.php, /info.php, /test.php, /php.php, /?phpinfo=1, /status?full, /ping et 3 easter eggs PHP. Uniquement pour les serveurs dont vous êtes propriétaire.',
       'ui.php.versionMin': 'Borne inférieure de la version PHP',
       'ui.php.lowerBoundNote': 'Borne inférieure d’après {app} ; ce n’est pas une version exacte.',
+      'ui.php.lowerBoundUnknown':
+        'La version de PHP n’est pas divulguée. On sait seulement qu’elle n’est pas inférieure à {min} — ce n’est pas suffisant pour un verdict.',
       'ui.php.legacy': 'PHP 5.x (legacy)',
       'ui.php.app': 'Application',
       'ui.php.sourcePhpinfo': 'depuis phpinfo()',
@@ -1291,13 +1297,13 @@
       'server.reason.legacyPhp5':
         'Un easter egg PHP répond : le serveur fonctionne sous PHP 5.x (legacy, ≤ 5.4). La branche 5.x n’a reçu aucun correctif — les deux CVE affectent toutes ses versions.',
       'server.reason.lowerBound':
-        'La version exacte de PHP n’est pas divulguée, mais {app} exige PHP ≥ {min} (borne inférieure). C’est inférieur au correctif {fix} de la branche {branch} ; vérifiez la version réelle.',
+        'La version exacte de PHP n’est pas divulguée : {app} exige PHP ≥ {min}, seule une borne inférieure est donc connue. Elle est inférieure au correctif {fix} de la branche {branch}, mais la version réelle peut déjà être corrigée — vérifiez `php -v` sur le serveur.',
       'server.reason.lowerBoundEol':
-        'La version exacte de PHP n’est pas divulguée, mais {app} exige PHP ≥ {min} (borne inférieure). La branche {branch} n’a reçu aucun correctif — probablement vulnérable.',
+        'La version exacte de PHP n’est pas divulguée : {app} exige PHP ≥ {min}, seule une borne inférieure est donc connue. La branche {branch} n’a reçu aucun correctif, mais la version réelle peut être plus récente — vérifiez `php -v` sur le serveur.',
       'server.reason.lowerBoundFixed':
-        'La version exacte de PHP n’est pas divulguée, mais {app} exige PHP ≥ {min}. Ce n’est pas inférieur au correctif {fix} de la branche {branch} — la borne inférieure est corrigée.',
+        'La version exacte de PHP n’est pas divulguée : {app} exige PHP ≥ {min}. La borne inférieure n’est pas inférieure au correctif {fix} de la branche {branch} — la version réelle est forcément corrigée.',
       'server.reason.lowerBoundNewer':
-        'La version exacte de PHP n’est pas divulguée, mais {app} exige PHP ≥ {min}. C’est plus récent que la branche corrigée la plus récente {newest} — la borne inférieure est corrigée.',
+        'La version exacte de PHP n’est pas divulguée : {app} exige PHP ≥ {min}. La borne inférieure est plus récente que la branche corrigée la plus récente {newest} — la version réelle est forcément corrigée.',
       'server.reason.unknownApp': 'l’application',
       'server.rec.verifyVersion':
         'Vérifiez la version réelle de PHP : seule la borne inférieure ≥ {min} a été détectée automatiquement.',

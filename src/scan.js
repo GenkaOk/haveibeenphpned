@@ -343,6 +343,9 @@ function buildPhp(detection, context, lang) {
     precision: detection.precision,
     versionMin: null,
     versionMinSource: null,
+    // Явная структура нижней границы для потребителей отчёта: это НЕ версия,
+    // а только «PHP не старше min». Источник — app-fingerprint.
+    versionBound: null,
     legacyPhp5: false,
     app: null,
     distro: detection.distro,
@@ -364,6 +367,9 @@ function buildPhp(detection, context, lang) {
     if (!php.version) {
       php.versionMin = context.app.versionMin;
       php.versionMinSource = 'app-fingerprint';
+      php.versionBound = context.app.versionMin
+        ? { min: context.app.versionMin, source: 'app-fingerprint' }
+        : null;
       php.versionSource = 'app-fingerprint';
       php.evidence.push(
         context.app.version
@@ -389,6 +395,7 @@ function buildPhp(detection, context, lang) {
     php.precision = parsed ? parsed.precision : 0;
     php.versionMin = null;
     php.versionMinSource = null;
+    php.versionBound = null;
     php.legacyPhp5 = false;
     php.confidence = 'high';
     php.evidence.push(t(lang, 'server.evidence.phpinfoFound', { version: context.phpinfo.version }));
@@ -411,6 +418,7 @@ function buildPhp(detection, context, lang) {
     php.confidence = 'medium';
     php.versionMin = null;
     php.versionMinSource = null;
+    php.versionBound = null;
     php.evidence.push(t(lang, 'server.evidence.easterEgg'));
   }
 
@@ -524,6 +532,7 @@ function buildErrorReport(target, error, startedAt, lang = 'ru', deep = false) {
     precision: 0,
     versionMin: null,
     versionMinSource: null,
+    versionBound: null,
     legacyPhp5: false,
     app: null,
     distro: null,

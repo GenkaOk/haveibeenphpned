@@ -118,6 +118,62 @@ test('evaluateCve: версия не раскрыта — unknown, без дог
   assert.equal(result.confidence, 'low');
 });
 
+test('evaluateCve: нижняя граница 7.2.24 — unknown, не likely_vulnerable', () => {
+  const php = {
+    detected: true,
+    version: null,
+    versionMin: '7.2.24',
+    versionMinSource: 'app-fingerprint',
+    versionSource: 'app-fingerprint',
+    app: { name: 'WordPress', version: '6.6.3' },
+    distro: null,
+    evidence: ['приложение WordPress 6.6.3: требует PHP ≥ 7.2.24'],
+  };
+  const result = evaluateCve(CVE_LIST[0], php);
+  assert.equal(result.status, 'unknown');
+  assert.equal(result.confidence, 'low');
+  assert.equal(result.lowerBoundOnly, true);
+  assert.match(result.reason, /7\.2\.24/);
+  assert.match(result.reason, /нижняя граница/i);
+  assert.match(result.reason, /php -v/);
+});
+
+test('evaluateCve: нижняя граница 8.2.0 ниже фикса 8.2.35 — unknown', () => {
+  const php = {
+    detected: true,
+    version: null,
+    versionMin: '8.2.0',
+    versionMinSource: 'app-fingerprint',
+    versionSource: 'app-fingerprint',
+    app: { name: 'Drupal', version: '10' },
+    distro: null,
+    evidence: [],
+  };
+  const result = evaluateCve(CVE_LIST[0], php);
+  assert.equal(result.status, 'unknown');
+  assert.equal(result.confidence, 'low');
+  assert.equal(result.lowerBoundOnly, true);
+  assert.match(result.reason, /8\.2\.35/);
+});
+
+test('evaluateCve: нижняя граница 8.4.27 — not_vulnerable, high', () => {
+  const php = {
+    detected: true,
+    version: null,
+    versionMin: '8.4.27',
+    versionMinSource: 'app-fingerprint',
+    versionSource: 'app-fingerprint',
+    app: { name: 'Example App', version: '2.0' },
+    distro: null,
+    evidence: [],
+  };
+  const result = evaluateCve(CVE_LIST[0], php);
+  assert.equal(result.status, 'not_vulnerable');
+  assert.equal(result.confidence, 'high');
+  assert.match(result.reason, /8\.4\.27/);
+  assert.match(result.reason, /нижняя граница/i);
+});
+
 test('evaluateCve: PHP не обнаружен — not_applicable', () => {
   const php = { detected: false, version: null, distro: null, evidence: [] };
   const result = evaluateCve(CVE_LIST[0], php);

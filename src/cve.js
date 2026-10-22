@@ -123,45 +123,44 @@ function evaluateCve(cve, php, lang = 'ru') {
     }
 
     // Точной версии нет, но фингерпринт приложения даёт нижнюю границу.
+    // Нижняя граница — это только «PHP не старше X». Если X ниже исправленной
+    // версии, фактическая версия всё равно может быть исправлена: вердикт
+    // о подверженности по ней невозможен, поэтому только unknown.
     const versionMin = php.versionMin ? parseVersion(php.versionMin) : null;
     if (versionMin) {
       const app = php.app && php.app.name ? php.app.name : t(code, 'server.reason.unknownApp');
       const minBranch = branchOf(versionMin);
       const minFix = fixForBranch(minBranch);
+      const newerThanNewestFixed = isNewerThanNewestFixed(versionMin);
 
-      if (isNewerThanNewestFixed(versionMin)) {
+      // Обратное направление: нижняя граница не ниже исправленной версии —
+      // фактическая версия гарантированно исправлена.
+      if (newerThanNewestFixed || (minFix && compareVersions(versionMin, minFix) >= 0)) {
         return {
           ...base,
           status: 'not_vulnerable',
-          confidence: 'medium',
-          reason: t(code, 'server.reason.lowerBoundNewer', {
-            app,
-            min: php.versionMin,
-            newest: NEWEST_FIXED_VERSION,
-          }),
-          evidence: phpEvidence,
-        };
-      }
-
-      if (minFix && compareVersions(versionMin, minFix) >= 0) {
-        return {
-          ...base,
-          status: 'not_vulnerable',
-          confidence: 'medium',
-          reason: t(code, 'server.reason.lowerBoundFixed', {
-            app,
-            min: php.versionMin,
-            fix: minFix,
-            branch: minBranch,
-          }),
+          confidence: 'high',
+          reason: newerThanNewestFixed
+            ? t(code, 'server.reason.lowerBoundNewer', {
+                app,
+                min: php.versionMin,
+                newest: NEWEST_FIXED_VERSION,
+              })
+            : t(code, 'server.reason.lowerBoundFixed', {
+                app,
+                min: php.versionMin,
+                fix: minFix,
+                branch: minBranch,
+              }),
           evidence: phpEvidence,
         };
       }
 
       return {
         ...base,
-        status: 'likely_vulnerable',
-        confidence: 'medium',
+        status: 'unknown',
+        confidence: 'low',
+        lowerBoundOnly: true,
         reason: minFix
           ? t(code, 'server.reason.lowerBound', {
               app,
