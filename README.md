@@ -107,15 +107,18 @@ PORT=8080 npm start
 репозитория отдаёт **404**: GitHub не переносит URL Pages при transfer, а
 `genkaok.github.io/haveibeenphpned` — project site удалённого репозитория.
 Вернуть его можно, создав в аккаунте `GenkaOk` отдельный репозиторий-зеркало
-с тем же `docs/` (Pages: `main` / `/docs`) и добавив remote:
+`GenkaOk/haveibeenphpned` с тем же `docs/` (Pages: `main` / `/docs`). Важно:
+этот путь совпадает с текущим URL remote `origin`, поэтому сначала переведите
+`origin` на канонический адрес, иначе push продолжит уходить в зеркало:
 
 ```bash
+git remote set-url origin git@github.com:HaveIbeenPHPned/haveibeenphpned.github.io.git
 git remote add site git@github.com:GenkaOk/haveibeenphpned.git
 ```
 
-`npm run deploy:site` тогда будет пушить и в него. CORS для
+`npm run deploy:site` тогда будет пушить и в зеркало. CORS для
 `https://genkaok.github.io` уже разрешён, так что восстановленное зеркало
-заработает без правок API.
+заработает без правок API. Сейчас зеркала нет: старый адрес отдаёт 404.
 
 Источник правды — `public/`. Сборка и публикация:
 
@@ -610,7 +613,9 @@ node cli.js example.com --json
   It serves the generated `docs/` with Pages source
   *Deploy from a branch → `main` / `/docs`*. The old
   https://genkaok.github.io/haveibeenphpned/ returns 404 after the repository
-  transfer; restoring it needs a separate mirror repository under `GenkaOk`.
+  transfer; restoring it needs a separate mirror repository under `GenkaOk`
+  (and `origin` must be repointed to the canonical URL first, because the
+  mirror path equals the current `origin` URL).
   After any change in
   `public/`, run `npm run build:pages`, commit `docs/` and run
   `npm run deploy:site` — it pushes `main` to both remotes (`origin`, `site`),
