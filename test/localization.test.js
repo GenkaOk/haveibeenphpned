@@ -347,6 +347,29 @@ test('lang=ru: отчёт остаётся русским, коды статус
   }
 });
 
+test('recommendations: Sury есть в ru/en/fr и всегда с оговоркой о стороннем репозитории', async () => {
+  const fixture = await startFixtureServer({ root: fixtures['php-8-4-26'] });
+  const app = await startApp();
+  try {
+    const expectations = {
+      ru: /сторонний репозиторий/,
+      en: /third-party repository/,
+      fr: /dépôt tiers/,
+    };
+    for (const [lang, caution] of Object.entries(expectations)) {
+      const report = await (await postCheck(app.url, { url: fixture.url, lang })).json();
+      const sury = report.recommendations.filter((rec) => rec.includes('deb.sury.org'));
+      assert.equal(sury.length, 2, `${lang}: ожидались рекомендация Sury и оговорка`);
+      assert.match(sury[0], /USN-8948-1/, `${lang}: нет ссылки на дистрибутив`);
+      assert.match(sury[1], caution, `${lang}: нет оговорки о стороннем репозитории`);
+      assert.match(sury[1], /php-fpm|PHP-FPM/, `${lang}: нет требования перезапустить php-fpm`);
+    }
+  } finally {
+    await app.close();
+    await fixture.close();
+  }
+});
+
 test('ошибки API en/fr без кириллицы, ru — с кириллицей', async () => {
   const blocked = await startApp({ allowPrivateTargets: false });
   try {

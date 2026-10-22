@@ -437,15 +437,39 @@ credits-страница — `/?=PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000`; в al
 ### Обновление из Sury (Debian/Ubuntu)
 
 Если дистрибутив не даёт исправленную версию, альтернатива — репозиторий
-Sury: <https://deb.sury.org> (ключ и пакеты на `packages.sury.org`). Для
-PHP-FPM ставьте `php8.x-fpm` (например `php8.4-fpm`) и нужные модули.
+Sury: <https://deb.sury.org>. Команды ниже повторяют официальную инструкцию
+[packages.sury.org/php/README.txt](https://packages.sury.org/php/README.txt);
+если вы работаете от root, `sudo` не нужен.
+
+```bash
+# 1. Ключ и репозиторий Sury
+sudo apt-get update
+sudo apt-get -y install lsb-release ca-certificates curl
+sudo curl -sSLo /tmp/debsuryorg-archive-keyring.deb https://packages.sury.org/debsuryorg-archive-keyring.deb
+sudo dpkg -i /tmp/debsuryorg-archive-keyring.deb
+sudo sh -c 'echo "deb [signed-by=/usr/share/keyrings/debsuryorg-archive-keyring.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list'
+sudo apt-get update
+
+# 2. Обновите свою ветку (пример — 8.4; подставьте 8.2/8.3/8.5)
+sudo apt-get install --only-upgrade php8.4-fpm php8.4-cli
+# если ветка ещё не установлена:
+# sudo apt-get install php8.4-fpm php8.4-cli
+
+# 3. Проверка и перезапуск воркеров
+php -v
+sudo systemctl restart php8.4-fpm
+sudo systemctl reload nginx      # Apache: sudo systemctl restart apache2
+```
 
 Важно: Sury — **сторонний** репозиторий, а не официальный канал безопасности
 Debian/Ubuntu. После обновления выполните `php -v` и **перезапустите**
 `php-fpm` и веб-сервер: иначе воркеры останутся на старой версии.
 
-Первоисточники: [php.net](https://www.php.net/), GHSA-w8hw-w9fx-j79w,
-GHSA-6wmf-4rv5-p3rp, USN-8948-1.
+Ссылки: [php.net/security](https://www.php.net/security/),
+[GHSA-w8hw-w9fx-j79w](https://github.com/advisories/GHSA-w8hw-w9fx-j79w),
+[GHSA-6wmf-4rv5-p3rp](https://github.com/advisories/GHSA-6wmf-4rv5-p3rp),
+[Ubuntu USN-8948-1](https://ubuntu.com/security/notices/USN-8948-1),
+[deb.sury.org](https://deb.sury.org).
 
 ## Коды выхода CLI
 

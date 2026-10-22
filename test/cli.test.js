@@ -92,6 +92,18 @@ test('cli: человекочитаемый вывод содержит верд
   }
 });
 
+test('cli: в рекомендациях есть Sury и предупреждение о стороннем репозитории', async () => {
+  const srv = await startFixtureServer({ root: fixtures['php-8-4-26'] });
+  try {
+    const result = await runCli([srv.url, '--lang=en']);
+    assert.equal(result.code, 1, result.stderr);
+    assert.match(result.stdout, /deb\.sury\.org/);
+    assert.match(result.stdout, /third-party repository/);
+  } finally {
+    await srv.close();
+  }
+});
+
 test('cli: заблокированная цель → exit 2 и понятная ошибка', async () => {
   const result = await runCli(['http://169.254.169.254/']);
   assert.equal(result.code, 2);
