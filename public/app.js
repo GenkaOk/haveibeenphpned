@@ -30,7 +30,7 @@
 
   if (!form || !input || !consent || !button || !result) return;
 
-  const REQUEST_TIMEOUT_MS = 25000;
+  const REQUEST_TIMEOUT_MS = 70000;
   const STORAGE_KEY = 'php2shell.lang';
   const RELEASE_DATE = '2026-10-21';
 

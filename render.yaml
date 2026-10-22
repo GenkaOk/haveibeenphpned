@@ -1,0 +1,23 @@
+# Render Blueprint для API проверки PHP2Shell.
+#
+# Как создать сервис: Render Dashboard → New → Blueprint → выбрать репозиторий
+# GenkaOk/haveibeenphpned → Apply. Render читает этот файл из корня ветки,
+# собирает образ из ./Dockerfile и поднимает сервис по health check.
+#
+# Секретов в манифесте нет: NODE_ENV и ALLOWED_ORIGINS не секретны, а PORT
+# Render передаёт сам — src/server.js читает process.env.PORT.
+
+services:
+  - type: web
+    name: haveibeenphpned-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: frankfurt
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ALLOWED_ORIGINS
+        value: https://genkaok.github.io

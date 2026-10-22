@@ -164,14 +164,37 @@ curl -s http://127.0.0.1:8080/api/health       # {"ok":true}
 Образ: `node:22-alpine`, процесс работает от пользователя `node`,
 `HEALTHCHECK` дергает `/api/health`.
 
-#### Render
+#### Render (Blueprint)
 
-1. **New → Web Service**, подключить репозиторий `GenkaOk/haveibeenphpned`.
-2. Runtime: **Docker** (Dockerfile в корне) или **Node**:
-   Build `npm ci`, Start `node src/server.js`.
-3. Environment: `ALLOWED_ORIGINS=https://genkaok.github.io`.
-4. Health check path: `/api/health`. После деплоя скопировать публичный URL
-   в переменную `API_BASE` (шаг 1).
+В корне репозитория лежит `render.yaml` — манифест Render Blueprint. Сервис
+создаётся из него, руками поля заполнять не нужно:
+
+1. **New → Blueprint**, подключить репозиторий `GenkaOk/haveibeenphpned`.
+2. Render находит `render.yaml` и показывает сервис `haveibeenphpned-api`:
+   runtime Docker (`./Dockerfile`), plan `free`, region Frankfurt,
+   health check `/api/health`, автодеплой при push в ветку.
+3. **Apply** — Render собирает образ и запускает контейнер.
+4. Скопировать публичный URL вида
+   `https://haveibeenphpned-api.onrender.com` и передать его в `API_BASE`
+   при сборке страницы (шаг 1):
+
+   ```bash
+   API_BASE=https://haveibeenphpned-api.onrender.com npm run build:pages
+   ```
+
+Переменные из манифеста: `NODE_ENV=production` и
+`ALLOWED_ORIGINS=https://genkaok.github.io`. `PORT` Render передаёт сам —
+`src/server.js` читает `process.env.PORT`. Секретов в манифесте нет.
+
+Если Blueprint не нужен, тот же сервис создаётся вручную:
+**New → Web Service**, runtime Docker, health check `/api/health`,
+`ALLOWED_ORIGINS=https://genkaok.github.io`.
+
+**Free-план засыпает.** После ~15 минут без запросов инстанс останавливается,
+и первый запрос после сна идёт ~30–60 с. На сайте это выглядит как
+«сервер просыпается»: таймаут проверки увеличен до 70 с, а сообщение об
+ошибке объясняет сон free-плана и предлагает повторить. Для мгновенного
+отклика нужен платный план Render либо always-on хост (Fly.io / VPS ниже).
 
 #### Fly.io
 

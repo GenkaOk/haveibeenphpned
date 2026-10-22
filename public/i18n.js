@@ -136,7 +136,7 @@
 
       'ui.net.failed': 'Не удалось связаться с сервисом проверки. Попробуйте ещё раз.',
       'ui.net.timeout':
-        'Проверка заняла слишком много времени. Сервер не ответил за 25 секунд — попробуйте ещё раз.',
+        'Сервер не ответил за 70 секунд. На бесплатном плане Render инстанс засыпает после 15 минут простоя и первый запрос после сна идёт до минуты. Подождите немного и повторите проверку.',
       'ui.net.network':
         'Не удалось связаться с сервисом проверки. Проверьте сеть и попробуйте ещё раз.',
       'ui.net.badResponse': 'Сервис вернул неожиданный ответ. Попробуйте ещё раз.',
@@ -500,7 +500,7 @@
 
       'ui.net.failed': 'Could not reach the check service. Try again.',
       'ui.net.timeout':
-        'The check took too long. The server did not respond within 25 seconds — try again.',
+        'The server did not respond within 70 seconds. On the Render free plan the instance sleeps after 15 minutes idle and the first request after sleep can take up to a minute. Wait a moment and run the check again.',
       'ui.net.network': 'Could not reach the check service. Check your network and try again.',
       'ui.net.badResponse': 'The service returned an unexpected response. Try again.',
       'ui.net.retryAfter': 'Try again in {seconds} s.',
@@ -866,7 +866,7 @@
 
       'ui.net.failed': 'Impossible de joindre le service de vérification. Réessayez.',
       'ui.net.timeout':
-        "La vérification a pris trop de temps. Le serveur n'a pas répondu en 25 secondes — réessayez.",
+        "Le serveur n'a pas répondu en 70 secondes. Sur le plan gratuit de Render, l'instance se met en veille après 15 minutes d'inactivité et la première requête peut prendre jusqu'à une minute. Patientez un instant puis relancez la vérification.",
       'ui.net.network':
         'Impossible de joindre le service de vérification. Vérifiez votre réseau et réessayez.',
       'ui.net.badResponse': 'Le service a renvoyé une réponse inattendue. Réessayez.',
