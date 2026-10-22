@@ -1,0 +1,79 @@
+{
+  "php-8-4-26": {
+    "status": 200,
+    "headers": {
+      "Server": "nginx/1.24.0",
+      "X-Powered-By": "PHP/8.4.26"
+    },
+    "body": "<!doctype html><html><head><title>Магазин</title></head><body><a href=\"/index.php\">Главная</a></body></html>"
+  },
+  "php-8-4-27": {
+    "status": 200,
+    "headers": {
+      "Server": "nginx/1.24.0",
+      "X-Powered-By": "PHP/8.4.27"
+    },
+    "body": "<!doctype html><html><body><a href=\"/index.php\">Главная</a></body></html>"
+  },
+  "php-8-5-12": {
+    "status": 200,
+    "headers": {
+      "Server": "nginx/1.24.0",
+      "X-Powered-By": "PHP/8.5.12"
+    },
+    "body": "<html><body>ok</body></html>"
+  },
+  "php-7-4-33": {
+    "status": 200,
+    "headers": {
+      "Server": "nginx/1.24.0",
+      "X-Powered-By": "PHP/7.4.33"
+    },
+    "body": "<html><body><a href=\"/index.php\">Главная</a></body></html>"
+  },
+  "php-ubuntu-backport": {
+    "status": 200,
+    "headers": {
+      "Server": "Apache/2.4.52 (Ubuntu)",
+      "X-Powered-By": "PHP/8.1.2-1ubuntu2.14"
+    },
+    "body": "<html><body><a href=\"/index.php\">Главная</a></body></html>"
+  },
+  "php-hidden-version": {
+    "status": 200,
+    "headers": {
+      "Server": "nginx",
+      "Set-Cookie": ["PHPSESSID=deadbeefdeadbeef; path=/; HttpOnly"]
+    },
+    "body": "<!doctype html><html><body><form action=\"/login.php\" method=\"post\"></form></body></html>"
+  },
+  "php-body-only": {
+    "status": 200,
+    "headers": {
+      "Server": "nginx/1.24.0"
+    },
+    "body": "<html><body><a href=\"/about.php\">О компании</a><a href=\"/contacts.php\">Контакты</a></body></html>"
+  },
+  "no-php": {
+    "status": 200,
+    "headers": {
+      "Server": "nginx/1.24.0"
+    },
+    "body": "<!doctype html><html><body><h1>Статический сайт</h1><a href=\"/about.html\">О нас</a></body></html>"
+  },
+  "php-fpm-explicit": {
+    "status": 200,
+    "headers": {
+      "Server": "nginx/1.24.0 (PHP-FPM)",
+      "X-Powered-By": "PHP/8.3.35"
+    },
+    "body": "<html><body>ok</body></html>"
+  },
+  "forbidden": {
+    "status": 403,
+    "headers": {
+      "Server": "Apache/2.4.58"
+    },
+    "body": "Forbidden"
+  }
+}
