@@ -17,10 +17,10 @@ CVE-2026-109619  устаревшее состояние воркера межд
 Дистрибутивы (Ubuntu USN-8948-1 и др.) бэкпортировали патч.
 ```
 
-- Репозиторий: <https://github.com/GenkaOk/haveibeenphpned>
-- Сайт (основной адрес, GitHub Pages):
-  <https://haveibeenphpned.github.io/> — зеркало
-  <https://genkaok.github.io/haveibeenphpned/> (старый адрес, работает)
+- Репозиторий: <https://github.com/HaveIbeenPHPned/haveibeenphpned.github.io>
+- Сайт (основной адрес, GitHub Pages): <https://haveibeenphpned.github.io/>
+- Старый адрес <https://genkaok.github.io/haveibeenphpned/> после переноса
+  репозитория отдаёт 404 (см. «Деплой»); API уже разрешает его origin.
 - API: размещается отдельно, адрес задаётся в `API_BASE` (см. «Деплой»).
 
 Первоисточники: [GHSA-w8hw-w9fx-j79w](https://github.com/advisories/GHSA-w8hw-w9fx-j79w),
@@ -63,7 +63,7 @@ PORT=8080 npm start
   `public/i18n.js`, `public/config.js`;
 - все ссылки на ассеты относительные, поэтому один и тот же `public/`
   работает и в корне (`http://localhost:8080/`, `https://haveibeenphpned.github.io/`),
-  и в подкаталоге (`https://genkaok.github.io/haveibeenphpned/`);
+  и в подкаталоге (`http://localhost:8080/haveibeenphpned/`);
 - без CDN, внешних шрифтов и аналитики — страница работает офлайн;
 - форма: адрес сервера и подтверждение владения (без него кнопка неактивна);
 - состояния: пустое, загрузка, ошибка человеческим текстом, результат;
@@ -96,15 +96,26 @@ PORT=8080 npm start
 
 ### 1. Страница на GitHub Pages
 
-Основной адрес — **<https://haveibeenphpned.github.io/>**, старый
-**<https://genkaok.github.io/haveibeenphpned/>** остаётся зеркалом с тем же
-содержимым. Оба репозитория отдают **одну и ту же** сгенерированную папку
-`docs/` (Pages: **Deploy from a branch → `main` / `/docs`**):
+Основной адрес — **<https://haveibeenphpned.github.io/>**. Его отдаёт
+репозиторий `HaveIbeenPHPned/haveibeenphpned.github.io` — бывший
+`GenkaOk/haveibeenphpned`, перенесённый в организацию (git-адрес
+`GenkaOk/haveibeenphpned` редиректится, поэтому remote `origin` работает).
+Это **user site**: Pages настроены на **Deploy from a branch → `main` /
+`/docs`**, и `docs/` отдаётся из корня домена.
 
-| Адрес | Репозиторий | Remote |
-| --- | --- | --- |
-| основной | `HaveIbeenPHPned/haveibeenphpned.github.io` | `site` |
-| зеркало | `GenkaOk/haveibeenphpned` | `origin` |
+Старый адрес **<https://genkaok.github.io/haveibeenphpned/>** после переноса
+репозитория отдаёт **404**: GitHub не переносит URL Pages при transfer, а
+`genkaok.github.io/haveibeenphpned` — project site удалённого репозитория.
+Вернуть его можно, создав в аккаунте `GenkaOk` отдельный репозиторий-зеркало
+с тем же `docs/` (Pages: `main` / `/docs`) и добавив третий remote:
+
+```bash
+git remote add mirror git@github.com:GenkaOk/haveibeenphpned.git
+```
+
+`npm run deploy:site` тогда будет пушить и в него (`SITE_REMOTE=mirror` или
+добавьте push вручную). CORS для `https://genkaok.github.io` уже разрешён,
+так что восстановленное зеркало заработает без правок API.
 
 Источник правды — `public/`. Сборка и публикация:
 
@@ -113,18 +124,17 @@ PORT=8080 npm start
 API_BASE=https://haveibeenphpned-api.onrender.com npm run build:pages
 # 2. закоммитить public/ + docs/
 git add public docs && git commit -m "…"
-# 3. опубликовать этот коммит в оба репозитория (origin и site)
+# 3. опубликовать в main репозитория сайта
 npm run deploy:site
 ```
 
 `npm run deploy:site` (`scripts/publish-site.js`) пушит текущий коммит `main`
-в оба remote, поэтому оба адреса обновляются вместе. Перед push скрипт
-проверяет: ветка `main`, чистое рабочее дерево, `docs/` совпадает с `public/`
-и `docs/config.js` содержит непустой `API_BASE`. Второй remote добавляется один раз:
-
-```bash
-git remote add site git@github.com:HaveIbeenPHPned/haveibeenphpned.github.io.git
-```
+в оба remote — `origin` и `site`. После переноса репозитория оба адреса ведут
+в `HaveIbeenPHPned/haveibeenphpned.github.io` (у `origin` срабатывает
+редирект GitHub), поэтому оба push обновляют один и тот же репозиторий и одну
+и ту же страницу. Перед push скрипт проверяет: ветка `main`, чистое рабочее
+дерево, `docs/` совпадает с `public/` и `docs/config.js` содержит непустой
+`API_BASE`.
 
 Скрипт `scripts/build-pages.js` очищает `docs/`, копирует `public/`, пишет
 `docs/.nojekyll` (отключает Jekyll целиком — иначе GitHub ищет
@@ -134,16 +144,17 @@ git remote add site git@github.com:HaveIbeenPHPned/haveibeenphpned.github.io.git
 запустить `npm run build:pages` и закоммитить результат вместе с `public/`.
 GitHub сам этот скрипт не запускает — сборка статики остаётся в репозитории.
 
-Разовая настройка каждого репозитория:
+Разовая настройка репозитория:
 
 1. **Settings → Pages → Build and deployment → Source: Deploy from a branch.**
 2. Branch: `main`, folder: `/docs`.
 3. Push в `main` — сайт пересобирается без Jekyll.
 
-`HaveIbeenPHPned/haveibeenphpned.github.io` — user site, поэтому отдаётся
-из корня `https://haveibeenphpned.github.io/`; `GenkaOk/haveibeenphpned` —
-project site, поэтому подкаталог `/haveibeenphpned/`. Относительные пути в
-`public/` работают в обоих случаях.
+`HaveIbeenPHPned/haveibeenphpned.github.io` — user site, поэтому сайт
+отдаётся из корня `https://haveibeenphpned.github.io/`. Если зеркало
+`GenkaOk/haveibeenphpned` создадут, оно будет project site и отдастся из
+подкаталога `/haveibeenphpned/`; относительные пути в `public/` работают в
+обоих случаях.
 
 Адрес API: `API_BASE` при сборке (шаг выше) либо query-параметр
 `?api=https://…`. Без значения форма честно скажет, что API не подключён.
@@ -156,14 +167,12 @@ Source: GitHub Actions. При source=branch он не нужен.
 Проверка после деплоя:
 
 ```bash
-# 1. оба сайта отдаются
+# 1. сайт отдаётся
 curl -sI https://haveibeenphpned.github.io/ | head -1             # HTTP/2 200
-curl -sI https://genkaok.github.io/haveibeenphpned/ | head -1     # HTTP/2 200
-# 2. страницы видят API: в config.js должен быть адрес API
+# 2. страница видит API: в config.js должен быть адрес API
 curl -s https://haveibeenphpned.github.io/config.js
-curl -s https://genkaok.github.io/haveibeenphpned/config.js
 #    window.__PHP2SHELL_API__ = "https://haveibeenphpned-api.onrender.com";
-# 3. API жив и разрешает origin обоих сайтов
+# 3. API жив и разрешает origin сайта (и старого зеркала, когда оно есть)
 curl -s https://haveibeenphpned-api.onrender.com/api/health       # {"ok":true}
 for origin in https://haveibeenphpned.github.io https://genkaok.github.io; do
   curl -sI -X OPTIONS https://haveibeenphpned-api.onrender.com/api/check \
@@ -206,7 +215,9 @@ curl -s http://127.0.0.1:8080/api/health       # {"ok":true}
 В корне репозитория лежит `render.yaml` — манифест Render Blueprint. Сервис
 создаётся из него, руками поля заполнять не нужно:
 
-1. **New → Blueprint**, подключить репозиторий `GenkaOk/haveibeenphpned`.
+1. **New → Blueprint**, подключить репозиторий
+   `HaveIbeenPHPned/haveibeenphpned.github.io` (старый адрес
+   `GenkaOk/haveibeenphpned` перенаправляет на него).
 2. Render находит `render.yaml` и показывает сервис `haveibeenphpned-api`:
    runtime Docker (`./Dockerfile`), plan `free`, region Frankfurt,
    health check `/api/health`, автодеплой при push в ветку.
@@ -228,9 +239,10 @@ curl -s http://127.0.0.1:8080/api/health       # {"ok":true}
 **New → Web Service**, runtime Docker, health check `/api/health`,
 `ALLOWED_ORIGINS=https://haveibeenphpned.github.io,https://genkaok.github.io`.
 
-**Деплой API** — push в `main` репозитория `GenkaOk/haveibeenphpned`
-(`autoDeploy: true` в манифесте): Render пересобирает образ сам, настройки
-трогать не нужно. `npm run deploy:site` пушит туда же и обновляет сайт.
+**Деплой API** — push в `main` репозитория
+`HaveIbeenPHPned/haveibeenphpned.github.io` (`autoDeploy: true` в манифесте):
+Render пересобирает образ сам, настройки трогать не нужно.
+`npm run deploy:site` пушит туда же и обновляет сайт.
 
 **Free-план засыпает.** После ~15 минут без запросов инстанс останавливается,
 и первый запрос после сна идёт ~30–60 с. На сайте это выглядит как
@@ -596,12 +608,16 @@ node cli.js example.com --json
 ```
 
 - **Site:** primary address is https://haveibeenphpned.github.io/ (repo
-  `HaveIbeenPHPned/haveibeenphpned.github.io`); https://genkaok.github.io/haveibeenphpned/
-  is a mirror. Both serve the same generated `docs/` with Pages source
-  *Deploy from a branch → `main` / `/docs`*. After any change in `public/`, run
-  `npm run build:pages`, commit `docs/` and run `npm run deploy:site` — it pushes
-  the commit to both remotes (`origin` and `site`). Never edit `docs/` by hand.
-  The script also writes `docs/.nojekyll` so Pages skips Jekyll entirely.
+  `HaveIbeenPHPned/haveibeenphpned.github.io`, formerly `GenkaOk/haveibeenphpned`).
+  It serves the generated `docs/` with Pages source
+  *Deploy from a branch → `main` / `/docs`*. The old
+  https://genkaok.github.io/haveibeenphpned/ returns 404 after the repository
+  transfer; restoring it needs a separate mirror repository under `GenkaOk`.
+  After any change in
+  `public/`, run `npm run build:pages`, commit `docs/` and run
+  `npm run deploy:site` — it pushes `main` to both remotes (`origin`, `site`),
+  which now point to the same repository. Never edit `docs/` by hand. The
+  script also writes `docs/.nojekyll` so Pages skips Jekyll entirely.
 - **API:** run the Docker image on any HTTPS host, set
   `ALLOWED_ORIGINS=https://haveibeenphpned.github.io,https://genkaok.github.io`
   (env adds to the built-in defaults), then rebuild the site with
@@ -611,8 +627,9 @@ node cli.js example.com --json
 - **CORS:** only listed origins get `Access-Control-Allow-Origin` (the exact
   request origin, no wildcard); `OPTIONS` preflight returns `204` with
   `POST, GET, OPTIONS` and `Content-Type`.
-- **Deploy:** push to `main` of `origin`; Render rebuilds the API and Pages
-  republishes `/docs`; `npm run deploy:site` also updates the mirror.
+- **Deploy:** push to `main` of `origin`/`site` (same repository); Render
+  rebuilds the API and Pages republishes `/docs`; `npm run deploy:site` does
+  both pushes.
   `.github/workflows/pages.yml` stays as a manual GitHub Actions fallback only.
   Backend: `docker run -p 8080:8080 -e ALLOWED_ORIGINS=…`.
 

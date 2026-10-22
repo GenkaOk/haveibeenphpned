@@ -24,8 +24,9 @@ const MAX_REQUEST_BODY = 64 * 1024;
 const STATIC_DIR = path.join(__dirname, '..', 'public');
 // Origin страниц на GitHub Pages. Сайт и API живут на разных хостах,
 // поэтому браузеру нужно явное разрешение на кросс-доменный POST.
-// Основной адрес — haveibeenphpned.github.io, старый genkaok.github.io
-// остаётся зеркалом и должен продолжать работать.
+// Основной адрес — haveibeenphpned.github.io. Старый genkaok.github.io
+// разрешён, чтобы зеркало работало, если его восстановят после переноса
+// репозитория (сейчас старый URL Pages отдаёт 404).
 const DEFAULT_ALLOWED_ORIGINS = [
   'https://haveibeenphpned.github.io',
   'https://genkaok.github.io',
