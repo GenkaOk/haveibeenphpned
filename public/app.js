@@ -17,6 +17,7 @@
   const form = document.getElementById('check-form');
   const input = document.getElementById('target-url');
   const consent = document.getElementById('consent');
+  const deepInput = document.getElementById('deep');
   const button = document.getElementById('check-button');
   const formError = document.getElementById('form-error');
   const linkHint = document.getElementById('link-hint');
@@ -60,6 +61,7 @@
   let currentLang = I18N.FALLBACK;
   let busy = false;
   let lastTarget = '';
+  let lastDeep = false;
   let lastReport = null;
   let lastError = null;
   /** @type {Record<string, object>} отчёты по языкам — переключение без повторного запроса */
@@ -195,6 +197,7 @@
 
   function syncButton() {
     button.disabled = busy || !consent.checked;
+    if (deepInput) deepInput.disabled = busy;
   }
 
   function showFormError(key) {
@@ -336,6 +339,7 @@
     } else {
       pair(t('ui.meta.requests'), '—', true);
     }
+    pair(t('ui.meta.deep'), report.deep === true ? t('ui.meta.deepOn') : t('ui.meta.deepOff'));
 
     panel.append(dl);
 
@@ -345,6 +349,14 @@
       panel.append(el('p', 'callout', t('ui.meta.unreachable', { message })));
     }
     return panel;
+  }
+
+  function versionSourceLabel(source) {
+    if (source === 'body') return t('ui.php.sourceBody');
+    if (source === 'phpinfo') return t('ui.php.sourcePhpinfo');
+    if (source === 'easter-egg') return t('ui.php.sourceEasterEgg');
+    if (source === 'app-fingerprint') return t('ui.php.sourceAppFingerprint');
+    return t('ui.php.sourceHeader');
   }
 
   function renderPhp(report) {
@@ -360,8 +372,28 @@
     const versionValue = el('dd');
     if (php.version) {
       versionValue.append(el('span', 'version', php.version));
-      const source = php.versionSource === 'body' ? t('ui.php.sourceBody') : t('ui.php.sourceHeader');
-      versionValue.append(el('div', 'source-note', t('ui.php.source', { source })));
+      versionValue.append(
+        el('div', 'source-note', t('ui.php.source', { source: versionSourceLabel(php.versionSource) })),
+      );
+    } else if (php.legacyPhp5) {
+      versionValue.append(el('span', 'version', t('ui.php.legacy')));
+      versionValue.append(
+        el('div', 'source-note', t('ui.php.source', { source: versionSourceLabel('easter-egg') })),
+      );
+    } else if (php.versionMin) {
+      versionValue.append(el('span', 'version', `≥ ${php.versionMin}`));
+      versionValue.append(
+        el(
+          'div',
+          'source-note',
+          t('ui.php.lowerBoundNote', {
+            app: isObject(php.app) && php.app.name ? php.app.name : '—',
+          }),
+        ),
+      );
+      versionValue.append(
+        el('div', 'source-note', t('ui.php.source', { source: versionSourceLabel('app-fingerprint') })),
+      );
     } else {
       versionValue.append(el('span', 'version', t('ui.php.notDisclosed')));
     }
@@ -389,6 +421,13 @@
       distroGroup.append(el('dt', null, t('ui.php.distro')));
       distroGroup.append(el('dd', null, php.distro.name));
       dl.append(distroGroup);
+    }
+
+    if (isObject(php.app) && php.app.name) {
+      const appGroup = el('div');
+      appGroup.append(el('dt', null, t('ui.php.app')));
+      appGroup.append(el('dd', null, php.app.version ? `${php.app.name} ${php.app.version}` : php.app.name));
+      dl.append(appGroup);
     }
 
     if (!php.detected) {
@@ -564,14 +603,14 @@
     return error;
   }
 
-  async function postCheck(target, lang) {
+  async function postCheck(target, lang, deepMode) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
     try {
       const response = await fetch(apiUrl('/api/check'), {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ url: target, lang }),
+        body: JSON.stringify({ url: target, lang, deep: deepMode === true }),
         signal: controller.signal,
       });
 
@@ -622,9 +661,10 @@
     if (badge) badge.focus({ preventScroll: false });
   }
 
-  async function runCheck(target) {
+  async function runCheck(target, deepMode) {
     if (busy) return;
     busy = true;
+    lastDeep = deepMode === true;
     syncButton();
     input.readOnly = true;
     clearFormError();
@@ -634,7 +674,7 @@
 
     const sentLang = currentLang;
     try {
-      const payload = await postCheck(target, sentLang);
+      const payload = await postCheck(target, sentLang, lastDeep);
       applyReport(payload, target);
       if (payload.lang && payload.lang !== currentLang) await refreshReportForLang();
     } catch (error) {
@@ -666,7 +706,7 @@
 
     const token = ++langRequestToken;
     try {
-      const payload = await postCheck(lastTarget, lang);
+      const payload = await postCheck(lastTarget, lang, lastDeep);
       if (token !== langRequestToken || lang !== currentLang) return;
       reportCache[lang] = payload;
       lastReport = payload;
@@ -769,7 +809,7 @@
       showApiNotConfigured();
       return;
     }
-    runCheck(checked.url);
+    runCheck(checked.url, Boolean(deepInput && deepInput.checked));
   });
 
   consent.addEventListener('change', () => {
@@ -792,7 +832,7 @@
       showApiNotConfigured();
       return;
     }
-    runCheck(lastTarget || input.value.trim());
+    runCheck(lastTarget || input.value.trim(), Boolean(deepInput && deepInput.checked));
   });
 
   copyButton.addEventListener('click', copyShareLink);

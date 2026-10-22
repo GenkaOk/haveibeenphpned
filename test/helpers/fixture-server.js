@@ -9,11 +9,20 @@ const fixtures = require('../fixtures.json');
  */
 async function startFixtureServer(overrides = {}) {
   const table = { ...fixtures, ...overrides };
+  /** @type {string[]} */
+  const requests = [];
 
   const server = http.createServer((req, res) => {
-    const pathname = (req.url || '/').split('?')[0];
-    const key = pathname === '/' ? 'root' : pathname.replace(/^\/+/, '');
-    const fixture = table[key] || table.root;
+    const rawUrl = req.url || '/';
+    requests.push(rawUrl);
+    const pathname = rawUrl.split('?')[0];
+    const cleanPath = pathname.replace(/^\/+/, '');
+    const fixture =
+      table[rawUrl] ||
+      table[pathname] ||
+      table[cleanPath] ||
+      (pathname === '/' ? table.root : null) ||
+      table.root;
 
     if (!fixture) {
       res.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' });
@@ -41,6 +50,8 @@ async function startFixtureServer(overrides = {}) {
     host: `127.0.0.1:${port}`,
     port,
     server,
+    requests,
+    getRequests: () => requests.slice(),
     close: () => new Promise((resolve) => server.close(resolve)),
   };
 }

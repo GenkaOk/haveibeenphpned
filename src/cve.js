@@ -109,6 +109,75 @@ function evaluateCve(cve, php, lang = 'ru') {
   const parsed = version ? parseVersion(version) : null;
 
   if (!parsed) {
+    // Пасхалка PHP отвечает только на legacy-версиях (≤ 5.4): ветка 5.x
+    // исправленных релизов не получала, поэтому обе CVE её затрагивают.
+    // Точную версию по пасхалке не выводим.
+    if (php.legacyPhp5) {
+      return {
+        ...base,
+        status: 'vulnerable',
+        confidence: 'medium',
+        reason: t(code, 'server.reason.legacyPhp5'),
+        evidence: phpEvidence,
+      };
+    }
+
+    // Точной версии нет, но фингерпринт приложения даёт нижнюю границу.
+    const versionMin = php.versionMin ? parseVersion(php.versionMin) : null;
+    if (versionMin) {
+      const app = php.app && php.app.name ? php.app.name : t(code, 'server.reason.unknownApp');
+      const minBranch = branchOf(versionMin);
+      const minFix = fixForBranch(minBranch);
+
+      if (isNewerThanNewestFixed(versionMin)) {
+        return {
+          ...base,
+          status: 'not_vulnerable',
+          confidence: 'medium',
+          reason: t(code, 'server.reason.lowerBoundNewer', {
+            app,
+            min: php.versionMin,
+            newest: NEWEST_FIXED_VERSION,
+          }),
+          evidence: phpEvidence,
+        };
+      }
+
+      if (minFix && compareVersions(versionMin, minFix) >= 0) {
+        return {
+          ...base,
+          status: 'not_vulnerable',
+          confidence: 'medium',
+          reason: t(code, 'server.reason.lowerBoundFixed', {
+            app,
+            min: php.versionMin,
+            fix: minFix,
+            branch: minBranch,
+          }),
+          evidence: phpEvidence,
+        };
+      }
+
+      return {
+        ...base,
+        status: 'likely_vulnerable',
+        confidence: 'medium',
+        reason: minFix
+          ? t(code, 'server.reason.lowerBound', {
+              app,
+              min: php.versionMin,
+              fix: minFix,
+              branch: minBranch,
+            })
+          : t(code, 'server.reason.lowerBoundEol', {
+              app,
+              min: php.versionMin,
+              branch: minBranch,
+            }),
+        evidence: phpEvidence,
+      };
+    }
+
     return {
       ...base,
       status: 'unknown',

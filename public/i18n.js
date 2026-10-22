@@ -239,6 +239,10 @@
         'Обновите PHP до исправленной версии для вашей ветки: {fixList}.',
       'server.rec.restart':
         'После обновления перезапустите PHP-FPM и веб-сервер, проверьте `php -v`.',
+      'server.rec.sury':
+        'Debian/Ubuntu: PHP можно обновить из дистрибутива (USN-8948-1) или из репозитория Sury — https://deb.sury.org (пакеты php8.x для Debian/Ubuntu).',
+      'server.rec.suryCaution':
+        'Sury — сторонний репозиторий (https://deb.sury.org), а не официальный канал безопасности Debian/Ubuntu. После обновления проверьте `php -v` и перезапустите php-fpm и веб-сервер: иначе воркеры останутся на старой версии.',
       'server.rec.checkPackage':
         'Проверьте версию пакета на сервере: `{command}` и наличие обновления (Ubuntu: USN-8948-1). Версия в X-Powered-By может не отражать бэкпорт патча.',
       'server.rec.learnVersion':
@@ -379,6 +383,65 @@
       'cli.recommendations': 'Что делать:',
       'cli.error': 'Ошибка:',
       'cli.limits': 'Ограничения:',
+      'ui.form.deep': 'Глубокая проверка (deep scan)',
+      'ui.form.deepHint':
+        'До 10 последовательных запросов только по allowlist: /phpinfo.php, /info.php, /test.php, /php.php, /?phpinfo=1, /status?full, /ping и 3 пасхалки PHP. Только для серверов, которыми вы владеете.',
+      'ui.php.versionMin': 'Нижняя граница версии PHP',
+      'ui.php.lowerBoundNote': 'Нижняя граница по приложению {app}; это не точная версия.',
+      'ui.php.legacy': 'PHP 5.x (legacy)',
+      'ui.php.app': 'Приложение',
+      'ui.php.sourcePhpinfo': 'из phpinfo()',
+      'ui.php.sourceEasterEgg': 'из пасхалки PHP',
+      'ui.php.sourceAppFingerprint': 'по фингерпринту приложения',
+      'ui.meta.deep': 'Глубокая проверка',
+      'ui.meta.deepOn': 'включена',
+      'ui.meta.deepOff': 'выключена',
+
+      'server.evidence.headerSignal': 'заголовок {name}: {value}',
+      'server.evidence.headerPhp': 'PHP-признак в заголовке {name}',
+      'server.evidence.headerVersion': 'версия PHP из заголовка {header}: {version}',
+      'server.evidence.multipleHeaderVersions':
+        'несколько версий в заголовках: {versions}; берём минимальную',
+      'server.evidence.appImpliesPhp': 'приложение {app} работает на PHP',
+      'server.evidence.appFingerprint':
+        'приложение {app} {version}: требует PHP ≥ {min} (нижняя граница, не точная версия)',
+      'server.evidence.appFingerprintNoVersion':
+        'приложение {app}: требует PHP ≥ {min} (нижняя граница, версия приложения не раскрыта)',
+      'server.evidence.phpinfoFound': 'phpinfo() доступен: PHP {version}',
+      'server.evidence.phpinfoSapi': 'phpinfo(): Server API {sapi}',
+      'server.evidence.easterEgg':
+        'пасхалка PHP отвечает: legacy PHP 5.x (точная версия по пасхалке не определяется)',
+      'server.evidence.fpmStatus':
+        'FPM status доступен: подтверждает PHP-FPM, версию не раскрывает',
+      'server.evidence.fpmPing': 'FPM ping отвечает: подтверждает PHP-FPM, версию не раскрывает',
+      'server.source.phpinfo': 'phpinfo()',
+      'server.source.easter-egg': 'пасхалка PHP',
+      'server.source.app-fingerprint': 'фингерпринт приложения',
+      'server.checks.deepProbe': '{path}: HTTP {status}',
+      'server.checks.deepError': '{path}: ошибка {error}',
+      'server.checks.deepSkipped': 'лимит {max} запросов deep scan достигнут',
+      'server.checks.versionLegacy': 'источник: пасхалка PHP; определена только ветка 5.x',
+      'server.checks.versionLowerBound':
+        'точная версия не раскрыта; нижняя граница ≥ {min} по приложению {app}',
+      'server.reason.legacyPhp5':
+        'Пасхалка PHP отвечает: сервер работает на PHP 5.x (legacy, ≤ 5.4). Ветка 5.x не получала исправлений — обе CVE затрагивают все её версии.',
+      'server.reason.lowerBound':
+        'Точная версия PHP не раскрыта, но {app} требует PHP ≥ {min} (нижняя граница). Это ниже исправленной {fix} для ветки {branch}; проверьте фактическую версию.',
+      'server.reason.lowerBoundEol':
+        'Точная версия PHP не раскрыта, но {app} требует PHP ≥ {min} (нижняя граница). Ветка {branch} исправлений не получила — вероятно подвержен.',
+      'server.reason.lowerBoundFixed':
+        'Точная версия PHP не раскрыта, но {app} требует PHP ≥ {min}. Это не ниже исправленной {fix} для ветки {branch} — по нижней границе версия исправлена.',
+      'server.reason.lowerBoundNewer':
+        'Точная версия PHP не раскрыта, но {app} требует PHP ≥ {min}. Это новее самой новой исправленной ветки {newest} — по нижней границе версия исправлена.',
+      'server.reason.unknownApp': 'приложение',
+      'server.rec.verifyVersion':
+        'Проверьте фактическую версию PHP: автоматически определена только нижняя граница ≥ {min}.',
+      'server.rec.legacyPhp5':
+        'Обновите PHP: ветка 5.x не поддерживается и не получала исправлений для этих CVE.',
+      'cli.optionDeep':
+        'глубокий режим: allowlist phpinfo/FPM/пасхалки, до 10 запросов, только свои серверы',
+      'cli.versionMin': 'Нижняя граница PHP: ≥ {min} ({app}, не точная версия)',
+      'cli.legacyPhp5': 'PHP 5.x (legacy, по пасхалке)',
     },
 
     en: {
@@ -602,6 +665,10 @@
         'Update PHP to the fixed version for your branch: {fixList}.',
       'server.rec.restart':
         'After the update, restart PHP-FPM and the web server, then check `php -v`.',
+      'server.rec.sury':
+        'Debian/Ubuntu: you can update PHP from the distribution (USN-8948-1) or from the Sury repository — https://deb.sury.org (php8.x packages for Debian/Ubuntu).',
+      'server.rec.suryCaution':
+        'Sury is a third-party repository (https://deb.sury.org), not the official Debian/Ubuntu security channel. After the update, check `php -v` and restart php-fpm and the web server; otherwise the workers keep the old version.',
       'server.rec.checkPackage':
         'Check the package version on the server: `{command}` and whether an update is available (Ubuntu: USN-8948-1). The version in X-Powered-By may not reflect a backported patch.',
       'server.rec.learnVersion':
@@ -742,6 +809,65 @@
       'cli.recommendations': 'What to do:',
       'cli.error': 'Error:',
       'cli.limits': 'Limitations:',
+      'ui.form.deep': 'Deep scan',
+      'ui.form.deepHint':
+        'Up to 10 sequential requests to an allowlist only: /phpinfo.php, /info.php, /test.php, /php.php, /?phpinfo=1, /status?full, /ping and 3 PHP easter eggs. Only for servers you own.',
+      'ui.php.versionMin': 'PHP version lower bound',
+      'ui.php.lowerBoundNote': 'Lower bound from {app}; this is not an exact version.',
+      'ui.php.legacy': 'PHP 5.x (legacy)',
+      'ui.php.app': 'Application',
+      'ui.php.sourcePhpinfo': 'from phpinfo()',
+      'ui.php.sourceEasterEgg': 'from a PHP easter egg',
+      'ui.php.sourceAppFingerprint': 'from the application fingerprint',
+      'ui.meta.deep': 'Deep scan',
+      'ui.meta.deepOn': 'on',
+      'ui.meta.deepOff': 'off',
+
+      'server.evidence.headerSignal': 'header {name}: {value}',
+      'server.evidence.headerPhp': 'PHP signal in header {name}',
+      'server.evidence.headerVersion': 'PHP version from header {header}: {version}',
+      'server.evidence.multipleHeaderVersions':
+        'multiple versions in headers: {versions}; using the lowest',
+      'server.evidence.appImpliesPhp': 'application {app} runs on PHP',
+      'server.evidence.appFingerprint':
+        'application {app} {version}: requires PHP ≥ {min} (lower bound, not an exact version)',
+      'server.evidence.appFingerprintNoVersion':
+        'application {app}: requires PHP ≥ {min} (lower bound; application version not disclosed)',
+      'server.evidence.phpinfoFound': 'phpinfo() is available: PHP {version}',
+      'server.evidence.phpinfoSapi': 'phpinfo(): Server API {sapi}',
+      'server.evidence.easterEgg':
+        'PHP easter egg responds: legacy PHP 5.x (the egg cannot reveal an exact version)',
+      'server.evidence.fpmStatus':
+        'FPM status is available: confirms PHP-FPM, does not reveal the version',
+      'server.evidence.fpmPing': 'FPM ping responds: confirms PHP-FPM, does not reveal the version',
+      'server.source.phpinfo': 'phpinfo()',
+      'server.source.easter-egg': 'PHP easter egg',
+      'server.source.app-fingerprint': 'application fingerprint',
+      'server.checks.deepProbe': '{path}: HTTP {status}',
+      'server.checks.deepError': '{path}: error {error}',
+      'server.checks.deepSkipped': 'deep scan request limit {max} reached',
+      'server.checks.versionLegacy': 'source: PHP easter egg; only the 5.x branch is identified',
+      'server.checks.versionLowerBound':
+        'exact version not disclosed; lower bound ≥ {min} from {app}',
+      'server.reason.legacyPhp5':
+        'A PHP easter egg responds: the server runs PHP 5.x (legacy, ≤ 5.4). The 5.x branch received no fixes — both CVEs affect every version in it.',
+      'server.reason.lowerBound':
+        'The exact PHP version is not disclosed, but {app} requires PHP ≥ {min} (lower bound). This is below the fixed {fix} for branch {branch}; verify the actual version.',
+      'server.reason.lowerBoundEol':
+        'The exact PHP version is not disclosed, but {app} requires PHP ≥ {min} (lower bound). Branch {branch} received no fixes — likely affected.',
+      'server.reason.lowerBoundFixed':
+        'The exact PHP version is not disclosed, but {app} requires PHP ≥ {min}. This is not below the fixed {fix} for branch {branch} — the lower bound is fixed.',
+      'server.reason.lowerBoundNewer':
+        'The exact PHP version is not disclosed, but {app} requires PHP ≥ {min}. This is newer than the newest fixed branch {newest} — the lower bound is fixed.',
+      'server.reason.unknownApp': 'the application',
+      'server.rec.verifyVersion':
+        'Verify the actual PHP version: only the lower bound ≥ {min} was detected automatically.',
+      'server.rec.legacyPhp5':
+        'Upgrade PHP: the 5.x branch is unsupported and received no fixes for these CVEs.',
+      'cli.optionDeep':
+        'deep mode: phpinfo/FPM/easter-egg allowlist, up to 10 requests, your own servers only',
+      'cli.versionMin': 'PHP lower bound: ≥ {min} ({app}, not an exact version)',
+      'cli.legacyPhp5': 'PHP 5.x (legacy, from a PHP easter egg)',
     },
 
     fr: {
@@ -972,6 +1098,10 @@
         'Mettez PHP à jour vers la version corrigée de votre branche : {fixList}.',
       'server.rec.restart':
         'Après la mise à jour, redémarrez PHP-FPM et le serveur web, puis vérifiez `php -v`.',
+      'server.rec.sury':
+        'Debian/Ubuntu : vous pouvez mettre PHP à jour depuis la distribution (USN-8948-1) ou depuis le dépôt Sury — https://deb.sury.org (paquets php8.x pour Debian/Ubuntu).',
+      'server.rec.suryCaution':
+        'Sury est un dépôt tiers (https://deb.sury.org), pas le canal de sécurité officiel de Debian/Ubuntu. Après la mise à jour, vérifiez `php -v` et redémarrez php-fpm et le serveur web ; sinon les workers gardent l’ancienne version.',
       'server.rec.checkPackage':
         "Vérifiez la version du paquet sur le serveur : `{command}` et la disponibilité d'une mise à jour (Ubuntu : USN-8948-1). La version dans X-Powered-By peut ne pas refléter un correctif rétroporté.",
       'server.rec.learnVersion':
@@ -1117,6 +1247,66 @@
       'cli.recommendations': 'Que faire :',
       'cli.error': 'Erreur :',
       'cli.limits': 'Limites :',
+      'ui.form.deep': 'Analyse approfondie (deep scan)',
+      'ui.form.deepHint':
+        'Jusqu’à 10 requêtes séquentielles, uniquement sur une liste blanche : /phpinfo.php, /info.php, /test.php, /php.php, /?phpinfo=1, /status?full, /ping et 3 easter eggs PHP. Uniquement pour les serveurs dont vous êtes propriétaire.',
+      'ui.php.versionMin': 'Borne inférieure de la version PHP',
+      'ui.php.lowerBoundNote': 'Borne inférieure d’après {app} ; ce n’est pas une version exacte.',
+      'ui.php.legacy': 'PHP 5.x (legacy)',
+      'ui.php.app': 'Application',
+      'ui.php.sourcePhpinfo': 'depuis phpinfo()',
+      'ui.php.sourceEasterEgg': 'depuis un easter egg PHP',
+      'ui.php.sourceAppFingerprint': 'd’après l’empreinte de l’application',
+      'ui.meta.deep': 'Analyse approfondie',
+      'ui.meta.deepOn': 'activée',
+      'ui.meta.deepOff': 'désactivée',
+
+      'server.evidence.headerSignal': 'en-tête {name} : {value}',
+      'server.evidence.headerPhp': 'indice PHP dans l’en-tête {name}',
+      'server.evidence.headerVersion': 'version PHP depuis l’en-tête {header} : {version}',
+      'server.evidence.multipleHeaderVersions':
+        'plusieurs versions dans les en-têtes : {versions} ; la plus basse est retenue',
+      'server.evidence.appImpliesPhp': 'l’application {app} fonctionne sous PHP',
+      'server.evidence.appFingerprint':
+        'application {app} {version} : exige PHP ≥ {min} (borne inférieure, pas une version exacte)',
+      'server.evidence.appFingerprintNoVersion':
+        'application {app} : exige PHP ≥ {min} (borne inférieure ; version de l’application non divulguée)',
+      'server.evidence.phpinfoFound': 'phpinfo() est accessible : PHP {version}',
+      'server.evidence.phpinfoSapi': 'phpinfo() : Server API {sapi}',
+      'server.evidence.easterEgg':
+        'un easter egg PHP répond : PHP 5.x legacy (l’easter egg ne donne pas la version exacte)',
+      'server.evidence.fpmStatus':
+        'FPM status est accessible : confirme PHP-FPM, ne révèle pas la version',
+      'server.evidence.fpmPing': 'FPM ping répond : confirme PHP-FPM, ne révèle pas la version',
+      'server.source.phpinfo': 'phpinfo()',
+      'server.source.easter-egg': 'easter egg PHP',
+      'server.source.app-fingerprint': 'empreinte de l’application',
+      'server.checks.deepProbe': '{path} : HTTP {status}',
+      'server.checks.deepError': '{path} : erreur {error}',
+      'server.checks.deepSkipped': 'limite de {max} requêtes deep scan atteinte',
+      'server.checks.versionLegacy':
+        'source : easter egg PHP ; seule la branche 5.x est identifiée',
+      'server.checks.versionLowerBound':
+        'version exacte non divulguée ; borne inférieure ≥ {min} d’après {app}',
+      'server.reason.legacyPhp5':
+        'Un easter egg PHP répond : le serveur fonctionne sous PHP 5.x (legacy, ≤ 5.4). La branche 5.x n’a reçu aucun correctif — les deux CVE affectent toutes ses versions.',
+      'server.reason.lowerBound':
+        'La version exacte de PHP n’est pas divulguée, mais {app} exige PHP ≥ {min} (borne inférieure). C’est inférieur au correctif {fix} de la branche {branch} ; vérifiez la version réelle.',
+      'server.reason.lowerBoundEol':
+        'La version exacte de PHP n’est pas divulguée, mais {app} exige PHP ≥ {min} (borne inférieure). La branche {branch} n’a reçu aucun correctif — probablement vulnérable.',
+      'server.reason.lowerBoundFixed':
+        'La version exacte de PHP n’est pas divulguée, mais {app} exige PHP ≥ {min}. Ce n’est pas inférieur au correctif {fix} de la branche {branch} — la borne inférieure est corrigée.',
+      'server.reason.lowerBoundNewer':
+        'La version exacte de PHP n’est pas divulguée, mais {app} exige PHP ≥ {min}. C’est plus récent que la branche corrigée la plus récente {newest} — la borne inférieure est corrigée.',
+      'server.reason.unknownApp': 'l’application',
+      'server.rec.verifyVersion':
+        'Vérifiez la version réelle de PHP : seule la borne inférieure ≥ {min} a été détectée automatiquement.',
+      'server.rec.legacyPhp5':
+        'Mettez PHP à jour : la branche 5.x n’est plus prise en charge et n’a reçu aucun correctif pour ces CVE.',
+      'cli.optionDeep':
+        'mode approfondi : liste blanche phpinfo/FPM/easter eggs, jusqu’à 10 requêtes, serveurs dont vous êtes propriétaire uniquement',
+      'cli.versionMin': 'Borne inférieure PHP : ≥ {min} ({app}, pas une version exacte)',
+      'cli.legacyPhp5': 'PHP 5.x (legacy, d’après un easter egg)',
     },
   };
 

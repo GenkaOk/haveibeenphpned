@@ -331,6 +331,8 @@ function createApp(options = {}) {
         const report = await scanImpl(payload.url, {
           allowPrivateTargets,
           lang,
+          // Deep scan — только при явном true. Любое другое значение = пассивный режим.
+          deep: payload.deep === true,
         });
         sendJson(res, 200, report);
         return;

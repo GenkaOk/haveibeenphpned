@@ -52,10 +52,11 @@ function argError(code, arg) {
  * @param {string[]} argv
  */
 function parseArgs(argv) {
-  const result = { url: null, json: false, help: false, timeoutMs: undefined, allowPrivate: false, lang: null };
+  const result = { url: null, json: false, help: false, deep: false, timeoutMs: undefined, allowPrivate: false, lang: null };
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === '--json') result.json = true;
+    else if (arg === '--deep') result.deep = true;
     else if (arg === '--help' || arg === '-h') result.help = true;
     else if (arg === '--allow-private') result.allowPrivate = true;
     else if (arg.startsWith('--timeout=')) result.timeoutMs = Number(arg.slice('--timeout='.length));
@@ -106,10 +107,11 @@ function usage(lang) {
     t(lang, 'cli.intro'),
     '',
     t(lang, 'cli.usageHeading'),
-    '  node cli.js <url> [--json] [--timeout=<ms>] [--allow-private] [--lang=ru|en|fr]',
+    '  node cli.js <url> [--json] [--deep] [--timeout=<ms>] [--allow-private] [--lang=ru|en|fr]',
     '',
     t(lang, 'cli.optionsHeading'),
     `  --json            ${t(lang, 'cli.optionJson')}`,
+    `  --deep            ${t(lang, 'cli.optionDeep')}`,
     `  --timeout=<ms>    ${t(lang, 'cli.optionTimeout')}`,
     `  --allow-private   ${t(lang, 'cli.optionAllowPrivate')}`,
     `  --lang=<code>     ${t(lang, 'cli.optionLang')}`,
@@ -146,7 +148,11 @@ function formatHuman(report, lang = DEFAULT_LANG) {
   );
 
   if (php.detected) {
-    const version = php.version ? php.version : t(lang, 'cli.versionHidden');
+    const version = php.version
+      ? php.version
+      : php.versionMin
+        ? `>=${php.versionMin}`
+        : t(lang, 'cli.versionHidden');
     const confidence = t(lang, `ui.confidence.${php.sapiConfidence}`);
     const sapiName =
       php.sapi === 'php-fpm'
@@ -157,6 +163,15 @@ function formatHuman(report, lang = DEFAULT_LANG) {
     const sapi =
       php.sapi === 'unknown' ? sapiName : t(lang, 'cli.sapi', { sapi: sapiName, confidence });
     lines.push(`${t(lang, 'cli.label.php')} ${t(lang, 'cli.phpDetected', { version, sapi })}`);
+    if (php.versionMin && !php.version) {
+      lines.push(
+        t(lang, 'cli.versionMin', {
+          min: php.versionMin,
+          app: php.app && php.app.name ? php.app.name : '—',
+        }),
+      );
+    }
+    if (php.legacyPhp5) lines.push(t(lang, 'cli.legacyPhp5'));
     if (php.distro && php.distro.name) {
       lines.push(t(lang, 'cli.distro', { name: php.distro.name }));
     }
@@ -237,6 +252,7 @@ async function main(argv) {
     report = await scan(args.url, {
       timeoutMs: args.timeoutMs,
       allowPrivateTargets: allowPrivate,
+      deep: args.deep,
       lang,
     });
   } catch (error) {

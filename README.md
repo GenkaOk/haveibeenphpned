@@ -40,6 +40,7 @@ node cli.js https://example.com
 node cli.js example.com --json
 node cli.js http://127.0.0.1:8080 --allow-private
 node cli.js example.com --lang=en
+node cli.js example.com --deep     # только свой сервер, до 10 запросов
 ```
 
 `--json` печатает тот же отчёт, что отдаёт `POST /api/check`.
@@ -266,7 +267,9 @@ server {
 
 ### `POST /api/check`
 
-Тело: `{"url":"https://example.com","lang":"en"}`, `content-type: application/json`.
+Тело: `{"url":"https://example.com","lang":"en","deep":true}`, `content-type: application/json`.
+`deep` — необязательный boolean, по умолчанию `false`; включает ограниченный
+глубокий скан (см. «Deep scan»). Любое значение кроме `true` = пассивный режим.
 
 `lang` — необязательный код языка (`ru`, `en`, `fr`) для человекочитаемых строк.
 Порядок выбора: `lang` в теле → `?lang=` → заголовок `Accept-Language` → `en`.
@@ -281,9 +284,12 @@ server {
   "summary": { "status": "vulnerable", "label": "подвержен",
                "counts": { "vulnerable": 2, "likely_vulnerable": 0, "not_vulnerable": 0,
                            "not_applicable": 0, "unknown": 0 } },
+  "deep": false,
   "php": { "detected": true, "confidence": "high", "version": "8.4.26",
-           "versionSource": "header", "sapi": "php-fpm", "sapiConfidence": "low",
-           "distro": null,
+           "versionSource": "header", "precision": 3,
+           "versionMin": null, "versionMinSource": null, "legacyPhp5": false,
+           "app": null, "requests": 1,
+           "sapi": "php-fpm", "sapiConfidence": "low", "distro": null,
            "evidence": ["X-Powered-By: PHP/8.4.26", "Server: nginx/1.24.0"] },
   "cves": [
     { "id": "CVE-2026-109618", "title": "Некорректное состояние при OOM",
@@ -323,8 +329,9 @@ Access-Control-Max-Age: 600
 
 ## Метод проверки
 
-1. **Не более 3 запросов** к цели, включая редиректы. Обычно хватает одного `GET /`;
-   второй `HEAD` делается только если первый ответ пустой или ошибочный.
+1. **Не более 3 запросов** к цели в пассивном режиме, включая редиректы. Обычно
+   хватает одного `GET /`; второй `HEAD` делается только если первый ответ пустой
+   или ошибочный. В deep-режиме — не более 10 запросов всего (см. «Deep scan»).
 2. Только **http/https**, только порты **80/443** (при `ALLOW_PRIVATE_TARGETS=1`
    ограничение по порту снимается — для своего интранета).
 3. Таймаут **10 с** на проверку, лимит тела **1 МБ**, редиректов **≤ 5**.
@@ -334,6 +341,84 @@ Access-Control-Max-Age: 600
    (`Server: nginx` → FPM, `Server: Apache` → mod_php) и помечается
    `sapiConfidence: "low"`. Прямое указание FPM/FastCGI — `high`, иначе `unknown`.
 6. Никаких эксплойтов, фаззинга, перебора путей и портов, изменения состояния.
+
+## Deep scan
+
+Опциональный режим, **по умолчанию выключен**. Включается только явно:
+
+- страница: чекбокс «Глубокая проверка» + существующее подтверждение владения;
+- API: `{"url":"https://example.com","deep":true}`;
+- CLI: `node cli.js example.com --deep`.
+
+Deep scan не эксплуатирует CVE и не подбирает пути: это фиксированный allowlist,
+только `GET`, последовательно, с таймаутами. Всего не более **10 запросов**,
+включая первый пассивный `GET /`; если бюджет кончился, оставшиеся пробы
+пропускаются (в отчёте есть check `deep:limit`).
+
+### Allowlist
+
+| Запрос | Что даёт |
+| --- | --- |
+| `/phpinfo.php`, `/info.php`, `/test.php`, `/php.php`, `/?phpinfo=1` | точная версия PHP и `Server API`, если страница доступна |
+| `/?=PHPE9568F34-…`, `/?=PHPE9568F35-…`, `/?=PHPE9568F36-…` | пасхалки-логотипы PHP/Zend: доказывают legacy PHP 5.x |
+| `/status?full`, `/ping` | FPM status/ping: подтверждают PHP-FPM, версию не раскрывают |
+
+Приоритет: phpinfo → пасхалки-логотипы → FPM. Если точная версия или
+legacy-пасхалка уже найдены, оставшиеся запросы не делаются. Настоящая
+credits-страница — `/?=PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000`; в allowlist
+её нет, потому что постановка ограничивает пасхалки тремя запросами, а
+точную версию по пасхалке мы всё равно не выводим. Так как
+бюджет — 10 запросов всего, включая первый `GET /`, последний логотип или
+`/ping` может быть пропущен; это отражено в check `deep:limit`.
+
+### Что подтверждено источниками
+
+- **Пасхалки удалены в PHP 5.5.0.** В анонсе 5.5.0: «PHP logo GUIDs have been
+  removed» ([php.net/releases/5_5_0.php](https://www.php.net/releases/5_5_0.php)).
+  Они работали только при `expose_php=On` и только на PHP ≤ 5.4, поэтому
+  успешный ответ доказывает legacy-ветку 5.x, но **не** точную версию.
+- **Уточнение к постановке:** `PHPE9568F34` — это логотип, а не credits. Credits
+  отдаёт `PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000`; `PHPE9568F35` — Zend Engine
+  logo, `PHPE9568F36` — PHP logo ([php.watch/articles/php-easter-eggs](https://php.watch/articles/php-easter-eggs)).
+- **phpinfo()** — самый точный источник версии, но страница может быть удалена
+  или закрыта. Из HTML берутся только `PHP Version` и `Server API`; пути,
+  `$_SERVER`, токены и прочие поля в отчёт не попадают
+  ([php.net/manual/en/function.phpinfo.php](https://www.php.net/manual/en/function.phpinfo.php)).
+- **FPM status/ping** должны быть явно включены (`pm.status_path`, `ping.path`),
+  по умолчанию их нет; они подтверждают SAPI, а не версию
+  ([php.net/manual/en/install.fpm.configuration.php](https://www.php.net/manual/en/install.fpm.configuration.php)).
+- **Фингерпринт приложения даёт нижнюю границу, а не версию.** Официальные
+  минимумы: WordPress 6.6+ → PHP 7.2.24, 6.3–6.5 → 7.0, 6.0–6.2/5.2–5.9 →
+  5.6.20 ([make.wordpress.org](https://make.wordpress.org/core/2024/04/08/dropping-support-for-php-7-1/));
+  Drupal 11 → 8.3, Drupal 10 → 8.1; Joomla 5 → 8.1, Joomla 4 → 7.2.5;
+  Laravel 11/12 → 8.2, 10 → 8.1, 9 → 8.0.2; Symfony 7 → 8.2, 6.4 → 8.1.
+  **Уточнение:** WordPress 6.5 требует PHP 7.0+, а не 7.2.24 — минимум 7.2.24
+  поднят в 6.6 ([WordPress 6.5 PHP Compatibility](https://make.wordpress.org/hosting/2024/04/05/wordpress-6-5-php-compatibility/)).
+- **Заголовки:** версию уверенно дают `X-Powered-By` (включая несколько
+  значений), `X-PHP-Version`, `Server` с токеном PHP, `X-Backend-Server`;
+  `Via`, `X-Varnish`, `X-FPM-*` — косвенные признаки SAPI/прокси.
+
+### Поля отчёта
+
+- `deep` — был ли включён режим;
+- `php.versionSource` — `header` | `body` | `phpinfo` | `easter-egg` |
+  `app-fingerprint`;
+- `php.versionMin` + `php.versionMinSource` — нижняя граница по приложению;
+- `php.legacyPhp5` — пасхалка подтвердила legacy PHP 5.x;
+- `php.requests` — сколько запросов реально сделано (совпадает с `http.requests`).
+
+Вердикт по `versionMin`: если нижняя граница ниже исправленной версии —
+`likely_vulnerable` с confidence `medium` и evidence «приложение требует PHP ≥ X».
+Если нижняя граница уже не ниже фикса — `not_vulnerable` (confidence `medium`).
+Без точной версии статус `vulnerable` с `high` не выставляется.
+
+### Безопасность deep scan
+
+- Только `GET`, только перечисленные пути, без payload'ов и фаззинга.
+- Не более 10 запросов, последовательно, каждый с таймаутом; при находке
+  точной версии или пасхалки оставшиеся запросы отменяются.
+- Включается только пользователем; на странице требуется подтверждение владения.
+- Отчёт не содержит сырой phpinfo: только версия, SAPI и локализованные evidence.
 
 ## Вердикты
 
@@ -348,6 +433,19 @@ Access-Control-Max-Age: 600
 Для дистрибутивных сборок ниже фикса (`8.1.2-1ubuntu2.14`) вердикт `unknown`:
 патч мог быть бэкпортирован. В рекомендациях — команда проверки пакета
 (`dpkg -l | grep php`, `apk info -v | grep php`, `rpm -qa | grep php`).
+
+### Обновление из Sury (Debian/Ubuntu)
+
+Если дистрибутив не даёт исправленную версию, альтернатива — репозиторий
+Sury: <https://deb.sury.org> (ключ и пакеты на `packages.sury.org`). Для
+PHP-FPM ставьте `php8.x-fpm` (например `php8.4-fpm`) и нужные модули.
+
+Важно: Sury — **сторонний** репозиторий, а не официальный канал безопасности
+Debian/Ubuntu. После обновления выполните `php -v` и **перезапустите**
+`php-fpm` и веб-сервер: иначе воркеры останутся на старой версии.
+
+Первоисточники: [php.net](https://www.php.net/), GHSA-w8hw-w9fx-j79w,
+GHSA-6wmf-4rv5-p3rp, USN-8948-1.
 
 ## Коды выхода CLI
 
@@ -391,6 +489,8 @@ Access-Control-Max-Age: 600
 
 ```
 src/scan.js             движок проверки, scan(target, opts)
+src/deep.js             allowlist deep scan, пасхалки, phpinfo, FPM
+src/fingerprint.js      фингерпринт приложений → нижняя граница PHP
 src/safefetch.js        SSRF-guard, DNS-пиннинг, редиректы, лимиты
 src/cve.js              данные CVE и вердикты
 src/version.js          разбор и сравнение версий

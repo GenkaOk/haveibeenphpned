@@ -16,6 +16,17 @@ const {
 } = require('./safefetch');
 const { headerValue, headerList, shortValue } = require('./headers');
 const { parseVersion, matchDistro } = require('./version');
+const { detectApp } = require('./fingerprint');
+const {
+  MAX_DEEP_REQUESTS,
+  DEEP_BODY_BYTES,
+  DEEP_PROBES,
+  probeUrl,
+  collectHeaderVersions,
+  detectEasterEgg,
+  extractPhpinfo,
+  detectFpm,
+} = require('./deep');
 const {
   CVE_LIST,
   FIXED_BY_BRANCH,
@@ -105,12 +116,12 @@ function bodySignals(body, lang = 'ru') {
  * @param {boolean} phpDetected
  * @param {'ru'|'en'|'fr'} [lang]
  */
-function detectSapi(server, poweredBy, phpDetected, lang = 'ru') {
+function detectSapi(server, poweredBy, phpDetected, lang = 'ru', extra = '') {
   if (!phpDetected) {
     return { sapi: 'unknown', confidence: 'none', note: t(lang, 'server.sapi.notDetected') };
   }
-  const hay = `${server} ${poweredBy}`;
-  if (/php-?fpm|fastcgi/i.test(hay)) {
+  const hay = `${server} ${poweredBy} ${extra}`;
+  if (/php-?fpm|fastcgi|\bx-fpm-/i.test(hay)) {
     return {
       sapi: 'php-fpm',
       confidence: 'high',
@@ -144,16 +155,23 @@ function detectPhp(response, lang = 'ru') {
 
   const poweredBy = headerValue(headers, 'x-powered-by');
   const server = headerValue(headers, 'server');
+  const xPhpVersion = headerValue(headers, 'x-php-version');
+  const backend = headerValue(headers, 'x-backend-server');
+  const via = headerValue(headers, 'via');
+  const varnish = headerValue(headers, 'x-varnish');
+  const xFpmHeaders = Object.keys(headers).filter((key) => key.startsWith('x-fpm-'));
   const setCookies = headerList(headers, 'set-cookie');
 
   const evidence = [];
   const strong = [];
   const medium = [];
+  let headerEvidence = false;
 
   if (poweredBy) {
     if (/php/i.test(poweredBy)) {
       strong.push(t(lang, 'server.evidence.poweredByPhp'));
       evidence.push(`X-Powered-By: ${shortValue(poweredBy)}`);
+      headerEvidence = true;
     } else {
       evidence.push(t(lang, 'server.evidence.poweredByOther', { value: shortValue(poweredBy) }));
     }
@@ -163,7 +181,34 @@ function detectPhp(response, lang = 'ru') {
     evidence.push(t(lang, 'server.evidence.serverHeader', { value: shortValue(server) }));
     if (PHP_VERSION_RE.test(server) || /(^|[\s/])php([\s/]|$)/i.test(server)) {
       strong.push(t(lang, 'server.evidence.serverPhp'));
+      headerEvidence = true;
     }
+  }
+
+  // Дополнительные заголовки: иногда версию или SAPI раскрывает прокси/бэкенд.
+  for (const [name, value] of [
+    ['x-php-version', xPhpVersion],
+    ['x-backend-server', backend],
+    ['via', via],
+    ['x-varnish', varnish],
+  ]) {
+    if (!value) continue;
+    evidence.push(t(lang, 'server.evidence.headerSignal', { name, value: shortValue(value) }));
+    if (/php/i.test(value) || PHP_VERSION_RE.test(value)) {
+      strong.push(t(lang, 'server.evidence.headerPhp', { name }));
+      headerEvidence = true;
+    }
+  }
+  if (xPhpVersion && !/php/i.test(xPhpVersion)) {
+    strong.push(t(lang, 'server.evidence.headerPhp', { name: 'x-php-version' }));
+    headerEvidence = true;
+  }
+  for (const key of xFpmHeaders) {
+    const value = headerValue(headers, key);
+    if (!value) continue;
+    evidence.push(t(lang, 'server.evidence.headerSignal', { name: key, value: shortValue(value) }));
+    strong.push(t(lang, 'server.evidence.headerPhp', { name: key }));
+    headerEvidence = true;
   }
 
   for (const cookie of setCookies) {
@@ -182,25 +227,25 @@ function detectPhp(response, lang = 'ru') {
 
   const detected = strong.length > 0 || medium.length > 0;
   let confidence = 'none';
-  if (detected) {
-    const headerEvidence =
-      /php/i.test(poweredBy) ||
-      PHP_VERSION_RE.test(server) ||
-      strong.includes(t(lang, 'server.evidence.cookieShort'));
-    confidence = headerEvidence ? 'high' : 'low';
-  }
+  if (detected) confidence = headerEvidence ? 'high' : 'low';
 
   // Версия: сначала заголовки (сильный источник), потом тело (слабый).
+  // Несколько значений в заголовках поддерживаются; при расхождении берём
+  // минимальную версию, чтобы отчёт не стал оптимистичнее реальности.
   let version = null;
   let versionSource = null;
-  const fromPoweredBy = extractPhpVersion(poweredBy);
-  const fromServer = extractPhpVersion(server);
-  if (fromPoweredBy) {
-    version = fromPoweredBy;
+  const fromHeaders = collectHeaderVersions(headers);
+  if (fromHeaders.version) {
+    version = fromHeaders.version;
     versionSource = 'header';
-  } else if (fromServer) {
-    version = fromServer;
-    versionSource = 'header';
+    const headerNames = [...new Set(fromHeaders.sources.map((item) => item.header))].join(', ');
+    evidence.push(t(lang, 'server.evidence.headerVersion', { header: headerNames, version }));
+    const allVersions = [...new Set(fromHeaders.sources.flatMap((item) => item.versions))];
+    if (allVersions.length > 1) {
+      evidence.push(
+        t(lang, 'server.evidence.multipleHeaderVersions', { versions: allVersions.join(', ') }),
+      );
+    }
   } else {
     const fromBody = body.match(PHP_VERSION_IN_TEXT_RE);
     if (fromBody) {
@@ -228,7 +273,13 @@ function detectPhp(response, lang = 'ru') {
     }
   }
 
-  const sapi = detectSapi(server, poweredBy, detected, lang);
+  const sapi = detectSapi(
+    server,
+    poweredBy,
+    detected,
+    lang,
+    `${xPhpVersion} ${backend} ${via} ${xFpmHeaders.map((key) => `${key} ${headerValue(headers, key)}`).join(' ')}`,
+  );
 
   if (!detected) {
     evidence.push(t(lang, 'server.evidence.noPhpSigns'));
@@ -251,6 +302,134 @@ function detectPhp(response, lang = 'ru') {
 }
 
 /**
+ * Объединяет заголовки корневого ответа и deep-проб. Значения одного и того же
+ * заголовка сохраняются массивом: X-Powered-By может прийти из нескольких мест.
+ * @param {Record<string, string|string[]>} base
+ * @param {Record<string, string|string[]>} extra
+ * @returns {Record<string, string|string[]>}
+ */
+function mergeHeaders(base, extra) {
+  const out = { ...(base || {}) };
+  for (const [key, value] of Object.entries(extra || {})) {
+    if (value === undefined || value === null) continue;
+    if (out[key] === undefined) {
+      out[key] = value;
+      continue;
+    }
+    const current = Array.isArray(out[key]) ? out[key].map(String) : [String(out[key])];
+    const incoming = Array.isArray(value) ? value.map(String) : [String(value)];
+    out[key] = [...new Set([...current, ...incoming])];
+  }
+  return out;
+}
+
+/**
+ * Собирает итоговый объект php из пассивного определения, фингерпринта
+ * приложения и результатов deep scan.
+ *
+ * Приоритет источников версии: phpinfo > заголовки > тело > app-fingerprint.
+ * Пасхалка даёт только legacy PHP 5.x и никогда — точную версию.
+ *
+ * @param {object} detection результат detectPhp()
+ * @param {{app?: object|null, phpinfo?: object|null, easterEgg?: object|null, fpm?: string|null, requests: number}} context
+ * @param {'ru'|'en'|'fr'} lang
+ */
+function buildPhp(detection, context, lang) {
+  const php = {
+    detected: detection.detected,
+    confidence: detection.confidence,
+    version: detection.version,
+    versionSource: detection.versionSource,
+    precision: detection.precision,
+    versionMin: null,
+    versionMinSource: null,
+    legacyPhp5: false,
+    app: null,
+    distro: detection.distro,
+    sapi: detection.sapi,
+    sapiConfidence: detection.sapiConfidence,
+    sapiNote: detection.sapiNote,
+    evidence: [...detection.evidence],
+    requests: context.requests,
+  };
+
+  // Фингерпринт приложения: нижняя граница, только если точной версии нет.
+  if (context.app) {
+    php.app = { name: context.app.name, version: context.app.version || null };
+    if (!php.detected) {
+      php.detected = true;
+      php.confidence = 'medium';
+      php.evidence.push(t(lang, 'server.evidence.appImpliesPhp', { app: context.app.name }));
+    }
+    if (!php.version) {
+      php.versionMin = context.app.versionMin;
+      php.versionMinSource = 'app-fingerprint';
+      php.versionSource = 'app-fingerprint';
+      php.evidence.push(
+        context.app.version
+          ? t(lang, 'server.evidence.appFingerprint', {
+              app: context.app.name,
+              version: context.app.version,
+              min: context.app.versionMin,
+            })
+          : t(lang, 'server.evidence.appFingerprintNoVersion', {
+              app: context.app.name,
+              min: context.app.versionMin,
+            }),
+      );
+    }
+  }
+
+  // phpinfo(): самый точный источник, если страница действительно доступна.
+  if (context.phpinfo && context.phpinfo.version) {
+    const parsed = parseVersion(context.phpinfo.version);
+    php.detected = true;
+    php.version = context.phpinfo.version;
+    php.versionSource = 'phpinfo';
+    php.precision = parsed ? parsed.precision : 0;
+    php.versionMin = null;
+    php.versionMinSource = null;
+    php.legacyPhp5 = false;
+    php.confidence = 'high';
+    php.evidence.push(t(lang, 'server.evidence.phpinfoFound', { version: context.phpinfo.version }));
+    if (context.phpinfo.sapi) {
+      php.evidence.push(t(lang, 'server.evidence.phpinfoSapi', { sapi: context.phpinfo.sapi }));
+      if (/fpm|fastcgi/i.test(context.phpinfo.sapi)) {
+        php.sapi = 'php-fpm';
+        php.sapiConfidence = 'high';
+        php.sapiNote = t(lang, 'server.sapi.fpm');
+      }
+    }
+  }
+
+  // Пасхалка: только legacy PHP 5.x, без точной версии. Если точная версия
+  // уже известна, показания пасхалки игнорируем (противоречие = не доверяем).
+  if (!php.version && context.easterEgg) {
+    php.detected = true;
+    php.legacyPhp5 = true;
+    php.versionSource = 'easter-egg';
+    php.confidence = 'medium';
+    php.versionMin = null;
+    php.versionMinSource = null;
+    php.evidence.push(t(lang, 'server.evidence.easterEgg'));
+  }
+
+  if (context.fpm) {
+    if (php.sapi !== 'php-fpm') {
+      php.sapi = 'php-fpm';
+      php.sapiConfidence = 'medium';
+      php.sapiNote = t(lang, 'server.sapi.fpm');
+    }
+    php.evidence.push(
+      t(lang, context.fpm === 'fpm-ping' ? 'server.evidence.fpmPing' : 'server.evidence.fpmStatus'),
+    );
+  }
+
+  php.evidence = [...new Set(php.evidence)];
+  return php;
+}
+
+/**
  * @param {object} php
  * @param {object[]} cves
  * @param {'ru'|'en'|'fr'} [lang]
@@ -268,6 +447,10 @@ function buildRecommendations(php, cves, lang = 'ru') {
       .join(', ');
     recs.push(t(lang, 'server.rec.update', { fixList }));
     recs.push(t(lang, 'server.rec.restart'));
+    // Sury — не официальный канал безопасности; оговорка обязательна рядом
+    // с предложением обновиться, а не где-то в документации.
+    recs.push(t(lang, 'server.rec.sury'));
+    recs.push(t(lang, 'server.rec.suryCaution'));
   }
 
   if (php.distro && php.distro.name && hasUnknown) {
@@ -277,6 +460,14 @@ function buildRecommendations(php, cves, lang = 'ru') {
 
   if (!php.version) {
     recs.push(t(lang, 'server.rec.learnVersion'));
+  }
+
+  if (php.versionMin && !php.version) {
+    recs.push(t(lang, 'server.rec.verifyVersion', { min: php.versionMin }));
+  }
+
+  if (php.legacyPhp5) {
+    recs.push(t(lang, 'server.rec.legacyPhp5'));
   }
 
   if (!php.detected) {
@@ -319,7 +510,7 @@ function summarize(cves, lang = 'ru') {
  * @param {number} startedAt
  * @param {'ru'|'en'|'fr'} [lang]
  */
-function buildErrorReport(target, error, startedAt, lang = 'ru') {
+function buildErrorReport(target, error, startedAt, lang = 'ru', deep = false) {
   const errorCode = error.code || 'fetch_failed';
   // Для ru сохраняем техническую деталь (таймаут, DNS и т.п.). Для en/fr —
   // локализованный текст по коду; safefetch тоже отдаёт сообщения на выбранном
@@ -331,14 +522,20 @@ function buildErrorReport(target, error, startedAt, lang = 'ru') {
     version: null,
     versionSource: null,
     precision: 0,
+    versionMin: null,
+    versionMinSource: null,
+    legacyPhp5: false,
+    app: null,
     distro: null,
     sapi: 'unknown',
     sapiConfidence: 'none',
     sapiNote: null,
     evidence: [],
+    requests: 0,
   };
   return {
     lang,
+    deep,
     target,
     finalUrl: null,
     scannedAt: new Date().toISOString(),
@@ -374,8 +571,9 @@ function buildErrorReport(target, error, startedAt, lang = 'ru') {
  * @param {string} target URL или хост (без схемы будет добавлен https://)
  * @param {object} [opts]
  * @param {number} [opts.timeoutMs] общий таймаут проверки, по умолчанию 10000
- * @param {number} [opts.maxRequests] максимум запросов к цели, по умолчанию 3
+ * @param {number} [opts.maxRequests] максимум запросов к цели, по умолчанию 3 (deep: 10)
  * @param {boolean} [opts.allowPrivateTargets] разрешить приватные адреса (ALLOW_PRIVATE_TARGETS=1)
+ * @param {boolean} [opts.deep] включить ограниченный deep scan (allowlist, ≤ 10 запросов)
  * @param {'ru'|'en'|'fr'} [opts.lang] язык человекочитаемых строк отчёта, по умолчанию ru
  * @returns {Promise<object>}
  */
@@ -384,7 +582,12 @@ async function scan(target, opts = {}) {
   const scannedAt = new Date(startedAt).toISOString();
   const lang = normalizeLang(opts.lang) || 'ru';
   const timeoutMs = Number(opts.timeoutMs) > 0 ? Number(opts.timeoutMs) : DEFAULT_TIMEOUT_MS;
-  const maxRequests = Number(opts.maxRequests) > 0 ? Number(opts.maxRequests) : MAX_REQUESTS;
+  const deep = opts.deep === true;
+  const requestedMax = Number(opts.maxRequests) > 0 ? Math.floor(Number(opts.maxRequests)) : null;
+  // Deep scan — жёсткий предел: корневой GET + не больше MAX_DEEP_REQUESTS проб.
+  const maxRequests = deep
+    ? Math.min(requestedMax || MAX_DEEP_REQUESTS, MAX_DEEP_REQUESTS)
+    : requestedMax || MAX_REQUESTS;
   const allowPrivateTargets =
     opts.allowPrivateTargets !== undefined
       ? opts.allowPrivateTargets === true
@@ -394,7 +597,9 @@ async function scan(target, opts = {}) {
   const targetUrl = normalizeUrl(target, lang).href;
 
   const budget = { remaining: maxRequests };
-  const deadline = startedAt + timeoutMs;
+  // Deep scan делает до 10 последовательных запросов, поэтому общий дедлайн
+  // больше пассивного. Каждый запрос по-прежнему ограничен timeoutMs.
+  const deadline = startedAt + (deep ? Math.max(timeoutMs, 30_000) : timeoutMs);
   const checks = [];
 
   let response;
@@ -412,7 +617,7 @@ async function scan(target, opts = {}) {
     });
   } catch (error) {
     if (error instanceof InvalidTargetError || error instanceof BlockedTargetError) throw error;
-    return buildErrorReport(targetUrl, error, startedAt, lang);
+    return buildErrorReport(targetUrl, error, startedAt, lang, deep);
   }
 
   checks.push(guardCheck(lang, response.guard));
@@ -427,9 +632,13 @@ async function scan(target, opts = {}) {
   let headers = { ...response.headers };
   let finalUrl = response.finalUrl;
 
-  // Если первый ответ пустой/ошибочный и версия не раскрыта — один HEAD-запрос.
   let detection = detectPhp({ headers, body: response.body }, lang);
-  if (!detection.version && budget.remaining > 0 && (response.status >= 400 || !response.body)) {
+  const app = detectApp({ headers, body: response.body });
+  const findings = { phpinfo: null, easterEgg: null, fpm: null };
+
+  // Пассивный режим: если первый ответ пустой/ошибочный и версия не раскрыта —
+  // один HEAD-запрос. В deep-режиме бюджет нужен probes, HEAD не делаем.
+  if (!deep && !detection.version && budget.remaining > 0 && (response.status >= 400 || !response.body)) {
     try {
       const head = await safeFetch(finalUrl, {
         budget,
@@ -456,6 +665,84 @@ async function scan(target, opts = {}) {
         evidence: shortValue(error.message, 160),
       });
     }
+  }
+
+  // Deep scan: только allowlist, последовательно, до исчерпания бюджета.
+  if (deep) {
+    let skipped = false;
+    for (const probe of DEEP_PROBES) {
+      if (budget.remaining <= 0) {
+        skipped = true;
+        break;
+      }
+      // Точная версия или legacy-пасхалка уже доказаны — дальнейшие запросы
+      // не нужны и только нагружают цель.
+      if (detection.version && detection.precision >= 3) break;
+      if (findings.easterEgg) break;
+
+      let probeResponse;
+      try {
+        probeResponse = await safeFetch(probeUrl(finalUrl, probe.path), {
+          budget,
+          deadline,
+          timeoutMs,
+          maxRequests,
+          allowPrivateTargets,
+          lang,
+          method: 'GET',
+          maxBytes: DEEP_BODY_BYTES,
+          maxRedirects: 2,
+        });
+      } catch (error) {
+        checks.push({
+          name: `deep:${probe.id}`,
+          result: 'error',
+          evidence: t(lang, 'server.checks.deepError', {
+            path: probe.path,
+            error: shortValue(error.message, 120),
+          }),
+        });
+        continue;
+      }
+
+      checks.push({
+        name: `deep:${probe.id}`,
+        result: String(probeResponse.status),
+        evidence: t(lang, 'server.checks.deepProbe', {
+          path: probe.path,
+          status: probeResponse.status,
+        }),
+      });
+
+      headers = mergeHeaders(headers, probeResponse.headers);
+
+      if (probe.kind === 'phpinfo') {
+        const info = extractPhpinfo(probeResponse.body);
+        if (info && info.version) {
+          findings.phpinfo = info;
+          break;
+        }
+      } else if (probe.kind === 'easter-egg') {
+        const egg = detectEasterEgg(probeResponse);
+        if (egg) {
+          findings.easterEgg = { ...egg, path: probe.path };
+          break;
+        }
+      } else if (detectFpm(probe.kind, probeResponse)) {
+        findings.fpm = probe.kind;
+      }
+    }
+
+    if (skipped) {
+      checks.push({
+        name: 'deep:limit',
+        result: 'reached',
+        evidence: t(lang, 'server.checks.deepSkipped', { max: MAX_DEEP_REQUESTS }),
+      });
+    }
+
+    // Заголовки из deep-проб могли раскрыть версию/SAPI.
+    detection = detectPhp({ headers, body: response.body }, lang);
   }
 
   checks.push({
@@ -491,34 +778,40 @@ async function scan(target, opts = {}) {
         ? t(lang, 'server.checks.bodyTruncated', { limit: MAX_BODY_BYTES })
         : t(lang, 'server.checks.bodyRead'),
   });
+
+  const requestsMade = maxRequests - budget.remaining;
+  const php = buildPhp(
+    detection,
+    { app, phpinfo: findings.phpinfo, easterEgg: findings.easterEgg, fpm: findings.fpm, requests: requestsMade },
+    lang,
+  );
+
+  const versionSourceKey = php.versionSource || 'header';
+  const versionSourceLabel = t(lang, `server.source.${versionSourceKey}`);
+  let versionEvidence = t(lang, 'server.checks.versionHidden');
+  if (php.version) {
+    versionEvidence = t(lang, 'server.checks.versionSource', { source: versionSourceLabel });
+  } else if (php.legacyPhp5) {
+    versionEvidence = t(lang, 'server.checks.versionLegacy');
+  } else if (php.versionMin) {
+    versionEvidence = t(lang, 'server.checks.versionLowerBound', {
+      min: php.versionMin,
+      app: php.app && php.app.name ? php.app.name : '—',
+    });
+  }
+
   checks.push({
     name: 'php:version',
-    result: detection.version || 'unknown',
-    evidence: detection.version
-      ? t(lang, 'server.checks.versionSource', {
-          source: t(lang, `server.source.${detection.versionSource === 'body' ? 'body' : 'header'}`),
-        })
-      : t(lang, 'server.checks.versionHidden'),
+    result: php.version || (php.versionMin ? `>=${php.versionMin}` : php.legacyPhp5 ? 'legacy-php-5' : 'unknown'),
+    evidence: versionEvidence,
   });
-
-  const php = {
-    detected: detection.detected,
-    confidence: detection.confidence,
-    version: detection.version,
-    versionSource: detection.versionSource,
-    precision: detection.precision,
-    distro: detection.distro,
-    sapi: detection.sapi,
-    sapiConfidence: detection.sapiConfidence,
-    sapiNote: detection.sapiNote,
-    evidence: detection.evidence,
-  };
 
   const cves = CVE_LIST.map((cve) => evaluateCve(cve, php, lang));
   const summary = summarize(cves, lang);
 
   return {
     lang,
+    deep,
     target: targetUrl,
     finalUrl,
     scannedAt,
@@ -530,7 +823,7 @@ async function scan(target, opts = {}) {
     checks,
     http: {
       status: response.status,
-      requests: budget.remaining >= 0 ? maxRequests - budget.remaining : maxRequests,
+      requests: requestsMade,
       redirects: response.redirects,
       hops: response.hops,
       elapsedMs: Date.now() - startedAt,
@@ -544,12 +837,15 @@ module.exports = {
   scan,
   guardCheck,
   detectPhp,
+  buildPhp,
+  mergeHeaders,
   extractPhpVersion,
   summarize,
   DISCLAIMER,
   MITIGATIONS,
   mitigationsFor,
   MAX_REQUESTS,
+  MAX_DEEP_REQUESTS,
   MAX_BODY_BYTES,
   NEWEST_FIXED_VERSION,
 };
