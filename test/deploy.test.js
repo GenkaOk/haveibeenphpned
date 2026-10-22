@@ -96,7 +96,28 @@ test('build:pages: без API_BASE docs/config.js остаётся same-origin',
   }
 });
 
-test('build:pages: публикуемая docs/config.js пустая (без адреса-заглушки)', () => {
+test('docs/: собран целиком и совпадает с public/, кроме config.js', () => {
+  const docs = path.join(ROOT, 'docs');
+  for (const entry of fs.readdirSync(PUBLIC_DIR, { withFileTypes: true })) {
+    if (!entry.isFile()) continue;
+    const source = path.join(PUBLIC_DIR, entry.name);
+    const target = path.join(docs, entry.name);
+    assert.ok(fs.existsSync(target), `в docs/ нет ${entry.name}`);
+    if (entry.name === 'config.js') continue;
+    assert.equal(
+      fs.readFileSync(target).equals(fs.readFileSync(source)),
+      true,
+      `docs/${entry.name} отличается от public/${entry.name} — пересоберите docs/`,
+    );
+  }
+  assert.ok(fs.existsSync(path.join(docs, '.nojekyll')), 'в docs/ нет .nojekyll');
+});
+
+test('docs/config.js: пустой API_BASE или https-адрес, без заглушки example', () => {
   const config = fs.readFileSync(path.join(ROOT, 'docs', 'config.js'), 'utf8');
-  assert.match(config, /window\.__PHP2SHELL_API__ = "";/, 'в docs/config.js не должно быть временного API_BASE');
+  const value = /window\.__PHP2SHELL_API__ = (.*);/.exec(config);
+  assert.ok(value, 'в docs/config.js нет window.__PHP2SHELL_API__');
+  const base = JSON.parse(value[1]);
+  assert.match(base, /^(|https:\/\/[^"']+)$/, 'API_BASE должен быть пустым или https-адресом');
+  assert.doesNotMatch(base, /example\.onrender\.com/, 'в docs/config.js не должно быть адреса-заглушки');
 });
