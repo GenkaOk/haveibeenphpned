@@ -40,8 +40,6 @@
       'ui.form.submit': 'Проверить сервер',
       'ui.form.hint':
         'Схему можно не указывать — подставим https://. Поддерживаются только http и https.',
-      'ui.form.linkHint':
-        'Адрес из ссылки. Подтвердите, что сервер ваш, и нажмите «Проверить сервер».',
       'ui.form.consent': 'Я владею этим сервером или имею разрешение на проверку',
 
       'ui.idle.title': 'Что показывает проверка',
@@ -56,9 +54,58 @@
       'ui.idle.note': 'Уязвимость не эксплуатируется: запросов к чужим портам и путям нет.',
 
       'ui.actions.again': 'Проверить снова',
-      'ui.actions.copy': 'Скопировать ссылку на результат',
-      'ui.actions.copyDone': 'Ссылка скопирована',
-      'ui.actions.copyFailed': 'Не удалось скопировать ссылку',
+      'ui.actions.warn': 'Скопировать текст для команды',
+      'ui.actions.warnAria': 'Скопировать нейтральный текст-чеклист о php2shell',
+      'ui.actions.warnDone': 'Текст для команды скопирован',
+      'ui.actions.warnFailed': 'Не удалось скопировать текст',
+
+      'ui.warn.title': 'Предупредите команду',
+      'ui.warn.intro':
+        'Один нейтральный чеклист: затронутые ветки PHP, исправленные версии и ссылка на инструмент. Без вердикта, версии и адреса вашего сервера.',
+      'ui.warn.text':
+        'php2shell: критическая уязвимость в ядре PHP (CVE-2026-109618, CVE-2026-109619)\n\n' +
+        'Что проверить в своей команде:\n' +
+        '1. Версия PHP: php -v.\n' +
+        '2. Затронуты ветки 8.2, 8.3, 8.4, 8.5. Исправления: 8.2.35, 8.3.36, 8.4.27, 8.5.12.\n' +
+        '3. Ветки 8.1, 8.0, 7.x и 5.x исправлений не получат — нужен переход на 8.2+.\n' +
+        '4. Пока обновление не установлено, не выставляйте наружу phpinfo и диагностические страницы.\n\n' +
+        'Пассивная проверка версии: https://haveibeenphpned.github.io/?utm_source=warning&utm_medium=copy&utm_campaign=php2shell\n' +
+        'Инструмент не эксплуатирует уязвимость и не публикует данные о сервере.',
+
+      'ui.facts.title': 'Поделитесь фактами, а не результатом',
+      'ui.facts.intro':
+        'Эти карточки не содержат данных о вашем сервере. Их можно публиковать как новость.',
+      'ui.facts.kicker': 'Факт',
+      'ui.facts.php81.title': 'PHP 8.1 не получит фикс',
+      'ui.facts.php81.text':
+        'Ветки 8.1, 8.0, 7.x и 5.x не получат исправлений для CVE-2026-109618 и CVE-2026-109619. Единственный путь — переход на 8.2 или новее.',
+      'ui.facts.php81.copy': 'Скопировать факт о PHP 8.1',
+      'ui.facts.php81.aria': 'Скопировать факт: PHP 8.1 не получит фикс',
+      'ui.facts.versions.title': 'Исправленные версии',
+      'ui.facts.versions.text':
+        '8.5.12 · 8.4.27 · 8.3.36 · 8.2.35 — обновитесь до версии своей ветки или выше. Ветки ниже 8.2 исправлений не получат.',
+      'ui.facts.versions.copy': 'Скопировать версии',
+      'ui.facts.versions.aria': 'Скопировать факт: исправленные версии php2shell',
+      'ui.facts.check60.title': 'Проверьте версию PHP за 60 секунд',
+      'ui.facts.check60.text':
+        'Выполните php -v. Если ветка 8.2–8.5 и версия ниже исправленной, обновитесь. Точную версию покажет только сам сервер.',
+      'ui.facts.check60.copy': 'Скопировать инструкцию',
+      'ui.facts.check60.aria':
+        'Скопировать факт: как проверить версию PHP за 60 секунд',
+      'ui.facts.copyDone': 'Текст скопирован',
+      'ui.facts.copyFailed': 'Не удалось скопировать текст',
+      'ui.facts.shareNote': 'Копируется только текст факта и ссылка на инструмент.',
+
+      'ui.badge.title': 'Бейдж для README',
+      'ui.badge.intro':
+        'Нейтральный бейдж для README и футера. Он не раскрывает вердикт или версию PHP.',
+      'ui.badge.copy': 'Скопировать markdown',
+      'ui.badge.copyAria': 'Скопировать markdown-код нейтрального бейджа',
+      'ui.badge.copyDone': 'Markdown скопирован',
+      'ui.badge.copyFailed': 'Не удалось скопировать markdown',
+
+      'ui.privacy.note':
+        'Результат проверки остаётся в этой вкладке: он не попадает в URL, заголовок страницы и внешние сервисы.',
 
       'ui.footer.disclaimer':
         'Отчёт основан на версии PHP, которую сервер раскрывает публично, и может быть неточным: сборки дистрибутивов обычно содержат бэкпорты патчей. Проверяйте только свои серверы или серверы, на проверку которых есть разрешение.',
@@ -532,8 +579,6 @@
       'ui.form.submit': 'Check server',
       'ui.form.hint':
         'The scheme is optional — we add https://. Only http and https are supported.',
-      'ui.form.linkHint':
-        'Address from a link. Confirm that you own the server, then click “Check server”.',
       'ui.form.consent': 'I own this server or have permission to check it',
 
       'ui.idle.title': 'What the check shows',
@@ -549,9 +594,58 @@
       'ui.idle.note': 'The vulnerability is not exploited: there are no requests to other ports or paths.',
 
       'ui.actions.again': 'Check again',
-      'ui.actions.copy': 'Copy result link',
-      'ui.actions.copyDone': 'Link copied',
-      'ui.actions.copyFailed': 'Could not copy the link',
+      'ui.actions.warn': 'Copy text for your team',
+      'ui.actions.warnAria': 'Copy a neutral php2shell checklist',
+      'ui.actions.warnDone': 'Text for your team copied',
+      'ui.actions.warnFailed': 'Could not copy the text',
+
+      'ui.warn.title': 'Warn your team',
+      'ui.warn.intro':
+        'One neutral checklist: affected PHP branches, fixed versions and a link to the tool. No verdict, version or address of your server.',
+      'ui.warn.text':
+        'php2shell: critical vulnerability in the PHP core (CVE-2026-109618, CVE-2026-109619)\n\n' +
+        'What to check with your team:\n' +
+        '1. PHP version: php -v.\n' +
+        '2. Affected branches: 8.2, 8.3, 8.4, 8.5. Fixed releases: 8.2.35, 8.3.36, 8.4.27, 8.5.12.\n' +
+        '3. Branches 8.1, 8.0, 7.x and 5.x will not receive a fix — plan an upgrade to 8.2 or newer.\n' +
+        '4. Until the update is installed, do not expose phpinfo or diagnostic pages.\n\n' +
+        'Passive version check: https://haveibeenphpned.github.io/?utm_source=warning&utm_medium=copy&utm_campaign=php2shell\n' +
+        'The tool does not exploit the vulnerability and does not publish server data.',
+
+      'ui.facts.title': 'Share facts, not results',
+      'ui.facts.intro':
+        'These cards contain no data about your server. You can publish them as news.',
+      'ui.facts.kicker': 'Fact',
+      'ui.facts.php81.title': 'PHP 8.1 will not get a fix',
+      'ui.facts.php81.text':
+        'Branches 8.1, 8.0, 7.x and 5.x will not receive fixes for CVE-2026-109618 and CVE-2026-109619. The only path is an upgrade to 8.2 or newer.',
+      'ui.facts.php81.copy': 'Copy the PHP 8.1 fact',
+      'ui.facts.php81.aria': 'Copy the fact: PHP 8.1 will not get a fix',
+      'ui.facts.versions.title': 'Fixed versions',
+      'ui.facts.versions.text':
+        '8.5.12 · 8.4.27 · 8.3.36 · 8.2.35 — upgrade to the fixed release for your branch or newer. Branches below 8.2 will not get a fix.',
+      'ui.facts.versions.copy': 'Copy the versions',
+      'ui.facts.versions.aria': 'Copy the fact: fixed php2shell versions',
+      'ui.facts.check60.title': 'Check your PHP version in 60 seconds',
+      'ui.facts.check60.text':
+        'Run php -v. If the branch is 8.2–8.5 and the version is below the fixed release, upgrade. Only the server itself can show the exact version.',
+      'ui.facts.check60.copy': 'Copy the check',
+      'ui.facts.check60.aria':
+        'Copy the fact: how to check the PHP version in 60 seconds',
+      'ui.facts.copyDone': 'Text copied',
+      'ui.facts.copyFailed': 'Could not copy the text',
+      'ui.facts.shareNote': 'Only the fact text and the tool link are copied.',
+
+      'ui.badge.title': 'README badge',
+      'ui.badge.intro':
+        'A neutral badge for README files and footers. It does not reveal the verdict or the PHP version.',
+      'ui.badge.copy': 'Copy markdown',
+      'ui.badge.copyAria': 'Copy the markdown code of the neutral badge',
+      'ui.badge.copyDone': 'Markdown copied',
+      'ui.badge.copyFailed': 'Could not copy the markdown',
+
+      'ui.privacy.note':
+        'The check result stays in this tab: it does not go to the URL, the page title or external services.',
 
       'ui.footer.disclaimer':
         'The report is based on the PHP version the server exposes publicly and may be inaccurate: distribution builds usually contain backported patches. Check only your own servers or servers you have permission to check.',
@@ -1025,8 +1119,6 @@
       'ui.form.submit': 'Vérifier le serveur',
       'ui.form.hint':
         'Le schéma est facultatif — nous ajoutons https://. Seuls http et https sont pris en charge.',
-      'ui.form.linkHint':
-        "Adresse issue d'un lien. Confirmez que le serveur est le vôtre, puis cliquez sur « Vérifier le serveur ».",
       'ui.form.consent': "Je possède ce serveur ou j'ai l'autorisation de le vérifier",
 
       'ui.idle.title': 'Ce que montre la vérification',
@@ -1043,9 +1135,58 @@
         "La vulnérabilité n'est pas exploitée : aucune requête vers d'autres ports ou chemins.",
 
       'ui.actions.again': 'Vérifier à nouveau',
-      'ui.actions.copy': 'Copier le lien du résultat',
-      'ui.actions.copyDone': 'Lien copié',
-      'ui.actions.copyFailed': 'Impossible de copier le lien',
+      'ui.actions.warn': "Copier le texte pour l'équipe",
+      'ui.actions.warnAria': 'Copier une liste de contrôle neutre sur php2shell',
+      'ui.actions.warnDone': "Texte pour l'équipe copié",
+      'ui.actions.warnFailed': 'Impossible de copier le texte',
+
+      'ui.warn.title': "Prévenez votre équipe",
+      'ui.warn.intro':
+        "Une liste de contrôle neutre : branches PHP concernées, versions corrigées et lien vers l'outil. Sans verdict, version ni adresse de votre serveur.",
+      'ui.warn.text':
+        "php2shell : vulnérabilité critique dans le cœur de PHP (CVE-2026-109618, CVE-2026-109619)\n\n" +
+        'À vérifier dans votre équipe :\n' +
+        '1. Version de PHP : php -v.\n' +
+        '2. Branches concernées : 8.2, 8.3, 8.4, 8.5. Versions corrigées : 8.2.35, 8.3.36, 8.4.27, 8.5.12.\n' +
+        "3. Les branches 8.1, 8.0, 7.x et 5.x ne recevront pas de correctif — prévoyez une migration vers 8.2 ou plus récent.\n" +
+        "4. Tant que la mise à jour n'est pas installée, n'exposez pas phpinfo ni les pages de diagnostic.\n\n" +
+        'Vérification passive de la version : https://haveibeenphpned.github.io/?utm_source=warning&utm_medium=copy&utm_campaign=php2shell\n' +
+        "L'outil n'exploite pas la vulnérabilité et ne publie aucune donnée du serveur.",
+
+      'ui.facts.title': 'Partagez des faits, pas un résultat',
+      'ui.facts.intro':
+        "Ces fiches ne contiennent aucune donnée sur votre serveur. Vous pouvez les publier comme une nouvelle.",
+      'ui.facts.kicker': 'Fait',
+      'ui.facts.php81.title': 'PHP 8.1 ne recevra pas de correctif',
+      'ui.facts.php81.text':
+        "Les branches 8.1, 8.0, 7.x et 5.x ne recevront pas de correctif pour CVE-2026-109618 et CVE-2026-109619. La seule voie est une migration vers 8.2 ou plus récent.",
+      'ui.facts.php81.copy': 'Copier le fait sur PHP 8.1',
+      'ui.facts.php81.aria': 'Copier le fait : PHP 8.1 ne recevra pas de correctif',
+      'ui.facts.versions.title': 'Versions corrigées',
+      'ui.facts.versions.text':
+        "8.5.12 · 8.4.27 · 8.3.36 · 8.2.35 — mettez à jour vers la version corrigée de votre branche ou plus récent. Les branches inférieures à 8.2 ne recevront pas de correctif.",
+      'ui.facts.versions.copy': 'Copier les versions',
+      'ui.facts.versions.aria': 'Copier le fait : versions corrigées de php2shell',
+      'ui.facts.check60.title': 'Vérifiez la version de PHP en 60 secondes',
+      'ui.facts.check60.text':
+        "Exécutez php -v. Si la branche est 8.2–8.5 et la version inférieure à la version corrigée, mettez à jour. Seul le serveur lui-même peut afficher la version exacte.",
+      'ui.facts.check60.copy': 'Copier la vérification',
+      'ui.facts.check60.aria':
+        'Copier le fait : comment vérifier la version de PHP en 60 secondes',
+      'ui.facts.copyDone': 'Texte copié',
+      'ui.facts.copyFailed': 'Impossible de copier le texte',
+      'ui.facts.shareNote': "Seuls le texte du fait et le lien vers l'outil sont copiés.",
+
+      'ui.badge.title': 'Badge pour README',
+      'ui.badge.intro':
+        'Un badge neutre pour les fichiers README et les pieds de page. Il ne révèle ni le verdict ni la version de PHP.',
+      'ui.badge.copy': 'Copier le markdown',
+      'ui.badge.copyAria': 'Copier le code markdown du badge neutre',
+      'ui.badge.copyDone': 'Markdown copié',
+      'ui.badge.copyFailed': 'Impossible de copier le markdown',
+
+      'ui.privacy.note':
+        "Le résultat de la vérification reste dans cet onglet : il n'apparaît ni dans l'URL, ni dans le titre de la page, ni dans des services externes.",
 
       'ui.footer.disclaimer':
         'Le rapport repose sur la version de PHP que le serveur expose publiquement et peut être inexact : les paquets des distributions contiennent souvent des correctifs rétroportés. Ne vérifiez que vos propres serveurs ou ceux pour lesquels vous avez une autorisation.',

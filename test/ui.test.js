@@ -50,8 +50,14 @@ test('index.html: язык, viewport и контрактные id', () => {
     'form-error',
     'result',
     'result-actions',
-    'copy-link',
     'check-again',
+    'warn-team',
+    'warn-status',
+    'facts',
+    'facts-status',
+    'badge',
+    'copy-badge',
+    'badge-status',
   ];
   for (const id of ids) {
     assert.match(html, new RegExp(`id="${id}"`), `в index.html нет id="${id}"`);

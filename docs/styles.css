@@ -1021,6 +1021,190 @@ a {
   font-size: 0.8125rem;
 }
 
+/* Предупреждение команды: нейтральный чеклист без данных проверки */
+
+.warn-band {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 18px;
+  padding: 18px 22px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+}
+
+.warn-copy h2 {
+  font-size: 1.0625rem;
+  font-weight: 650;
+}
+
+.warn-copy p {
+  max-width: 70ch;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.warn-action {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  flex: none;
+}
+
+.warn-action .btn {
+  white-space: nowrap;
+}
+
+/* Карточки фактов: делятся как новостью, без вердикта */
+
+.facts {
+  margin-top: 34px;
+}
+
+.fact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.fact-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.fact-kicker {
+  color: var(--accent);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.fact-quote {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+
+.fact-card > p:not(.fact-kicker) {
+  flex: 1 1 auto;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.fact-copy {
+  align-self: flex-start;
+  height: 36px;
+  margin-top: 4px;
+  font-size: 0.8125rem;
+}
+
+.facts-note {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+/* Нейтральный бейдж и приватность в футере */
+
+.badge-box {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.badge-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.badge-copy h2 {
+  font-size: 0.9375rem;
+  font-weight: 650;
+}
+
+.badge-copy p {
+  max-width: 70ch;
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+
+.php2shell-badge {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.php2shell-badge::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.badge-markdown {
+  display: block;
+  padding: 8px 10px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 0.75rem;
+  overflow-wrap: anywhere;
+}
+
+.badge-action {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.privacy-note {
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  border-left: 2px solid var(--safe-line);
+  border-radius: 0 6px 6px 0;
+  background: var(--safe-bg);
+  color: var(--safe-ink);
+  font-size: 0.75rem;
+}
+
 /* Футер */
 
 .site-footer {
@@ -1250,6 +1434,26 @@ a {
   .cve-foot {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .warn-band,
+  .badge-box {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .warn-action,
+  .badge-action {
+    align-items: stretch;
+  }
+
+  .warn-action .btn,
+  .badge-action .btn {
+    width: 100%;
+  }
+
+  .fact-grid {
+    grid-template-columns: 1fr;
   }
 }
 

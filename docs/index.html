@@ -85,7 +85,6 @@
             <button id="check-button" type="submit" disabled data-i18n="ui.form.submit">Проверить сервер</button>
           </div>
           <p id="url-hint" class="hint" data-i18n="ui.form.hint">Схему можно не указывать — подставим https://. Поддерживаются только http и https.</p>
-          <p id="link-hint" class="hint hint--link" hidden data-i18n="ui.form.linkHint">Адрес из ссылки. Подтвердите, что сервер ваш, и нажмите «Проверить сервер».</p>
         </div>
 
         <label class="consent" for="consent">
@@ -103,6 +102,18 @@
 
         <p id="form-error" class="form-error" role="alert" hidden></p>
       </form>
+    </section>
+
+    <section id="warn" class="warn-band" aria-labelledby="warn-title">
+      <div class="warn-copy">
+        <h2 id="warn-title" data-i18n="ui.warn.title">Предупредите команду</h2>
+        <p data-i18n="ui.warn.intro">Один нейтральный чеклист: затронутые ветки PHP, исправленные версии и ссылка на инструмент. Без вердикта, версии и адреса вашего сервера.</p>
+      </div>
+      <div class="warn-action">
+        <button id="warn-team" class="btn btn--quiet" type="button"
+                data-i18n="ui.actions.warn" aria-label="Скопировать нейтральный текст-чеклист о php2shell" data-i18n-aria-label="ui.actions.warnAria">Скопировать текст для команды</button>
+        <span id="warn-status" class="copy-status" role="status" aria-live="polite"></span>
+      </div>
     </section>
 
     <section id="result" class="result" data-state="idle" aria-live="polite" aria-busy="false">
@@ -142,9 +153,37 @@
 
     <div id="result-actions" class="result-actions" hidden>
       <button id="check-again" class="btn btn--quiet" type="button" data-i18n="ui.actions.again">Проверить снова</button>
-      <button id="copy-link" class="btn btn--quiet" type="button" data-i18n="ui.actions.copy">Скопировать ссылку на результат</button>
-      <span id="copy-status" class="copy-status" role="status" aria-live="polite"></span>
     </div>
+
+    <section id="facts" class="info-section facts" aria-labelledby="facts-title">
+      <h2 id="facts-title" data-i18n="ui.facts.title">Поделитесь фактами, а не результатом</h2>
+      <p class="section-intro" data-i18n="ui.facts.intro">Эти карточки не содержат данных о вашем сервере. Их можно публиковать как новость.</p>
+      <div class="fact-grid">
+        <article class="fact-card">
+          <p class="fact-kicker" data-i18n="ui.facts.kicker">Факт</p>
+          <blockquote class="fact-quote" data-i18n="ui.facts.php81.title">PHP 8.1 не получит фикс</blockquote>
+          <p data-i18n="ui.facts.php81.text">Ветки 8.1, 8.0, 7.x и 5.x не получат исправлений для CVE-2026-109618 и CVE-2026-109619. Единственный путь — переход на 8.2 или новее.</p>
+          <button class="btn btn--quiet fact-copy" type="button" data-copy-fact="php81"
+                  data-i18n="ui.facts.php81.copy" aria-label="Скопировать факт: PHP 8.1 не получит фикс" data-i18n-aria-label="ui.facts.php81.aria">Скопировать факт о PHP 8.1</button>
+        </article>
+        <article class="fact-card">
+          <p class="fact-kicker" data-i18n="ui.facts.kicker">Факт</p>
+          <blockquote class="fact-quote" data-i18n="ui.facts.versions.title">Исправленные версии</blockquote>
+          <p data-i18n="ui.facts.versions.text">8.5.12 · 8.4.27 · 8.3.36 · 8.2.35 — обновитесь до версии своей ветки или выше. Ветки ниже 8.2 исправлений не получат.</p>
+          <button class="btn btn--quiet fact-copy" type="button" data-copy-fact="versions"
+                  data-i18n="ui.facts.versions.copy" aria-label="Скопировать факт: исправленные версии php2shell" data-i18n-aria-label="ui.facts.versions.aria">Скопировать версии</button>
+        </article>
+        <article class="fact-card">
+          <p class="fact-kicker" data-i18n="ui.facts.kicker">Факт</p>
+          <blockquote class="fact-quote" data-i18n="ui.facts.check60.title">Проверьте версию PHP за 60 секунд</blockquote>
+          <p data-i18n="ui.facts.check60.text">Выполните php -v. Если ветка 8.2–8.5 и версия ниже исправленной, обновитесь. Точную версию покажет только сам сервер.</p>
+          <button class="btn btn--quiet fact-copy" type="button" data-copy-fact="check60"
+                  data-i18n="ui.facts.check60.copy" aria-label="Скопировать факт: как проверить версию PHP за 60 секунд" data-i18n-aria-label="ui.facts.check60.aria">Скопировать инструкцию</button>
+        </article>
+      </div>
+      <p id="facts-status" class="copy-status" role="status" aria-live="polite"></p>
+      <p class="facts-note" data-i18n="ui.facts.shareNote">Копируется только текст факта и ссылка на инструмент.</p>
+    </section>
 
     <section class="info-section" aria-labelledby="how-title">
       <h2 id="how-title" data-i18n="ui.how.title">Как мы проверяем</h2>
@@ -295,6 +334,20 @@
 
   <footer class="site-footer">
     <div class="wrap">
+      <div id="badge" class="badge-box" aria-labelledby="badge-title">
+        <div class="badge-copy">
+          <h2 id="badge-title" data-i18n="ui.badge.title">Бейдж для README</h2>
+          <p data-i18n="ui.badge.intro">Нейтральный бейдж для README и футера. Он не раскрывает вердикт или версию PHP.</p>
+          <span class="php2shell-badge">Checked with PHP2Shell</span>
+          <code class="badge-markdown">[Checked with PHP2Shell](https://haveibeenphpned.github.io/)</code>
+        </div>
+        <div class="badge-action">
+          <button id="copy-badge" class="btn btn--quiet" type="button"
+                  data-i18n="ui.badge.copy" aria-label="Скопировать markdown-код нейтрального бейджа" data-i18n-aria-label="ui.badge.copyAria">Скопировать markdown</button>
+          <span id="badge-status" class="copy-status" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+      <p class="privacy-note" data-i18n="ui.privacy.note">Результат проверки остаётся в этой вкладке: он не попадает в URL, заголовок страницы и внешние сервисы.</p>
       <p data-i18n="ui.footer.disclaimer">Отчёт основан на версии PHP, которую сервер раскрывает публично, и может быть неточным: сборки дистрибутивов обычно содержат бэкпорты патчей. Проверяйте только свои серверы или серверы, на проверку которых есть разрешение.</p>
       <p class="footer-meta" data-i18n="ui.footer.meta">Пассивная проверка · без эксплуатации · без внешних зависимостей</p>
       <p class="footer-updated" data-i18n="ui.footer.updated">Обновлено 23 октября 2026 г.</p>

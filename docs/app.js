@@ -27,12 +27,14 @@
   const deepInput = document.getElementById('deep');
   const button = document.getElementById('check-button');
   const formError = document.getElementById('form-error');
-  const linkHint = document.getElementById('link-hint');
   const result = document.getElementById('result');
   const actions = document.getElementById('result-actions');
-  const copyButton = document.getElementById('copy-link');
   const againButton = document.getElementById('check-again');
-  const copyStatus = document.getElementById('copy-status');
+  const warnButton = document.getElementById('warn-team');
+  const warnStatus = document.getElementById('warn-status');
+  const factsStatus = document.getElementById('facts-status');
+  const copyBadgeButton = document.getElementById('copy-badge');
+  const badgeStatus = document.getElementById('badge-status');
   const heroLede = document.getElementById('hero-lede');
   const langSwitch = document.getElementById('lang-switch');
 
@@ -698,7 +700,6 @@
     actions.hidden = false;
 
     lastTarget = typeof payload.target === 'string' && payload.target ? payload.target : fallbackTarget;
-    history.replaceState(null, '', shareUrl(lastTarget));
 
     const badge = document.getElementById('result-status');
     if (badge) badge.focus({ preventScroll: false });
@@ -761,14 +762,23 @@
     }
   }
 
-  /* ---------- ссылка на результат ---------- */
+  /* ---------- копирование фактов, а не результата ---------- */
 
-  function shareUrl(target) {
-    const params = new URLSearchParams();
-    params.set('url', target);
-    // На предрендеренных страницах язык уже в пути: ?lang= дал бы дубль.
-    if (!PRERENDERED) params.set('lang', currentLang);
-    return `${location.origin}${location.pathname}?${params.toString()}`;
+  const SITE_URL = 'https://haveibeenphpned.github.io/';
+  const statusTimers = new WeakMap();
+
+  /**
+   * Текст факта: заголовок, сам факт и ссылка на инструмент с UTM.
+   * Ни вердикт, ни версия, ни адрес проверенного сервера сюда не попадают.
+   * @param {'php81'|'versions'|'check60'} id
+   */
+  function factText(id) {
+    const params = new URLSearchParams({
+      utm_source: `fact-${id}`,
+      utm_medium: 'copy',
+      utm_campaign: 'php2shell',
+    });
+    return `${t(`ui.facts.${id}.title`)}\n\n${t(`ui.facts.${id}.text`)}\n\n${SITE_URL}?${params.toString()}`;
   }
 
   function legacyCopy(text) {
@@ -790,10 +800,20 @@
     return copied;
   }
 
-  async function copyShareLink() {
-    const target = lastTarget || input.value.trim();
-    if (!target) return;
-    const text = shareUrl(target);
+  function flashStatus(node, key) {
+    if (!node) return;
+    node.textContent = t(key);
+    clearTimeout(statusTimers.get(node));
+    statusTimers.set(
+      node,
+      setTimeout(() => {
+        node.textContent = '';
+      }, 4000),
+    );
+  }
+
+  async function copyText(text, statusNode, doneKey, failKey) {
+    if (!text) return false;
     let copied = false;
 
     if (navigator.clipboard && window.isSecureContext) {
@@ -806,12 +826,8 @@
     }
     if (!copied) copied = legacyCopy(text);
 
-    if (copyStatus) {
-      copyStatus.textContent = copied ? t('ui.actions.copyDone') : t('ui.actions.copyFailed');
-      setTimeout(() => {
-        copyStatus.textContent = '';
-      }, 3000);
-    }
+    flashStatus(statusNode, copied ? doneKey : failKey);
+    return copied;
   }
 
   /* ---------- язык ---------- */
@@ -867,7 +883,6 @@
 
   input.addEventListener('input', () => {
     if (!formError.hidden) clearFormError();
-    if (linkHint) linkHint.hidden = true;
   });
 
   againButton.addEventListener('click', () => {
@@ -883,7 +898,39 @@
     runCheck(lastTarget || input.value.trim(), Boolean(deepInput && deepInput.checked));
   });
 
-  copyButton.addEventListener('click', copyShareLink);
+  if (warnButton) {
+    warnButton.addEventListener('click', () => {
+      copyText(
+        t('ui.warn.text'),
+        warnStatus,
+        'ui.actions.warnDone',
+        'ui.actions.warnFailed',
+      );
+    });
+  }
+
+  for (const button of document.querySelectorAll('[data-copy-fact]')) {
+    button.addEventListener('click', () => {
+      copyText(
+        factText(button.getAttribute('data-copy-fact')),
+        factsStatus,
+        'ui.facts.copyDone',
+        'ui.facts.copyFailed',
+      );
+    });
+  }
+
+  if (copyBadgeButton) {
+    copyBadgeButton.addEventListener('click', () => {
+      const snippet = document.querySelector('.badge-markdown');
+      copyText(
+        snippet ? snippet.textContent.trim() : '',
+        badgeStatus,
+        'ui.badge.copyDone',
+        'ui.badge.copyFailed',
+      );
+    });
+  }
 
   if (langSwitch) {
     langSwitch.addEventListener('click', (event) => {
@@ -914,15 +961,8 @@
       navigatorLang: navigator.language,
     });
   applyStaticLanguage();
-  // Язык всегда виден в ссылке — ею можно поделиться.
+  // Язык виден в ссылке и не содержит данных проверки.
   if (!PRERENDERED && params.get('lang') !== currentLang) updateUrlLang();
-
-  const fromLink = (params.get('url') || '').trim();
-  if (fromLink) {
-    input.value = fromLink;
-    if (linkHint) linkHint.hidden = false;
-    input.focus();
-  }
 
   syncButton();
 })();
