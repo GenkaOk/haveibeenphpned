@@ -6,7 +6,8 @@
 
 - **CVEs:** CVE-2026-109618 (incorrect state after an out-of-memory error) and CVE-2026-109619 (stale PHP-FPM worker state between requests). Both are RCE in the PHP core, severity 9.2.
 - **Fixed versions:** PHP 8.5.12, 8.4.27, 8.3.36 and 8.2.35 (released 2026-10-21).
-- **No fix:** branches 8.1, 8.0, 7.x and 5.x received no fixed release, so every version in them is vulnerable.
+- **No upstream release:** branches 8.1, 8.0, 7.x and 5.x received no official PHP release. Distribution packages and deb.sury.org backports may still contain the patch — check the package version and changelog.
+- **Verified backports (2026-10-23):** Debian 12 php8.2 8.2.35-1~deb12u1, Debian 13 php8.4 8.4.27-1~deb13u1, Ubuntu 22.04 php8.1 8.1.2-1ubuntu2.28, Ubuntu 24.04 php8.3 8.3.6-0ubuntu0.24.04.13, and deb.sury.org php5.6–8.5 builds from 2026-10-21/22.
 - **Passive:** one or two ordinary GET or HEAD requests to the site root. The check reads only public headers (Server, X-Powered-By, Set-Cookie) and PHP markers in the body. No exploitation, no port or path scanning.
 - **Free:** no account, no database of checked addresses, MIT-licensed source code.
 - **Verdicts:** `vulnerable`, `likely_vulnerable`, `not_vulnerable`, `not_applicable`, `unknown`.
@@ -17,6 +18,7 @@
 - [PHP2Shell — Russian (default)](https://haveibeenphpned.github.io/): checker, 10-question FAQ, affected-branch table, primary sources.
 - [PHP2Shell — English](https://haveibeenphpned.github.io/en/): the same content in English.
 - [PHP2Shell — French](https://haveibeenphpned.github.io/fr/): the same content in French.
+- [Old PHP fix guide](https://haveibeenphpned.github.io/en/fix/): upgrade path, deb.sury.org backports, hosting-provider template and re-check steps.
 - [Full machine-readable description](https://haveibeenphpned.github.io/llms-full.txt): how the check works, API examples, limitations, citation format.
 - [Sitemap](https://haveibeenphpned.github.io/sitemap.xml): all indexable URLs with hreflang alternates.
 - [Source code](https://github.com/GenkaOk/haveibeenphpned): Node.js implementation with no external dependencies.

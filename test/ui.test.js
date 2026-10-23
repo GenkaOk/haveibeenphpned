@@ -125,6 +125,23 @@ test('npm start-сервер отдаёт страницу и ассеты', asy
   }
 });
 
+test('npm start-сервер отдаёт /fix/ на всех языках', async () => {
+  const app = await startApp();
+  try {
+    for (const pathname of ['/fix/', '/en/fix/', '/fr/fix/']) {
+      const response = await fetch(app.url + pathname);
+      assert.equal(response.status, 200, `${pathname}: статус ${response.status}`);
+      assert.match(response.headers.get('content-type'), /text\/html/, `${pathname}: content-type`);
+      const html = await response.text();
+      assert.match(html, /data-prerendered="true"/, `${pathname}: страница не собрана`);
+      assert.match(html, /fix\.faq\.q1/, `${pathname}: нет FAQ`);
+      assert.match(html, /packages\.sury\.org/, `${pathname}: нет источника Sury`);
+    }
+  } finally {
+    await app.close();
+  }
+});
+
 test('npm start-сервер отдаёт robots.txt, sitemap.xml и llms-файлы', async () => {
   const app = await startApp();
   try {

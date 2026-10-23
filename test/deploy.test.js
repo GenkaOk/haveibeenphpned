@@ -86,7 +86,8 @@ test('deploy:site: npm-скрипт публикует в оба remote и пр�
 test('docs/: ресурсы совпадают с public/, три страницы и og-image на месте', () => {
   const docs = path.join(ROOT, 'docs');
   for (const entry of fs.readdirSync(PUBLIC_DIR, { withFileTypes: true })) {
-    if (!entry.isFile() || entry.name === 'index.html') continue;
+    if (!entry.isFile()) continue;
+    if (['index.html', 'fix.html', 'fix-i18n.js'].includes(entry.name)) continue;
     const source = path.join(PUBLIC_DIR, entry.name);
     const target = path.join(docs, entry.name);
     assert.ok(fs.existsSync(target), `в docs/ нет ${entry.name}`);
@@ -98,7 +99,15 @@ test('docs/: ресурсы совпадают с public/, три страниц
     );
   }
 
-  for (const page of ['index.html', 'en/index.html', 'fr/index.html', 'og-image.png']) {
+  for (const page of [
+    'index.html',
+    'en/index.html',
+    'fr/index.html',
+    'fix/index.html',
+    'en/fix/index.html',
+    'fr/fix/index.html',
+    'og-image.png',
+  ]) {
     assert.ok(fs.existsSync(path.join(docs, page)), `в docs/ нет ${page}`);
   }
   assert.ok(fs.existsSync(path.join(docs, '.nojekyll')), 'в docs/ нет .nojekyll');
@@ -119,6 +128,18 @@ test('docs/: ресурсы совпадают с public/, три страниц
       fs.readFileSync(to).equals(fs.readFileSync(from)),
       true,
       `docs/${lang}/index.html отличается от public/${lang}/index.html`,
+    );
+  }
+
+  // Страницы решения тоже собираются в оба каталога.
+  for (const dir of ['fix', 'en/fix', 'fr/fix']) {
+    const from = path.join(PUBLIC_DIR, dir, 'index.html');
+    const to = path.join(docs, dir, 'index.html');
+    assert.ok(fs.existsSync(from), `в public/ нет ${dir}/index.html`);
+    assert.equal(
+      fs.readFileSync(to).equals(fs.readFileSync(from)),
+      true,
+      `docs/${dir}/index.html отличается от public/${dir}/index.html`,
     );
   }
 });

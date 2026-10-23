@@ -51,8 +51,17 @@ function assertDocsFresh() {
 
   for (const entry of fs.readdirSync(source, { withFileTypes: true })) {
     // index.html и config.js генерируются: шаблон public/index.html
-    // намеренно отличается от prerendered docs/index.html.
-    if (!entry.isFile() || entry.name === 'config.js' || entry.name === 'index.html') continue;
+    // намеренно отличается от prerendered docs/index.html. fix.html и
+    // fix-i18n.js — исходники страницы решения, в docs/ они не публикуются.
+    if (
+      !entry.isFile() ||
+      entry.name === 'config.js' ||
+      entry.name === 'index.html' ||
+      entry.name === 'fix.html' ||
+      entry.name === 'fix-i18n.js'
+    ) {
+      continue;
+    }
     const from = path.join(source, entry.name);
     const to = path.join(target, entry.name);
     if (!fs.existsSync(to) || !fs.readFileSync(to).equals(fs.readFileSync(from))) {
@@ -61,7 +70,15 @@ function assertDocsFresh() {
     }
   }
 
-  for (const page of ['index.html', 'en/index.html', 'fr/index.html', 'og-image.png']) {
+  for (const page of [
+    'index.html',
+    'en/index.html',
+    'fr/index.html',
+    'fix/index.html',
+    'en/fix/index.html',
+    'fr/fix/index.html',
+    'og-image.png',
+  ]) {
     if (!fs.existsSync(path.join(target, page))) {
       fail('в docs/ нет ' + page + ' — запустите `npm run build:pages`');
     }

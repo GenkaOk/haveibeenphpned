@@ -30,4 +30,34 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://haveibeenphpned.github.io/fr/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://haveibeenphpned.github.io/"/>
   </url>
+  <url>
+    <loc>https://haveibeenphpned.github.io/fix/</loc>
+    <lastmod>2026-10-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://haveibeenphpned.github.io/fix/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://haveibeenphpned.github.io/en/fix/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://haveibeenphpned.github.io/fr/fix/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://haveibeenphpned.github.io/fix/"/>
+  </url>
+  <url>
+    <loc>https://haveibeenphpned.github.io/en/fix/</loc>
+    <lastmod>2026-10-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://haveibeenphpned.github.io/fix/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://haveibeenphpned.github.io/en/fix/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://haveibeenphpned.github.io/fr/fix/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://haveibeenphpned.github.io/fix/"/>
+  </url>
+  <url>
+    <loc>https://haveibeenphpned.github.io/fr/fix/</loc>
+    <lastmod>2026-10-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://haveibeenphpned.github.io/fix/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://haveibeenphpned.github.io/en/fix/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://haveibeenphpned.github.io/fr/fix/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://haveibeenphpned.github.io/fix/"/>
+  </url>
 </urlset>

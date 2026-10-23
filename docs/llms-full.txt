@@ -7,6 +7,7 @@
 Site: https://haveibeenphpned.github.io/
 Source: https://github.com/GenkaOk/haveibeenphpned
 Languages: Russian (default) at `/`, English at `/en/`, French at `/fr/`
+Fix guide: `/fix/` (Russian, x-default), `/en/fix/`, `/fr/fix/`
 Content updated: 2026-10-23
 Vulnerability fixes released: 2026-10-21
 
@@ -31,10 +32,38 @@ application. The same fixed versions address both.
 | 8.4 | 8.4.27 | fixed |
 | 8.3 | 8.3.36 | fixed |
 | 8.2 | 8.2.35 | fixed |
-| 8.1, 8.0, 7.x, 5.x | — | no fix; every version is vulnerable |
+| 8.1, 8.0, 7.x, 5.x | — | no upstream release; distribution/Sury backports may exist |
 
 A version below the fixed release for its branch remains vulnerable. Versions at or above the
 fixed release are not vulnerable to these two CVEs.
+
+## If you are stuck on PHP 8.1, 8.0 or 7.x
+
+No upstream PHP release fixes these branches. A backport may still be available from the
+distribution or from deb.sury.org. Check the package version, not only the version reported by
+`X-Powered-By`.
+
+Verified on 2026-10-23:
+
+| Distribution | Package | Fixed version |
+| --- | --- | --- |
+| Debian 12 bookworm | php8.2 | 8.2.35-1~deb12u1 |
+| Debian 13 trixie | php8.4 | 8.4.27-1~deb13u1 |
+| Ubuntu 22.04 LTS | php8.1 | 8.1.2-1ubuntu2.28 |
+| Ubuntu 24.04 LTS | php8.3 | 8.3.6-0ubuntu0.24.04.13 |
+| Ubuntu 26.04 / 26.10 | php8.5 | 8.5.4-0ubuntu1.5 / 8.5.9-0ubuntu2.1 |
+
+deb.sury.org rebuilt php8.1 8.1.34-9, php8.0 8.0.30-25, php7.4 7.4.33-31, php7.3 7.3.33-35,
+php7.2 7.2.34-66, php7.1 7.1.33-81, php7.0 7.0.33-93 and php5.6 5.6.40-105 on 2026-10-21/22.
+Their `debian/changelog` contains `Backported from 8.2.35: [CVE-2026-109618, CVE-2026-109619]`.
+Sury is a third-party repository, not the official Debian/Ubuntu security channel: take a backup,
+test on staging, and read the changelog of the exact package.
+
+Debian Security Tracker: https://security-tracker.debian.org/tracker/CVE-2026-109618
+and https://security-tracker.debian.org/tracker/CVE-2026-109619
+Ubuntu USN-8948-1: https://ubuntu.com/security/notices/USN-8948-1
+Sury repository and setup: https://packages.sury.org/php/ (README.txt)
+Sury changelog example: https://packages.sury.org/php/pool/main/p/php8.1/php8.1_8.1.34-9+0~20261021.82+debian12~1.gbp4e430a.debian.tar.xz
 
 ## How the check works
 
@@ -156,5 +185,8 @@ PHP 8.5.12, 8.4.27, 8.3.36 and 8.2.35, released on 2026-10-21.
 - https://haveibeenphpned.github.io/ — Russian (x-default)
 - https://haveibeenphpned.github.io/en/ — English
 - https://haveibeenphpned.github.io/fr/ — French
+- https://haveibeenphpned.github.io/fix/ — Russian fix guide (x-default)
+- https://haveibeenphpned.github.io/en/fix/ — English fix guide
+- https://haveibeenphpned.github.io/fr/fix/ — French fix guide
 - https://haveibeenphpned.github.io/llms.txt — short machine-readable summary
 - https://haveibeenphpned.github.io/sitemap.xml — sitemap with hreflang alternates

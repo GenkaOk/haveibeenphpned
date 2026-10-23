@@ -242,7 +242,7 @@ test('robots.txt: обычные и AI-краулеры разрешены, site
   );
 });
 
-test('sitemap.xml: три URL, hreflang-альтернативы, lastmod, валидный XML', () => {
+test('sitemap.xml: шесть URL, hreflang-альтернативы, lastmod, валидный XML', () => {
   const dir = makeSandbox();
   try {
     const out = runBuild(dir, {
@@ -261,18 +261,29 @@ test('sitemap.xml: три URL, hreflang-альтернативы, lastmod, ва�
     assertWellFormedXml(docsXml);
 
     const locs = [...docsXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
-    assert.deepEqual(locs, [`${SITE_URL}/`, `${SITE_URL}/en/`, `${SITE_URL}/fr/`]);
-    assert.equal((docsXml.match(/<url>/g) || []).length, 3);
-    assert.equal((docsXml.match(/<xhtml:link /g) || []).length, 12, 'по 4 альтернативы на URL');
+    assert.deepEqual(locs, [
+      `${SITE_URL}/`,
+      `${SITE_URL}/en/`,
+      `${SITE_URL}/fr/`,
+      `${SITE_URL}/fix/`,
+      `${SITE_URL}/en/fix/`,
+      `${SITE_URL}/fr/fix/`,
+    ]);
+    assert.equal((docsXml.match(/<url>/g) || []).length, 6);
+    assert.equal((docsXml.match(/<xhtml:link /g) || []).length, 24, 'по 4 альтернативы на URL');
 
     const lastmod = new Date(Number(SOURCE_DATE_EPOCH) * 1000).toISOString().slice(0, 10);
-    assert.equal((docsXml.match(new RegExp(`<lastmod>${lastmod}</lastmod>`, 'g')) || []).length, 3);
+    assert.equal((docsXml.match(new RegExp(`<lastmod>${lastmod}</lastmod>`, 'g')) || []).length, 6);
 
     for (const [hreflang, href] of [
       ['ru', `${SITE_URL}/`],
       ['en', `${SITE_URL}/en/`],
       ['fr', `${SITE_URL}/fr/`],
       ['x-default', `${SITE_URL}/`],
+      ['ru', `${SITE_URL}/fix/`],
+      ['en', `${SITE_URL}/en/fix/`],
+      ['fr', `${SITE_URL}/fr/fix/`],
+      ['x-default', `${SITE_URL}/fix/`],
     ]) {
       assert.ok(docsXml.includes(`hreflang="${hreflang}" href="${href}"`), `нет hreflang ${hreflang}`);
     }
@@ -294,13 +305,13 @@ test('build:pages: robots.txt, sitemap.xml, llms.txt и llms-full.txt попад
   }
 });
 
-test('llms.txt: заголовок, сводка, 5–8 ссылок и ключевые факты', () => {
+test('llms.txt: заголовок, сводка, 5–9 ссылок и ключевые факты', () => {
   const short = fs.readFileSync(path.join(PUBLIC, 'llms.txt'), 'utf8');
   assert.match(short, /^# PHP2Shell$/m);
   assert.match(short, /^> .+\S/m, 'нет строки-описания в формате llmstxt.org');
 
   const links = [...short.matchAll(/\]\((https?:\/\/[^)]+)\)/g)];
-  assert.ok(links.length >= 5 && links.length <= 8, `ссылок ${links.length}, нужно 5–8`);
+  assert.ok(links.length >= 5 && links.length <= 9, `ссылок ${links.length}, нужно 5–9`);
 
   for (const fact of ['CVE-2026-109618', 'CVE-2026-109619', '8.5.12', '8.4.27', '8.3.36', '8.2.35']) {
     assert.ok(short.includes(fact), `llms.txt: нет ${fact}`);

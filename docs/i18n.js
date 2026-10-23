@@ -67,7 +67,7 @@
         'Что проверить в своей команде:\n' +
         '1. Версия PHP: php -v.\n' +
         '2. Затронуты ветки 8.2, 8.3, 8.4, 8.5. Исправления: 8.2.35, 8.3.36, 8.4.27, 8.5.12.\n' +
-        '3. Ветки 8.1, 8.0, 7.x и 5.x исправлений не получат — нужен переход на 8.2+.\n' +
+        '3. Ветки 8.1, 8.0, 7.x и 5.x не получат официального релиза PHP — нужен переход на 8.2+ или бэкпорт дистрибутива/Sury.\n' +
         '4. Пока обновление не установлено, не выставляйте наружу phpinfo и диагностические страницы.\n\n' +
         'Пассивная проверка версии: https://haveibeenphpned.github.io/?utm_source=warning&utm_medium=copy&utm_campaign=php2shell\n' +
         'Инструмент не эксплуатирует уязвимость и не публикует данные о сервере.',
@@ -76,11 +76,11 @@
       'ui.facts.intro':
         'Эти карточки не содержат данных о вашем сервере. Их можно публиковать как новость.',
       'ui.facts.kicker': 'Факт',
-      'ui.facts.php81.title': 'PHP 8.1 не получит фикс',
+      'ui.facts.php81.title': 'PHP 8.1: официального фикса нет',
       'ui.facts.php81.text':
-        'Ветки 8.1, 8.0, 7.x и 5.x не получат исправлений для CVE-2026-109618 и CVE-2026-109619. Единственный путь — переход на 8.2 или новее.',
+        'Официального релиза PHP для 8.1, 8.0, 7.x и 5.x не будет. Но дистрибутивы и Sury выпускают пакеты с бэкпортом: проверьте версию пакета, прежде чем считать сервер уязвимым.',
       'ui.facts.php81.copy': 'Скопировать факт о PHP 8.1',
-      'ui.facts.php81.aria': 'Скопировать факт: PHP 8.1 не получит фикс',
+      'ui.facts.php81.aria': 'Скопировать факт: у PHP 8.1 нет официального фикса',
       'ui.facts.versions.title': 'Исправленные версии',
       'ui.facts.versions.text':
         '8.5.12 · 8.4.27 · 8.3.36 · 8.2.35 — обновитесь до версии своей ветки или выше. Ветки ниже 8.2 исправлений не получат.',
@@ -208,7 +208,7 @@
         'Это две критические RCE в ядре PHP с одинаковой оценкой 9.2: одна возникает после нехватки памяти, вторая — из-за устаревшего состояния воркера PHP-FPM между запросами.',
       'ui.faq.q6': 'Какие версии PHP исправлены?',
       'ui.faq.a6':
-        'Исправленные версии: 8.5.12, 8.4.27, 8.3.36 и 8.2.35. Ветки 8.1, 8.0, 7.x и 5.x фиксов не получили, поэтому в них уязвимы все версии.',
+        'Исправленные версии: 8.5.12, 8.4.27, 8.3.36 и 8.2.35. Ветки 8.1, 8.0, 7.x и 5.x официальных релизов не получили, но бэкпорты выпускают дистрибутивы и Sury: проверьте версию пакета.',
       'ui.faq.q7': 'Что именно отправляет проверка?',
       'ui.faq.a7':
         'Один-два обычных GET- или HEAD-запроса на корень сайта. Проверка читает только публичные заголовки и не обращается к другим портам и путям.',
@@ -240,6 +240,8 @@
 
       'ui.footer.updated': 'Обновлено {updated}',
       'ui.crumb.page': 'Проверка CVE-2026-109618 и CVE-2026-109619',
+      'ui.fixCta': 'У меня старый PHP — что делать',
+      'ui.result.fixCta': 'Что делать со старым PHP',
 
       'ui.request.one': 'запрос',
       'ui.request.few': 'запроса',
@@ -607,7 +609,7 @@
         'What to check with your team:\n' +
         '1. PHP version: php -v.\n' +
         '2. Affected branches: 8.2, 8.3, 8.4, 8.5. Fixed releases: 8.2.35, 8.3.36, 8.4.27, 8.5.12.\n' +
-        '3. Branches 8.1, 8.0, 7.x and 5.x will not receive a fix — plan an upgrade to 8.2 or newer.\n' +
+        '3. Branches 8.1, 8.0, 7.x and 5.x will not receive an official PHP release — upgrade to 8.2 or newer, or use a distribution/Sury backport.\n' +
         '4. Until the update is installed, do not expose phpinfo or diagnostic pages.\n\n' +
         'Passive version check: https://haveibeenphpned.github.io/?utm_source=warning&utm_medium=copy&utm_campaign=php2shell\n' +
         'The tool does not exploit the vulnerability and does not publish server data.',
@@ -616,11 +618,11 @@
       'ui.facts.intro':
         'These cards contain no data about your server. You can publish them as news.',
       'ui.facts.kicker': 'Fact',
-      'ui.facts.php81.title': 'PHP 8.1 will not get a fix',
+      'ui.facts.php81.title': 'PHP 8.1: no official fix',
       'ui.facts.php81.text':
-        'Branches 8.1, 8.0, 7.x and 5.x will not receive fixes for CVE-2026-109618 and CVE-2026-109619. The only path is an upgrade to 8.2 or newer.',
+        'There will be no official PHP release for 8.1, 8.0, 7.x and 5.x. But distributions and Sury publish backported packages: check the package version before you treat the server as vulnerable.',
       'ui.facts.php81.copy': 'Copy the PHP 8.1 fact',
-      'ui.facts.php81.aria': 'Copy the fact: PHP 8.1 will not get a fix',
+      'ui.facts.php81.aria': 'Copy the fact: PHP 8.1 has no official fix',
       'ui.facts.versions.title': 'Fixed versions',
       'ui.facts.versions.text':
         '8.5.12 · 8.4.27 · 8.3.36 · 8.2.35 — upgrade to the fixed release for your branch or newer. Branches below 8.2 will not get a fix.',
@@ -749,7 +751,7 @@
         'They are two critical RCE flaws in the PHP core, both rated 9.2: one follows an out-of-memory error, the other comes from stale PHP-FPM worker state between requests.',
       'ui.faq.q6': 'Which PHP versions are fixed?',
       'ui.faq.a6':
-        'The fixed releases are 8.5.12, 8.4.27, 8.3.36 and 8.2.35. Branches 8.1, 8.0, 7.x and 5.x received no fix, so every version in them is vulnerable.',
+        'The fixed releases are 8.5.12, 8.4.27, 8.3.36 and 8.2.35. Branches 8.1, 8.0, 7.x and 5.x received no official release, but distributions and Sury publish backports: check the package version.',
       'ui.faq.q7': 'What exactly does the check send?',
       'ui.faq.a7':
         'One or two ordinary GET or HEAD requests to the site root. The check reads public headers only and never touches other ports or paths.',
@@ -781,6 +783,8 @@
 
       'ui.footer.updated': 'Updated {updated}',
       'ui.crumb.page': 'CVE-2026-109618 and CVE-2026-109619 check',
+      'ui.fixCta': 'I’m stuck on old PHP — what should I do?',
+      'ui.result.fixCta': 'What to do about old PHP',
 
       'ui.request.one': 'request',
       'ui.request.few': 'requests',
@@ -1148,7 +1152,7 @@
         'À vérifier dans votre équipe :\n' +
         '1. Version de PHP : php -v.\n' +
         '2. Branches concernées : 8.2, 8.3, 8.4, 8.5. Versions corrigées : 8.2.35, 8.3.36, 8.4.27, 8.5.12.\n' +
-        "3. Les branches 8.1, 8.0, 7.x et 5.x ne recevront pas de correctif — prévoyez une migration vers 8.2 ou plus récent.\n" +
+        "3. Les branches 8.1, 8.0, 7.x et 5.x ne recevront pas de version officielle de PHP — migrez vers 8.2 ou plus récent, ou utilisez un rétroportage de la distribution/Sury.\n" +
         "4. Tant que la mise à jour n'est pas installée, n'exposez pas phpinfo ni les pages de diagnostic.\n\n" +
         'Vérification passive de la version : https://haveibeenphpned.github.io/?utm_source=warning&utm_medium=copy&utm_campaign=php2shell\n' +
         "L'outil n'exploite pas la vulnérabilité et ne publie aucune donnée du serveur.",
@@ -1157,11 +1161,11 @@
       'ui.facts.intro':
         "Ces fiches ne contiennent aucune donnée sur votre serveur. Vous pouvez les publier comme une nouvelle.",
       'ui.facts.kicker': 'Fait',
-      'ui.facts.php81.title': 'PHP 8.1 ne recevra pas de correctif',
+      'ui.facts.php81.title': 'PHP 8.1 : pas de correctif officiel',
       'ui.facts.php81.text':
-        "Les branches 8.1, 8.0, 7.x et 5.x ne recevront pas de correctif pour CVE-2026-109618 et CVE-2026-109619. La seule voie est une migration vers 8.2 ou plus récent.",
+        "Il n’y aura pas de version officielle de PHP pour 8.1, 8.0, 7.x et 5.x. Mais les distributions et Sury publient des paquets rétroportés : vérifiez la version du paquet avant de considérer le serveur comme vulnérable.",
       'ui.facts.php81.copy': 'Copier le fait sur PHP 8.1',
-      'ui.facts.php81.aria': 'Copier le fait : PHP 8.1 ne recevra pas de correctif',
+      'ui.facts.php81.aria': 'Copier le fait : PHP 8.1 n’a pas de correctif officiel',
       'ui.facts.versions.title': 'Versions corrigées',
       'ui.facts.versions.text':
         "8.5.12 · 8.4.27 · 8.3.36 · 8.2.35 — mettez à jour vers la version corrigée de votre branche ou plus récent. Les branches inférieures à 8.2 ne recevront pas de correctif.",
@@ -1292,7 +1296,7 @@
         'Deux failles RCE critiques dans le cœur de PHP, toutes deux notées 9.2 : l’une suit une erreur de mémoire insuffisante, l’autre vient d’un état obsolète du worker PHP-FPM entre deux requêtes.',
       'ui.faq.q6': 'Quelles versions de PHP sont corrigées ?',
       'ui.faq.a6':
-        'Les versions corrigées sont 8.5.12, 8.4.27, 8.3.36 et 8.2.35. Les branches 8.1, 8.0, 7.x et 5.x n’ont reçu aucun correctif : toutes leurs versions sont vulnérables.',
+        'Les versions corrigées sont 8.5.12, 8.4.27, 8.3.36 et 8.2.35. Les branches 8.1, 8.0, 7.x et 5.x n’ont reçu aucune version officielle, mais les distributions et Sury publient des rétroportages : vérifiez la version du paquet.',
       'ui.faq.q7': 'Qu’envoie exactement le contrôle ?',
       'ui.faq.a7':
         'Une ou deux requêtes GET ou HEAD ordinaires vers la racine du site. Le contrôle ne lit que les en-têtes publics et ne touche ni aux autres ports ni aux autres chemins.',
@@ -1327,6 +1331,8 @@
 
       'ui.footer.updated': 'Mis à jour le {updated}',
       'ui.crumb.page': 'Contrôle CVE-2026-109618 et CVE-2026-109619',
+      'ui.fixCta': 'Mon PHP est ancien — que faire ?',
+      'ui.result.fixCta': 'Que faire avec un PHP ancien',
 
       'ui.request.one': 'requête',
       'ui.request.few': 'requêtes',

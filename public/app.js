@@ -37,6 +37,7 @@
   const badgeStatus = document.getElementById('badge-status');
   const heroLede = document.getElementById('hero-lede');
   const langSwitch = document.getElementById('lang-switch');
+  const fixCta = document.querySelector('.fix-cta');
 
   if (!form || !input || !consent || !button || !result) return;
 
@@ -107,6 +108,7 @@
 
   function applyStaticLanguage() {
     I18N.applyStatic(document, currentLang);
+    if (fixCta) fixCta.setAttribute('href', fixPageHref());
     if (heroLede) {
       heroLede.textContent = t('ui.hero.lede', {
         date: I18N.formatDate(RELEASE_DATE, currentLang, { dateStyle: 'long' }),
@@ -618,9 +620,31 @@
     return panel;
   }
 
+  /**
+   * Ссылка на страницу решения. На /en/ и /fr/ она относительная (`./fix/`),
+   * на корне с выбранным языком — с языковым префиксом.
+   */
+  function fixPageHref() {
+    if (/\/(?:en|fr)\/(?:index\.html)?$/.test(window.location.pathname)) return './fix/';
+    return currentLang === 'ru' ? './fix/' : `./${currentLang}/fix/`;
+  }
+
+  /** Для вердиктов vulnerable/likely_vulnerable — заметный переход к инструкции. */
+  function renderFixHint(status) {
+    if (status !== 'vulnerable' && status !== 'likely_vulnerable') return null;
+    const box = el('p', 'result-fix-hint');
+    const link = el('a', null, t('ui.result.fixCta'));
+    link.href = fixPageHref();
+    box.append(link);
+    return box;
+  }
+
   function renderReport(report) {
     result.replaceChildren();
     result.append(renderVerdict(report));
+    const summary = isObject(report.summary) ? report.summary : {};
+    const fixHint = renderFixHint(summary.status);
+    if (fixHint) result.append(fixHint);
     result.append(renderMeta(report));
     result.append(renderPhp(report));
     result.append(renderCves(report));

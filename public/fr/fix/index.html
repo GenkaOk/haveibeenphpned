@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="fr" data-prerendered="true" data-site-lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PHP ancien et CVE-2026-109618 : que faire</title>
+  <meta name="description" content="Guide pas à pas pour PHP 7.x–8.1 : mise à jour vers 8.5.12, 8.4.27, 8.3.36 ou 8.2.35, paquets Sury rétroportés, vérification et pièges à éviter.">
+  <meta name="color-scheme" content="light">
+  <link rel="canonical" href="https://haveibeenphpned.github.io/fr/fix/">
+  <link rel="alternate" hreflang="ru" href="https://haveibeenphpned.github.io/fix/">
+  <link rel="alternate" hreflang="en" href="https://haveibeenphpned.github.io/en/fix/">
+  <link rel="alternate" hreflang="fr" href="https://haveibeenphpned.github.io/fr/fix/">
+  <link rel="alternate" hreflang="x-default" href="https://haveibeenphpned.github.io/fix/">
+  <meta name="robots" content="index,follow">
+  <meta name="theme-color" content="#1c4ed8">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="PHP2Shell">
+  <meta property="og:title" content="PHP ancien et CVE-2026-109618 : que faire">
+  <meta property="og:description" content="Guide pas à pas pour PHP 7.x–8.1 : mise à jour vers 8.5.12, 8.4.27, 8.3.36 ou 8.2.35, paquets Sury rétroportés, vérification et pièges à éviter.">
+  <meta property="og:url" content="https://haveibeenphpned.github.io/fr/fix/">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:locale:alternate" content="ru_RU">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta property="og:image" content="https://haveibeenphpned.github.io/og-image.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="PHP ancien et CVE-2026-109618 : que faire">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="PHP ancien et CVE-2026-109618 : que faire">
+  <meta name="twitter:description" content="Guide pas à pas pour PHP 7.x–8.1 : mise à jour vers 8.5.12, 8.4.27, 8.3.36 ou 8.2.35, paquets Sury rétroportés, vérification et pièges à éviter.">
+  <meta name="twitter:image" content="https://haveibeenphpned.github.io/og-image.png">
+  <link rel="stylesheet" href="../../styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M12%202.5%204.5%205.6v5.7c0%204.6%203.1%208.6%207.5%2010.2%204.4-1.6%207.5-5.6%207.5-10.2V5.6L12%202.5Z'%20fill='%231c4ed8'/%3E%3C/svg%3E">
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://haveibeenphpned.github.io/#organization","name":"PHP2Shell","url":"https://haveibeenphpned.github.io/","logo":{"@type":"ImageObject","url":"https://haveibeenphpned.github.io/og-image.png"},"sameAs":["https://github.com/GenkaOk/haveibeenphpned"]},{"@type":"WebPage","@id":"https://haveibeenphpned.github.io/fr/fix/#page","url":"https://haveibeenphpned.github.io/fr/fix/","name":"PHP ancien et CVE-2026-109618 : que faire","description":"Guide pas à pas pour PHP 7.x–8.1 : mise à jour vers 8.5.12, 8.4.27, 8.3.36 ou 8.2.35, paquets Sury rétroportés, vérification et pièges à éviter.","inLanguage":"fr","dateModified":"2026-10-23","publisher":{"@id":"https://haveibeenphpned.github.io/#organization"}},{"@type":"FAQPage","@id":"https://haveibeenphpned.github.io/fr/fix/#faq","inLanguage":"fr","mainEntity":[{"@type":"Question","name":"Mon PHP est en 8.1. N’y a-t-il vraiment pas de correctif officiel ?","acceptedAnswer":{"@type":"Answer","text":"Oui, il n’y a pas de version amont de PHP pour 8.1. Mais Ubuntu 22.04 et Sury ont publié des paquets rétroportés : vérifiez la version du paquet, pas seulement celle de PHP."}},{"@type":"Question","name":"Puis-je simplement passer à PHP 8.5 ?","acceptedAnswer":{"@type":"Answer","text":"Oui, si l’application est compatible. 8.5 est la branche la plus récente, mais testez d’abord les extensions et le site sur un environnement de recette."}},{"@type":"Question","name":"deb.sury.org est-il sûr ?","acceptedAnswer":{"@type":"Answer","text":"C’est un dépôt tiers populaire, mais pas le canal de sécurité officiel de Debian/Ubuntu. Ajoutez-le uniquement depuis le README officiel, avec une sauvegarde et une vérification du changelog."}},{"@type":"Question","name":"Comment savoir si le correctif est déjà installé ?","acceptedAnswer":{"@type":"Answer","text":"Vérifiez la version du paquet et le changelog : dpkg -l | grep php et apt-get changelog php8.1 . La version de l’en-tête X-Powered-By peut être ancienne."}},{"@type":"Question","name":"Faut-il redémarrer le serveur après la mise à jour ?","acceptedAnswer":{"@type":"Answer","text":"Oui. Redémarrez PHP-FPM et le serveur web, sinon certains workers gardent l’ancien code."}},{"@type":"Question","name":"La vérification fonctionne-t-elle si PHP est masqué ?","acceptedAnswer":{"@type":"Answer","text":"Non. Le verdict sera unknown : vérifiez la version sur le serveur avec php -v ."}},{"@type":"Question","name":"Que faire si mon hébergeur ne met pas PHP à jour ?","acceptedAnswer":{"@type":"Answer","text":"Envoyez le modèle ci-dessus et demandez la version du paquet. S’il n’y a pas de correctif, déplacez le site vers une plateforme avec PHP 8.2 ou plus récent."}},{"@type":"Question","name":"Les mesures temporaires suffisent-elles ?","acceptedAnswer":{"@type":"Answer","text":"Elles réduisent le risque mais ne remplacent pas le correctif. Désactiver session.upload_progress et limiter les requêtes ne corrigent pas complètement la CVE."}},{"@type":"Question","name":"Cela s’applique-t-il à PHP 5.6 ?","acceptedAnswer":{"@type":"Answer","text":"Sury a aussi reconstruit 5.6 avec le rétroportage, mais la branche n’est plus prise en charge depuis longtemps. La production exige PHP 8.2 ou plus récent."}},{"@type":"Question","name":"Où sont les sources primaires ?","acceptedAnswer":{"@type":"Answer","text":"Les liens vers le Debian Security Tracker, USN-8948-1 et le changelog Sury se trouvent dans la section « Sources » en bas de page."}}]},{"@type":"BreadcrumbList","@id":"https://haveibeenphpned.github.io/fr/fix/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"PHP2Shell","item":"https://haveibeenphpned.github.io/"},{"@type":"ListItem","position":2,"name":"Que faire avec un PHP ancien","item":"https://haveibeenphpned.github.io/fr/fix/"}]}]}</script>
+</head>
+<body>
+  <a class="skip-link" href="#main" data-i18n="fix.skip">Aller au contenu</a>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" data-fix-home href="../">
+        <svg class="brand-mark" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M12 2.5 4.5 5.6v5.7c0 4.6 3.1 8.6 7.5 10.2 4.4-1.6 7.5-5.6 7.5-10.2V5.6L12 2.5Z"
+                fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+          <path d="m8.6 11.9 2.3 2.4 4.5-4.9" fill="none" stroke="currentColor"
+                stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="brand-name">PHP2Shell</span>
+        <span class="brand-note" data-i18n="fix.brandNote">guide PHP ancien</span>
+      </a>
+
+      <div class="header-right">
+        <span class="header-cves">CVE-2026-109618 · CVE-2026-109619</span>
+        <nav class="lang-switch" aria-label="Langue de l&#39;interface" data-i18n-aria-label="ui.lang.label">
+          <a class="lang-btn" data-fix-lang="ru" lang="ru" hreflang="ru" href="../../fix/">RU</a>
+          <a class="lang-btn" data-fix-lang="en" lang="en" hreflang="en" href="../../en/fix/">EN</a>
+          <a class="lang-btn" data-fix-lang="fr" lang="fr" hreflang="fr" href="./" aria-current="page">FR</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="wrap fix-page">
+    <nav class="breadcrumbs" aria-label="Fil d’Ariane" data-i18n-aria-label="fix.crumb.label">
+      <a data-fix-home data-i18n="fix.crumb.home" href="../">Vérification</a>
+      <span aria-hidden="true">/</span>
+      <span data-i18n="fix.crumb.current">Que faire avec un PHP ancien</span>
+    </nav>
+
+    <section class="hero fix-hero" aria-labelledby="fix-title">
+      <p class="fix-kicker" data-i18n="fix.kicker">Guide pratique</p>
+      <h1 id="fix-title" data-i18n="fix.title">Mon PHP est ancien — que faire ?</h1>
+      <p class="lede" data-i18n-html="fix.lede">Si votre branche est encore prise en charge, passez à 8.5.12, 8.4.27, 8.3.36 ou 8.2.35. Si vous êtes bloqué sur 8.1, 8.0 ou 7.x, PHP amont n’a pas de version pour vous — mais les paquets <a href="https://packages.sury.org/php/" rel="noopener">deb.sury.org</a> contiennent le rétroportage, et Ubuntu 22.04 a corrigé php8.1 par une mise à jour normale. Vérifiez d’abord la version du paquet : le correctif est peut-être déjà installé.</p>
+      <p class="fix-verified" data-i18n="fix.verified">Faits vérifiés auprès des sources primaires le 23 octobre 2026.</p>
+      <p class="hero-cta">
+        <a class="btn btn--quiet" data-fix-home data-i18n="fix.backToCheck" href="../">Vérifier le serveur</a>
+      </p>
+    </section>
+
+    <aside class="fix-answer" aria-labelledby="fix-answer-title">
+      <h2 id="fix-answer-title" data-i18n="fix.answer.title">Réponse courte</h2>
+      <p data-i18n-html="fix.answer.text">Mettez PHP à jour vers la version corrigée de votre branche. Si la mise à jour est impossible, installez un paquet rétroporté du dépôt de votre distribution ou de <a href="https://packages.sury.org/php/" rel="noopener">deb.sury.org</a>. Désactiver les contrôles de sécurité et ajouter des PPA au hasard ne résout pas le problème.</p>
+      <p class="fix-answer-note" data-i18n="fix.answer.note">Les branches 8.2–8.5 reçoivent des versions officielles de PHP. Il n’y a pas de version officielle pour 8.1, 8.0, 7.x et 5.x, mais les distributions et Sury publient des rétroportages. Ci-dessous : comment vérifier ce qui est installé et quoi faire dans chaque cas.</p>
+    </aside>
+
+    <section class="info-section fix-section" id="update" aria-labelledby="s1-title">
+      <h2 id="s1-title" data-i18n="fix.s1.title">Scénario 1. PHP peut être mis à jour</h2>
+      <p class="section-intro" data-i18n="fix.s1.intro">C’est la meilleure voie : une version officielle contient tous les correctifs de la branche, pas seulement celui de ces deux CVE.</p>
+      <ol class="fix-steps">
+        <li data-i18n-html="fix.s1.step1">Identifiez la branche et la version exacte : <code>php -v</code> et <code>php-fpm -v</code>. Si les commandes manquent, cherchez la version dans le panneau d’hébergement.</li>
+        <li data-i18n-html="fix.s1.step2">Mettez à jour les paquets de la distribution : <code>sudo apt update &amp;&amp; sudo apt upgrade</code> sous Debian/Ubuntu ou <code>sudo dnf upgrade</code> sous RHEL.</li>
+        <li data-i18n-html="fix.s1.step3">Redémarrez PHP-FPM et le serveur web : <code>sudo systemctl restart php8.3-fpm</code>. Sans redémarrage, certains workers gardent l’ancien code.</li>
+        <li data-i18n-html="fix.s1.step4">Vérifiez que <code>php -v</code> affiche 8.5.12, 8.4.27, 8.3.36 ou 8.2.35 pour votre branche, ou plus récent.</li>
+      </ol>
+      <pre class="fix-command"><code>php -v
+php-fpm -v
+
+sudo apt update
+sudo apt upgrade
+
+sudo systemctl restart php8.3-fpm
+
+dpkg -l | grep php</code></pre>
+      <p data-i18n-html="fix.s1.check">Ne vous fiez pas seulement à l’en-tête <code>X-Powered-By</code> : sa version peut être antérieure au correctif. Vérifiez le paquet : <code>dpkg -l | grep php</code> sous Debian/Ubuntu ou <code>rpm -q --changelog php-cli | head -40</code> sous RHEL.</p>
+      <p class="fix-note" data-i18n-html="fix.s1.note">Si <code>apt upgrade</code> ne propose rien, vérifiez que le dépôt de sécurité de la distribution est activé.</p>
+    </section>
+
+    <section class="info-section fix-section" id="sury" aria-labelledby="s2-title">
+      <h2 id="s2-title" data-i18n="fix.s2.title">Scénario 2. Vous êtes bloqué sur 8.1, 8.0 ou 7.x</h2>
+      <p class="section-intro" data-i18n="fix.s2.intro">Il n’y a pas de version officielle de PHP pour ces branches. Le correctif peut venir d’un paquet de la distribution ou du dépôt tiers Sury. Sury n’est pas le canal de sécurité officiel de Debian/Ubuntu : vérifiez d’abord si votre distribution propose déjà le correctif.</p>
+
+      <h3 data-i18n="fix.s2.officialTitle">Vérifiez d’abord le dépôt de votre distribution</h3>
+      <p class="fix-text" data-i18n-html="fix.s2.officialText">Debian 12 bookworm : <code>php8.2 8.2.35-1~deb12u1</code> ; Debian 13 trixie : <code>php8.4 8.4.27-1~deb13u1</code>. Ubuntu 22.04 : <code>php8.1 8.1.2-1ubuntu2.28</code> ; Ubuntu 24.04 : <code>php8.3 8.3.6-0ubuntu0.24.04.13</code> ; Ubuntu 26.04 et 26.10 : <code>php8.5</code>. Sources : <a href="https://security-tracker.debian.org/tracker/CVE-2026-109618" rel="noopener">Debian Security Tracker</a> et <a href="https://ubuntu.com/security/notices/USN-8948-1" rel="noopener">USN-8948-1</a>.</p>
+      <div class="table-wrap">
+        <table class="versions-table fix-table">
+          <thead>
+            <tr>
+              <th scope="col" data-i18n="fix.s2.tableDistro">Distribution</th>
+              <th scope="col" data-i18n="fix.s2.tablePackage">Paquet</th>
+              <th scope="col" data-i18n="fix.s2.tableVersion">Version corrigée</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Debian 12 bookworm</td><td><code>php8.2</code></td><td><code>8.2.35-1~deb12u1</code></td></tr>
+            <tr><td>Debian 13 trixie</td><td><code>php8.4</code></td><td><code>8.4.27-1~deb13u1</code></td></tr>
+            <tr><td>Ubuntu 22.04 LTS</td><td><code>php8.1</code></td><td><code>8.1.2-1ubuntu2.28</code></td></tr>
+            <tr><td>Ubuntu 24.04 LTS</td><td><code>php8.3</code></td><td><code>8.3.6-0ubuntu0.24.04.13</code></td></tr>
+            <tr><td>Ubuntu 26.04 / 26.10</td><td><code>php8.5</code></td><td><code>8.5.4-0ubuntu1.5</code> / <code>8.5.9-0ubuntu2.1</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 data-i18n="fix.s2.suryTitle">Paquets Sury avec rétroportage</h3>
+      <p class="fix-text" data-i18n="fix.s2.suryText">Le changelog Sury du 21 octobre 2026 contient « Backported from 8.2.35: [CVE-2026-109618, CVE-2026-109619] ». Nous avons vérifié les paquets sources : php8.1 8.1.34-9, php8.0 8.0.30-25, php7.4 7.4.33-31, ainsi que 7.0–7.3 et 5.6. Le correctif est présent dans toutes ces branches ; les versions et dates exactes sont dans le tableau.</p>
+      <div class="table-wrap">
+        <table class="versions-table fix-table">
+          <thead>
+            <tr>
+              <th scope="col" data-i18n="fix.s2.tableSuryPackage">Paquet Sury</th>
+              <th scope="col" data-i18n="fix.s2.tableSuryVersion">Version</th>
+              <th scope="col" data-i18n="fix.s2.tableSuryDate">Date de compilation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>php8.5</code></td><td><code>8.5.12-1</code></td><td>2026-10-21</td></tr>
+            <tr><td><code>php8.4</code></td><td><code>8.4.27-1</code></td><td>2026-10-21</td></tr>
+            <tr><td><code>php8.3</code></td><td><code>8.3.36-1</code></td><td>2026-10-21</td></tr>
+            <tr><td><code>php8.2</code></td><td><code>8.2.35-1</code></td><td>2026-10-21</td></tr>
+            <tr><td><code>php8.1</code></td><td><code>8.1.34-9</code></td><td>2026-10-21</td></tr>
+            <tr><td><code>php8.0</code></td><td><code>8.0.30-25</code></td><td>2026-10-21</td></tr>
+            <tr><td><code>php7.4</code></td><td><code>7.4.33-31</code></td><td>2026-10-21</td></tr>
+            <tr><td><code>php7.3</code></td><td><code>7.3.33-35</code></td><td>2026-10-21</td></tr>
+            <tr><td><code>php7.2</code></td><td><code>7.2.34-66</code></td><td>2026-10-21</td></tr>
+            <tr><td><code>php7.1</code></td><td><code>7.1.33-81</code></td><td>2026-10-22</td></tr>
+            <tr><td><code>php7.0</code></td><td><code>7.0.33-93</code></td><td>2026-10-22</td></tr>
+            <tr><td><code>php5.6</code></td><td><code>5.6.40-105</code></td><td>2026-10-22</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="fix-note" data-i18n="fix.s2.caution">Sury est un dépôt tiers, pas un canal de sécurité officiel. Faites un instantané ou une sauvegarde, testez la mise à jour sur un environnement de recette et n’ajoutez pas de PPA au hasard.</p>
+
+      <h3 data-i18n="fix.s2.repoTitle">Comment ajouter le dépôt Sury</h3>
+      <p data-i18n="fix.s2.step1">Installez la clé et ajoutez le dépôt avec les commandes du README officiel Sury :</p>
+      <pre class="fix-command"><code>sudo apt-get update
+sudo apt-get -y install lsb-release ca-certificates curl
+sudo curl -sSLo /tmp/debsuryorg-archive-keyring.deb https://packages.sury.org/debsuryorg-archive-keyring.deb
+sudo dpkg -i /tmp/debsuryorg-archive-keyring.deb
+sudo sh -c 'echo "deb [signed-by=/usr/share/keyrings/debsuryorg-archive-keyring.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list'
+sudo apt-get update</code></pre>
+
+      <p data-i18n="fix.s2.step2">Mettez à jour uniquement les paquets de votre branche. Exemple pour PHP 8.1 :</p>
+      <pre class="fix-command"><code>sudo apt-get install --only-upgrade php8.1-cli php8.1-fpm php8.1-common</code></pre>
+      <p class="fix-note" data-i18n-html="fix.s2.step2note">Remplacez <code>8.1</code> par <code>8.0</code>, <code>7.4</code> ou une autre branche. <code>--only-upgrade</code> met à jour les paquets déjà installés et n’ajoute pas d’extensions inutiles.</p>
+
+      <p data-i18n="fix.s2.step3">Vérifiez les versions de PHP, FPM et du paquet :</p>
+      <pre class="fix-command"><code>php -v
+php-fpm8.1 -v
+dpkg -l | grep '^ii  php8.1'</code></pre>
+
+      <p data-i18n="fix.s2.step4">Redémarrez FPM et le serveur web :</p>
+      <pre class="fix-command"><code>sudo systemctl restart php8.1-fpm
+sudo systemctl restart apache2</code></pre>
+      <p class="fix-note" data-i18n-html="fix.s2.step4note">Pour nginx, redémarrez <code>nginx</code>. Si le serveur héberge plusieurs versions de PHP, redémarrez le service et le pool de la branche concernée.</p>
+    </section>
+
+    <section class="info-section fix-section" id="hosting" aria-labelledby="s3-title">
+      <h2 id="s3-title" data-i18n="fix.s3.title">Scénario 3. Hébergement managé ou pas d’accès root</h2>
+      <p class="section-intro" data-i18n="fix.s3.intro">C’est l’hébergeur qui effectue la mise à jour. Demandez au support de confirmer la version du paquet, pas seulement celle du panneau.</p>
+
+      <h3 data-i18n="fix.s3.checkTitle">Ce qu’il faut vérifier dans le panneau</h3>
+      <ul class="fix-checklist">
+        <li data-i18n="fix.s3.check1">La disponibilité de PHP 8.2, 8.3, 8.4 ou 8.5.</li>
+        <li data-i18n="fix.s3.check2">La date de la dernière mise à jour de PHP et l’existence d’un rétroportage pour votre branche.</li>
+        <li data-i18n="fix.s3.check3">Le redémarrage des workers PHP-FPM après un changement de version.</li>
+        <li data-i18n="fix.s3.check4">La possibilité de lancer une copie de recette et de tester le site avant le basculement.</li>
+      </ul>
+
+      <h3 data-i18n="fix.s3.templateTitle">Modèle de message au support</h3>
+      <pre class="fix-template" data-i18n="fix.s3.template">Bonjour,
+
+Mon hébergement utilise PHP [version]. Pouvez-vous confirmer que CVE-2026-109618 et CVE-2026-109619 sont corrigées dans le paquet PHP installé ?
+
+Si la version corrigée n’est pas disponible, pouvez-vous basculer le site sur PHP 8.2 ou plus récent, ou installer un paquet rétroporté ? Sinon, quelles mesures temporaires prenez-vous en charge ?
+
+Merci de m’envoyer la sortie de php -v et la version du paquet (dpkg -l | grep php ou rpm -q php-cli), ainsi que la date de la dernière mise à jour de PHP.
+
+Merci.</pre>
+      <p class="fix-note" data-i18n-html="fix.s3.templateNote">N’envoyez pas de mots de passe, de jetons ni de données clients. La version de PHP, le nom de l’offre et la sortie de <code>php -v</code> suffisent.</p>
+      <p data-i18n="fix.s3.noRootNote">Si l’hébergeur ne peut pas mettre PHP à jour, la seule voie fiable est de déplacer le site vers une plateforme avec une version prise en charge.</p>
+    </section>
+
+    <section class="info-section fix-section" id="recheck" aria-labelledby="s4-title">
+      <h2 id="s4-title" data-i18n="fix.s4.title">Scénario 4. Vérifiez à nouveau le résultat</h2>
+      <p class="section-intro" data-i18n="fix.s4.text">Après la mise à jour et le redémarrage, revenez à la page principale et relancez la vérification passive. Elle affiche la version de PHP divulguée, mais ne prouve pas que le correctif est installé : le verdict reste une estimation du risque.</p>
+      <p class="hero-cta">
+        <a class="btn btn--quiet" data-fix-home data-i18n="fix.s4.homeLink" href="../">Ouvrir la vérification</a>
+      </p>
+      <p class="fix-text" data-i18n-html="fix.s4.apiText">Pour l’automatisation : <code>POST /api/check</code> avec le corps <code>{"url":"https://example.com","lang":"fr"}</code>. L’API est décrite dans <a href="https://haveibeenphpned.github.io/llms-full.txt" rel="noopener">llms-full.txt</a>.</p>
+
+      <h3 data-i18n="fix.s4.checklistTitle">Liste de contrôle après la mise à jour</h3>
+      <ul class="fix-checklist">
+        <li data-i18n-html="fix.s4.check1"><code>php -v</code> et <code>php-fpm -v</code> affichent la nouvelle version.</li>
+        <li data-i18n-html="fix.s4.check2"><code>dpkg -l | grep php</code> (ou <code>rpm -q php-cli</code>) affiche le paquet corrigé.</li>
+        <li data-i18n="fix.s4.check3">Le service PHP-FPM et le serveur web ont été redémarrés.</li>
+        <li data-i18n-html="fix.s4.check4">La nouvelle vérification n’affiche ni <code>vulnerable</code> ni <code>likely_vulnerable</code>.</li>
+      </ul>
+    </section>
+
+    <section class="info-section fix-section fix-dont" aria-labelledby="dont-title">
+      <h2 id="dont-title" data-i18n="fix.dont.title">Ce qu’il ne faut PAS faire</h2>
+      <ul class="fix-checklist fix-checklist--dont">
+        <li data-i18n-html="fix.dont.1">Ne désactivez pas les contrôles de sécurité, le WAF, <code>open_basedir</code> ou d’autres protections pour rester compatible avec du vieux code. Cela augmente le risque sans corriger la CVE.</li>
+        <li data-i18n-html="fix.dont.2">N’installez pas PHP depuis des PPA au hasard ou des compilations trouvées sur un forum : vous ne pouvez pas vérifier que le paquet contient le correctif.</li>
+        <li data-i18n-html="fix.dont.3">Ne croyez pas qu’un changement de version dans le panneau redémarre tous les workers. Vérifiez <code>php -v</code> et redémarrez FPM.</li>
+        <li data-i18n="fix.dont.4">Ne laissez pas phpinfo ni les pages de diagnostic accessibles avant l’installation de la mise à jour.</li>
+        <li data-i18n="fix.dont.5">Ne repoussez pas la sortie de 5.x et 7.x : le rétroportage corrige ces deux CVE mais ne rend pas la branche prise en charge.</li>
+      </ul>
+    </section>
+
+    <section class="info-section" id="faq" aria-labelledby="fix-faq-title">
+      <h2 id="fix-faq-title" data-i18n="fix.faq.title">Questions fréquentes sur PHP ancien</h2>
+      <div class="faq-list">
+        <article class="faq-item">
+          <h3 data-i18n="fix.faq.q1">Mon PHP est en 8.1. N’y a-t-il vraiment pas de correctif officiel ?</h3>
+          <p data-i18n-html="fix.faq.a1">Oui, il n’y a pas de version amont de PHP pour 8.1. Mais Ubuntu 22.04 et Sury ont publié des paquets rétroportés : vérifiez la version du paquet, pas seulement celle de PHP.</p>
+        </article>
+        <article class="faq-item">
+          <h3 data-i18n="fix.faq.q2">Puis-je simplement passer à PHP 8.5 ?</h3>
+          <p data-i18n-html="fix.faq.a2">Oui, si l’application est compatible. 8.5 est la branche la plus récente, mais testez d’abord les extensions et le site sur un environnement de recette.</p>
+        </article>
+        <article class="faq-item">
+          <h3 data-i18n="fix.faq.q3">deb.sury.org est-il sûr ?</h3>
+          <p data-i18n-html="fix.faq.a3">C’est un dépôt tiers populaire, mais pas le canal de sécurité officiel de Debian/Ubuntu. Ajoutez-le uniquement depuis le README officiel, avec une sauvegarde et une vérification du changelog.</p>
+        </article>
+        <article class="faq-item">
+          <h3 data-i18n="fix.faq.q4">Comment savoir si le correctif est déjà installé ?</h3>
+          <p data-i18n-html="fix.faq.a4">Vérifiez la version du paquet et le changelog : <code>dpkg -l | grep php</code> et <code>apt-get changelog php8.1</code>. La version de l’en-tête <code>X-Powered-By</code> peut être ancienne.</p>
+        </article>
+        <article class="faq-item">
+          <h3 data-i18n="fix.faq.q5">Faut-il redémarrer le serveur après la mise à jour ?</h3>
+          <p data-i18n-html="fix.faq.a5">Oui. Redémarrez PHP-FPM et le serveur web, sinon certains workers gardent l’ancien code.</p>
+        </article>
+        <article class="faq-item">
+          <h3 data-i18n="fix.faq.q6">La vérification fonctionne-t-elle si PHP est masqué ?</h3>
+          <p data-i18n-html="fix.faq.a6">Non. Le verdict sera <code>unknown</code> : vérifiez la version sur le serveur avec <code>php -v</code>.</p>
+        </article>
+        <article class="faq-item">
+          <h3 data-i18n="fix.faq.q7">Que faire si mon hébergeur ne met pas PHP à jour ?</h3>
+          <p data-i18n-html="fix.faq.a7">Envoyez le modèle ci-dessus et demandez la version du paquet. S’il n’y a pas de correctif, déplacez le site vers une plateforme avec PHP 8.2 ou plus récent.</p>
+        </article>
+        <article class="faq-item">
+          <h3 data-i18n="fix.faq.q8">Les mesures temporaires suffisent-elles ?</h3>
+          <p data-i18n-html="fix.faq.a8">Elles réduisent le risque mais ne remplacent pas le correctif. Désactiver <code>session.upload_progress</code> et limiter les requêtes ne corrigent pas complètement la CVE.</p>
+        </article>
+        <article class="faq-item">
+          <h3 data-i18n="fix.faq.q9">Cela s’applique-t-il à PHP 5.6 ?</h3>
+          <p data-i18n-html="fix.faq.a9">Sury a aussi reconstruit 5.6 avec le rétroportage, mais la branche n’est plus prise en charge depuis longtemps. La production exige PHP 8.2 ou plus récent.</p>
+        </article>
+        <article class="faq-item">
+          <h3 data-i18n="fix.faq.q10">Où sont les sources primaires ?</h3>
+          <p data-i18n-html="fix.faq.a10">Les liens vers le Debian Security Tracker, USN-8948-1 et le changelog Sury se trouvent dans la section « Sources » en bas de page.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="info-section" id="sources" aria-labelledby="sources-title">
+      <h2 id="sources-title" data-i18n="fix.sources.title">Sources et vérification des faits</h2>
+      <p class="section-intro" data-i18n="fix.sources.intro">Les versions et les dates ont été vérifiées auprès des sources primaires. Si un paquet a été mis à jour après publication, fiez-vous à son changelog.</p>
+      <ul class="sources-list">
+        <li>
+          <a href="https://security-tracker.debian.org/tracker/CVE-2026-109618" rel="noopener">CVE-2026-109618</a>
+          <span data-i18n="fix.sources.debian1">Debian Security Tracker : php8.2 corrigé dans bookworm et php8.4 dans trixie.</span>
+        </li>
+        <li>
+          <a href="https://security-tracker.debian.org/tracker/CVE-2026-109619" rel="noopener">CVE-2026-109619</a>
+          <span data-i18n="fix.sources.debian2">Le même tracker pour la seconde CVE ; les correctifs coïncident.</span>
+        </li>
+        <li>
+          <a href="https://ubuntu.com/security/notices/USN-8948-1" rel="noopener">USN-8948-1</a>
+          <span data-i18n="fix.sources.usn">Ubuntu USN-8948-1 : php8.1 sur 22.04, php8.3 sur 24.04, php8.5 sur 26.04 et 26.10.</span>
+        </li>
+        <li>
+          <a href="https://packages.sury.org/php/pool/main/p/php8.1/php8.1_8.1.34-9+0~20261021.82+debian12~1.gbp4e430a.debian.tar.xz" rel="noopener">php8.1 8.1.34-9 · changelog</a>
+          <span data-i18n="fix.sources.sury81">Paquet source Sury 8.1.34-9 : debian/changelog indique « Backported from 8.2.35: [CVE-2026-109618, CVE-2026-109619] ».</span>
+        </li>
+        <li>
+          <a href="https://packages.sury.org/php/pool/main/p/php7.4/php7.4_7.4.33-31+0~20261021.121+debian12~1.gbpe9c428.debian.tar.xz" rel="noopener">php7.4 7.4.33-31 · changelog</a>
+          <span data-i18n="fix.sources.sury74">Paquets sources 7.4.33-31 et 8.0.30-25 : la même entrée de changelog.</span>
+        </li>
+        <li>
+          <a href="https://packages.sury.org/php/README.txt" rel="noopener">packages.sury.org/php/README.txt</a>
+          <span data-i18n="fix.sources.readme">README packages.sury.org : clé et commandes d’ajout du dépôt.</span>
+        </li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p data-i18n="fix.footer.disclaimer">Ceci est un guide pratique, pas un avis de sécurité officiel. Ne vérifiez que vos propres serveurs ou ceux pour lesquels vous avez une autorisation.</p>
+      <p class="footer-meta">CVE-2026-109618 · CVE-2026-109619</p>
+      <p class="footer-updated" data-i18n="fix.footer.updated">Mis à jour le 23 octobre 2026</p>
+    </div>
+  </footer>
+</body>
+</html>
