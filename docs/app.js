@@ -14,6 +14,13 @@
   const I18N = window.PHP2SHELL_I18N;
   if (!I18N) return;
 
+  // Страницы /en/ и /fr/ собраны статически: язык задаёт путь, а не query.
+  const PRERENDERED =
+    document.documentElement.getAttribute('data-prerendered') === 'true';
+
+  // Язык страницы по умолчанию — русский (`/`); у I18N.FALLBACK другой смысл.
+  const DEFAULT_PAGE_LANG = 'ru';
+
   const form = document.getElementById('check-form');
   const input = document.getElementById('target-url');
   const consent = document.getElementById('consent');
@@ -122,10 +129,34 @@
   }
 
   function updateUrlLang() {
+    if (PRERENDERED) return;
     const params = new URLSearchParams(location.search);
     params.set('lang', currentLang);
     const query = params.toString();
     history.replaceState(null, '', `${location.pathname}${query ? `?${query}` : ''}${location.hash}`);
+  }
+
+  /**
+   * Путь соседней языковой страницы: `/` для ru, `/en/` и `/fr/` для остальных.
+   * Работает и в подкаталоге (`/haveibeenphpned/en/` → `/haveibeenphpned/fr/`).
+   * @param {'ru'|'en'|'fr'} lang
+   */
+  function languagePath(lang) {
+    let base = location.pathname;
+    if (base.endsWith('/index.html')) base = base.slice(0, -'index.html'.length);
+    if (currentLang !== DEFAULT_PAGE_LANG) {
+      const suffix = `/${currentLang}/`;
+      if (base.endsWith(suffix)) base = base.slice(0, 1 - suffix.length);
+    }
+    if (!base.endsWith('/')) base += '/';
+    return base + (lang === DEFAULT_PAGE_LANG ? '' : `${lang}/`);
+  }
+
+  function navigateToLanguage(lang) {
+    const params = new URLSearchParams(location.search);
+    params.delete('lang');
+    const query = params.toString();
+    location.assign(`${languagePath(lang)}${query ? `?${query}` : ''}${location.hash}`);
   }
 
   /* ---------- утилиты ---------- */
@@ -735,7 +766,8 @@
   function shareUrl(target) {
     const params = new URLSearchParams();
     params.set('url', target);
-    params.set('lang', currentLang);
+    // На предрендеренных страницах язык уже в пути: ?lang= дал бы дубль.
+    if (!PRERENDERED) params.set('lang', currentLang);
     return `${location.origin}${location.pathname}?${params.toString()}`;
   }
 
@@ -787,6 +819,10 @@
   function setLanguage(lang) {
     const next = I18N.normalizeLang(lang);
     if (!next || next === currentLang) return;
+    if (PRERENDERED) {
+      navigateToLanguage(next);
+      return;
+    }
     currentLang = next;
     storeLanguage(currentLang);
     applyStaticLanguage();
@@ -867,14 +903,19 @@
     storedLang = null;
   }
 
-  currentLang = I18N.detectLang({
-    queryLang: params.get('lang'),
-    storedLang,
-    navigatorLang: navigator.language,
-  });
+  // Предрендеренная страница уже на нужном языке: путь важнее query,
+  // localStorage и настроек браузера, иначе /en/ показал бы русский текст.
+  const pageLang = PRERENDERED ? I18N.normalizeLang(document.documentElement.lang) : null;
+  currentLang =
+    pageLang ||
+    I18N.detectLang({
+      queryLang: params.get('lang'),
+      storedLang,
+      navigatorLang: navigator.language,
+    });
   applyStaticLanguage();
   // Язык всегда виден в ссылке — ею можно поделиться.
-  if (params.get('lang') !== currentLang) updateUrlLang();
+  if (!PRERENDERED && params.get('lang') !== currentLang) updateUrlLang();
 
   const fromLink = (params.get('url') || '').trim();
   if (fromLink) {

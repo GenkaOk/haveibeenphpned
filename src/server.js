@@ -153,7 +153,7 @@ function serveStatic(req, res, pathname, staticDir = STATIC_DIR, lang = 'en') {
   }
 
   const relative = pathname === '/' ? 'index.html' : pathname.replace(/^\/+/, '');
-  const filePath = path.resolve(staticDir, relative);
+  let filePath = path.resolve(staticDir, relative);
   if (!filePath.startsWith(staticDir + path.sep) && filePath !== staticDir) {
     sendJson(res, 403, { error: { code: 'forbidden', message: t(lang, 'server.api.forbiddenPath') } });
     return true;
@@ -164,6 +164,24 @@ function serveStatic(req, res, pathname, staticDir = STATIC_DIR, lang = 'en') {
     stat = fs.statSync(filePath);
   } catch {
     return false;
+  }
+
+  // `/en` → `/en/` (как GitHub Pages), `/en/` → `en/index.html`.
+  if (stat.isDirectory()) {
+    const base = pathname.replace(/\/+$/, '');
+    if (pathname !== base + '/') {
+      const queryAt = req.url.indexOf('?');
+      const query = queryAt === -1 ? '' : req.url.slice(queryAt);
+      res.writeHead(301, { location: base + '/' + query });
+      res.end();
+      return true;
+    }
+    filePath = path.join(filePath, 'index.html');
+    try {
+      stat = fs.statSync(filePath);
+    } catch {
+      return false;
+    }
   }
   if (!stat.isFile()) return false;
 

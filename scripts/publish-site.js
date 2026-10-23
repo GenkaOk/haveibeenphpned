@@ -50,12 +50,20 @@ function assertDocsFresh() {
   }
 
   for (const entry of fs.readdirSync(source, { withFileTypes: true })) {
-    if (!entry.isFile() || entry.name === 'config.js') continue;
+    // index.html и config.js генерируются: шаблон public/index.html
+    // намеренно отличается от prerendered docs/index.html.
+    if (!entry.isFile() || entry.name === 'config.js' || entry.name === 'index.html') continue;
     const from = path.join(source, entry.name);
     const to = path.join(target, entry.name);
     if (!fs.existsSync(to) || !fs.readFileSync(to).equals(fs.readFileSync(from))) {
       fail('docs/' + entry.name + ' отличается от public/' + entry.name +
         ' — запустите `npm run build:pages` и закоммитьте результат');
+    }
+  }
+
+  for (const page of ['index.html', 'en/index.html', 'fr/index.html', 'og-image.png']) {
+    if (!fs.existsSync(path.join(target, page))) {
+      fail('в docs/ нет ' + page + ' — запустите `npm run build:pages`');
     }
   }
 

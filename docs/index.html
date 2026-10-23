@@ -1,11 +1,35 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru" data-prerendered="true" data-site-lang="ru">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PHP2Shell</title>
-  <meta name="description" content="">
+  <title>PHP2Shell — проверка сервера на CVE-2026-109618</title>
+  <meta name="description" content="Пассивная проверка сервера на критические RCE в ядре PHP CVE-2026-109618 и CVE-2026-109619: один запрос, только публичные заголовки, без эксплуатации.">
   <meta name="color-scheme" content="light">
+  <link rel="canonical" href="https://haveibeenphpned.github.io/">
+  <link rel="alternate" hreflang="ru" href="https://haveibeenphpned.github.io/">
+  <link rel="alternate" hreflang="en" href="https://haveibeenphpned.github.io/en/">
+  <link rel="alternate" hreflang="fr" href="https://haveibeenphpned.github.io/fr/">
+  <link rel="alternate" hreflang="x-default" href="https://haveibeenphpned.github.io/">
+  <meta name="robots" content="index,follow">
+  <meta name="theme-color" content="#1c4ed8">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="PHP2Shell">
+  <meta property="og:title" content="PHP2Shell — проверка сервера на CVE-2026-109618">
+  <meta property="og:description" content="Пассивная проверка сервера на критические RCE в ядре PHP CVE-2026-109618 и CVE-2026-109619: один запрос, только публичные заголовки, без эксплуатации.">
+  <meta property="og:url" content="https://haveibeenphpned.github.io/">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta property="og:locale:alternate" content="fr_FR">
+  <meta property="og:image" content="https://haveibeenphpned.github.io/og-image.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="PHP2Shell — проверка сервера на CVE-2026-109618">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="PHP2Shell — проверка сервера на CVE-2026-109618">
+  <meta name="twitter:description" content="Пассивная проверка сервера на критические RCE в ядре PHP CVE-2026-109618 и CVE-2026-109619: один запрос, только публичные заголовки, без эксплуатации.">
+  <meta name="twitter:image" content="https://haveibeenphpned.github.io/og-image.png">
   <link rel="stylesheet" href="./styles.css">
   <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M12%202.5%204.5%205.6v5.7c0%204.6%203.1%208.6%207.5%2010.2%204.4-1.6%207.5-5.6%207.5-10.2V5.6L12%202.5Z'%20fill='%231c4ed8'/%3E%3C/svg%3E">
   <!-- config.js: API base (injected by the Pages workflow from API_BASE).
@@ -15,7 +39,7 @@
   <script src="./i18n.js"></script>
 </head>
 <body>
-  <a class="skip-link" href="#main" data-i18n="ui.skip"></a>
+  <a class="skip-link" href="#main" data-i18n="ui.skip">Перейти к содержимому</a>
 
   <header class="site-header">
     <div class="wrap header-inner">
@@ -27,12 +51,12 @@
                 stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         <span class="brand-name">PHP2Shell</span>
-        <span class="brand-note" data-i18n="ui.brandNote"></span>
+        <span class="brand-note" data-i18n="ui.brandNote">проверка серверов</span>
       </span>
 
       <div class="header-right">
         <span class="header-cves">CVE-2026-109618 · CVE-2026-109619</span>
-        <div id="lang-switch" class="lang-switch" role="group" data-i18n-aria-label="ui.lang.label">
+        <div id="lang-switch" class="lang-switch" role="group" aria-label="Язык интерфейса" data-i18n-aria-label="ui.lang.label">
           <button type="button" class="lang-btn" data-lang="ru" lang="ru" aria-pressed="false">RU</button>
           <button type="button" class="lang-btn" data-lang="en" lang="en" aria-pressed="false">EN</button>
           <button type="button" class="lang-btn" data-lang="fr" lang="fr" aria-pressed="false">FR</button>
@@ -43,37 +67,37 @@
 
   <main id="main" class="wrap">
     <section class="hero" aria-labelledby="hero-title">
-      <h1 id="hero-title" data-i18n="ui.hero.title"></h1>
-      <p class="lede" id="hero-lede"></p>
+      <h1 id="hero-title" data-i18n="ui.hero.title">Проверьте, уязвим ли ваш сервер к PHP2Shell</h1>
+      <p class="lede" id="hero-lede" data-i18n="ui.hero.lede">Две критические RCE в ядре PHP — CVE-2026-109618 и CVE-2026-109619. Исправлено 21 октября 2026 г. в версиях 8.5.12, 8.4.27, 8.3.36 и 8.2.35. Проверка пассивная: один запрос к сайту и только публичные заголовки.</p>
     </section>
 
     <section class="checker" aria-labelledby="checker-title">
-      <h2 id="checker-title" class="visually-hidden" data-i18n="ui.checker.title"></h2>
+      <h2 id="checker-title" class="visually-hidden" data-i18n="ui.checker.title">Проверка сервера</h2>
       <form id="check-form" novalidate>
         <div class="field">
-          <label for="target-url" data-i18n="ui.form.label"></label>
+          <label for="target-url" data-i18n="ui.form.label">Адрес сервера</label>
           <div class="input-row">
             <input id="target-url" name="url" type="text" inputmode="url" autocomplete="url"
                    spellcheck="false" autocapitalize="off"
-                   data-i18n-placeholder="ui.form.placeholder"
+                   placeholder="example.com или https://example.com" data-i18n-placeholder="ui.form.placeholder"
                    aria-describedby="url-hint form-error">
-            <button id="check-button" type="submit" disabled data-i18n="ui.form.submit"></button>
+            <button id="check-button" type="submit" disabled data-i18n="ui.form.submit">Проверить сервер</button>
           </div>
-          <p id="url-hint" class="hint" data-i18n="ui.form.hint"></p>
-          <p id="link-hint" class="hint hint--link" hidden data-i18n="ui.form.linkHint"></p>
+          <p id="url-hint" class="hint" data-i18n="ui.form.hint">Схему можно не указывать — подставим https://. Поддерживаются только http и https.</p>
+          <p id="link-hint" class="hint hint--link" hidden data-i18n="ui.form.linkHint">Адрес из ссылки. Подтвердите, что сервер ваш, и нажмите «Проверить сервер».</p>
         </div>
 
         <label class="consent" for="consent">
           <input id="consent" type="checkbox">
-          <span data-i18n="ui.form.consent"></span>
+          <span data-i18n="ui.form.consent">Я владею этим сервером или имею разрешение на проверку</span>
         </label>
 
         <div class="deep-opt">
           <label class="consent consent--deep" for="deep">
             <input id="deep" type="checkbox">
-            <span data-i18n="ui.form.deep"></span>
+            <span data-i18n="ui.form.deep">Глубокая проверка (deep scan)</span>
           </label>
-          <p id="deep-hint" class="hint" data-i18n="ui.form.deepHint"></p>
+          <p id="deep-hint" class="hint" data-i18n="ui.form.deepHint">До 10 последовательных запросов только по allowlist: /phpinfo.php, /info.php, /test.php, /php.php, /?phpinfo=1, /status?full, /ping и 3 пасхалки PHP. Только для серверов, которыми вы владеете.</p>
         </div>
 
         <p id="form-error" class="form-error" role="alert" hidden></p>
@@ -82,15 +106,15 @@
 
     <section id="result" class="result" data-state="idle" aria-live="polite" aria-busy="false">
       <div class="idle">
-        <h2 data-i18n="ui.idle.title"></h2>
+        <h2 data-i18n="ui.idle.title">Что показывает проверка</h2>
         <div class="idle-grid">
           <div class="idle-item">
             <svg class="idle-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M4 6.5h16M4 12h16M4 17.5h9" fill="none" stroke="currentColor"
                     stroke-width="1.8" stroke-linecap="round"/>
             </svg>
-            <h3 data-i18n="ui.idle.php.title"></h3>
-            <p data-i18n-html="ui.idle.php.text"></p>
+            <h3 data-i18n="ui.idle.php.title">Версия PHP</h3>
+            <p data-i18n-html="ui.idle.php.text">Заголовки <code>Server</code> и <code>X-Powered-By</code>, если сервер их раскрывает.</p>
           </div>
           <div class="idle-item">
             <svg class="idle-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -99,33 +123,92 @@
               <path d="M12 9.4v4.2M12 16.8v.1" fill="none" stroke="currentColor"
                     stroke-width="1.9" stroke-linecap="round"/>
             </svg>
-            <h3 data-i18n="ui.idle.cve.title"></h3>
-            <p data-i18n="ui.idle.cve.text"></p>
+            <h3 data-i18n="ui.idle.cve.title">Две CVE</h3>
+            <p data-i18n="ui.idle.cve.text">Статус по каждой: подвержен, вероятно подвержен, не подвержен или неизвестно.</p>
           </div>
           <div class="idle-item">
             <svg class="idle-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M12 4v10m0 0 4-4m-4 4-4-4M5 19h14" fill="none" stroke="currentColor"
                     stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            <h3 data-i18n="ui.idle.actions.title"></h3>
-            <p data-i18n="ui.idle.actions.text"></p>
+            <h3 data-i18n="ui.idle.actions.title">Что делать</h3>
+            <p data-i18n="ui.idle.actions.text">Целевые версии обновления и временные меры, которые снижают риск.</p>
           </div>
         </div>
-        <p class="idle-note" data-i18n="ui.idle.note"></p>
+        <p class="idle-note" data-i18n="ui.idle.note">Уязвимость не эксплуатируется: запросов к чужим портам и путям нет.</p>
       </div>
     </section>
 
     <div id="result-actions" class="result-actions" hidden>
-      <button id="check-again" class="btn btn--quiet" type="button" data-i18n="ui.actions.again"></button>
-      <button id="copy-link" class="btn btn--quiet" type="button" data-i18n="ui.actions.copy"></button>
+      <button id="check-again" class="btn btn--quiet" type="button" data-i18n="ui.actions.again">Проверить снова</button>
+      <button id="copy-link" class="btn btn--quiet" type="button" data-i18n="ui.actions.copy">Скопировать ссылку на результат</button>
       <span id="copy-status" class="copy-status" role="status" aria-live="polite"></span>
     </div>
+
+    <section class="info-section" aria-labelledby="how-title">
+      <h2 id="how-title" data-i18n="ui.how.title">Как мы проверяем</h2>
+      <ul class="how-list">
+        <li data-i18n="ui.how.1">Пассивно: один-два обычных GET/HEAD-запроса на корень сайта.</li>
+        <li data-i18n="ui.how.2">Без эксплуатации: уязвимость не запускается, состояние сервера не меняется.</li>
+        <li data-i18n="ui.how.3">Только публичное: заголовки Server, X-Powered-By, Set-Cookie и маркеры PHP в теле.</li>
+        <li data-i18n="ui.how.4">Без перебора: никаких портов, путей, словарей и фаззинга.</li>
+      </ul>
+    </section>
+
+    <section class="info-section" aria-labelledby="verdict-title">
+      <h2 id="verdict-title" data-i18n="ui.verdict.title">Что означает вердикт</h2>
+      <p class="section-intro" data-i18n="ui.verdict.intro">Проверка использует только то, что сервер раскрывает публично, поэтому вердикт — оценка риска, а не доказательство эксплуатации.</p>
+      <dl class="verdict-list">
+        <div class="verdict-item">
+          <dt data-i18n="ui.status.vulnerable">Подвержен</dt>
+          <dd data-i18n="ui.statusExplain.vulnerable">Раскрытая версия PHP ниже исправленной для обеих CVE или для одной из них.</dd>
+        </div>
+        <div class="verdict-item">
+          <dt data-i18n="ui.status.likely_vulnerable">Вероятно подвержен</dt>
+          <dd data-i18n="ui.statusExplain.likely_vulnerable">Версия относится к уязвимой ветке, но точный уровень патча подтвердить нельзя.</dd>
+        </div>
+        <div class="verdict-item">
+          <dt data-i18n="ui.status.not_vulnerable">Не подвержен</dt>
+          <dd data-i18n="ui.statusExplain.not_vulnerable">Раскрытая версия не ниже исправленной — обновление не требуется.</dd>
+        </div>
+        <div class="verdict-item">
+          <dt data-i18n="ui.status.not_applicable">PHP не обнаружен</dt>
+          <dd data-i18n="ui.statusExplain.not_applicable">Признаков PHP не найдено — эти CVE к серверу не относятся.</dd>
+        </div>
+        <div class="verdict-item">
+          <dt data-i18n="ui.status.unknown">Неизвестно</dt>
+          <dd data-i18n="ui.statusExplain.unknown">Версию PHP определить не удалось: нужен ручной аудит.</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="info-section" aria-labelledby="faq-title">
+      <h2 id="faq-title" data-i18n="ui.faq.title">Частые вопросы</h2>
+      <div class="faq-list">
+        <article class="faq-item">
+          <h3 data-i18n="ui.faq.q1">Проверка что-то меняет на сервере?</h3>
+          <p data-i18n="ui.faq.a1">Нет. Это пассивный запрос: мы читаем публичные заголовки и не запускаем уязвимый код.</p>
+        </article>
+        <article class="faq-item">
+          <h3 data-i18n="ui.faq.q2">Можно ли проверить чужой сервер?</h3>
+          <p data-i18n="ui.faq.a2">Только с разрешения владельца. Форма требует подтвердить, что сервер ваш или что вы имеете право его проверять.</p>
+        </article>
+        <article class="faq-item">
+          <h3 data-i18n="ui.faq.q3">Насколько точен результат?</h3>
+          <p data-i18n="ui.faq.a3">Вердикт основан на раскрытой версии PHP. Дистрибутивы часто переносят патчи в старые версии, поэтому возможны ложные срабатывания: сомнительный случай проверьте вручную.</p>
+        </article>
+        <article class="faq-item">
+          <h3 data-i18n="ui.faq.q4">Что делать, если сервер уязвим?</h3>
+          <p data-i18n="ui.faq.a4">Обновите PHP до 8.5.12, 8.4.27, 8.3.36 или 8.2.35 в зависимости от ветки. Если обновление невозможно, примените временные меры из отчёта.</p>
+        </article>
+      </div>
+    </section>
   </main>
 
   <footer class="site-footer">
     <div class="wrap">
-      <p data-i18n="ui.footer.disclaimer"></p>
-      <p class="footer-meta" data-i18n="ui.footer.meta"></p>
+      <p data-i18n="ui.footer.disclaimer">Отчёт основан на версии PHP, которую сервер раскрывает публично, и может быть неточным: сборки дистрибутивов обычно содержат бэкпорты патчей. Проверяйте только свои серверы или серверы, на проверку которых есть разрешение.</p>
+      <p class="footer-meta" data-i18n="ui.footer.meta">Пассивная проверка · без эксплуатации · без внешних зависимостей</p>
     </div>
   </footer>
 

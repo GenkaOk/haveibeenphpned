@@ -12,39 +12,14 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { execFileSync } = require('node:child_process');
 
-const ROOT = path.join(__dirname, '..');
+const { ROOT, PUBLIC_DIR, makeSandbox, runBuild, removeSandbox } = require('./helpers/build-pages');
+
 const RENDER_YAML = path.join(ROOT, 'render.yaml');
-const BUILD_SCRIPT = path.join(ROOT, 'scripts', 'build-pages.js');
-const PUBLIC_DIR = path.join(ROOT, 'public');
-const TMP = path.join(ROOT, 'tmp');
 
 function readRender() {
   assert.ok(fs.existsSync(RENDER_YAML), 'нет render.yaml в корне репозитория');
   return fs.readFileSync(RENDER_YAML, 'utf8');
-}
-
-/** Песочница с копией scripts/ и public/ — build-pages пишет docs/ рядом. */
-function makeSandbox() {
-  fs.mkdirSync(TMP, { recursive: true });
-  const dir = fs.mkdtempSync(path.join(TMP, 'build-pages-'));
-  fs.mkdirSync(path.join(dir, 'scripts'));
-  fs.copyFileSync(BUILD_SCRIPT, path.join(dir, 'scripts', 'build-pages.js'));
-  fs.cpSync(PUBLIC_DIR, path.join(dir, 'public'), { recursive: true });
-  return dir;
-}
-
-function runBuild(dir, apiBase) {
-  const env = { ...process.env };
-  if (apiBase === undefined) delete env.API_BASE;
-  else env.API_BASE = apiBase;
-
-  return execFileSync(process.execPath, [path.join(dir, 'scripts', 'build-pages.js')], {
-    cwd: dir,
-    env,
-    encoding: 'utf8',
-  });
 }
 
 test('render.yaml: web-сервис на Docker, free, health check и env', () => {
@@ -70,7 +45,7 @@ test('render.yaml: web-сервис на Docker, free, health check и env', () 
 test('build:pages: API_BASE попадает в docs/config.js', () => {
   const dir = makeSandbox();
   try {
-    const out = runBuild(dir, 'https://example.onrender.com');
+    const out = runBuild(dir, { API_BASE: 'https://example.onrender.com' });
     const config = fs.readFileSync(path.join(dir, 'docs', 'config.js'), 'utf8');
 
     assert.match(config, /window\.__PHP2SHELL_API__ = "https:\/\/example\.onrender\.com";/);
@@ -78,21 +53,21 @@ test('build:pages: API_BASE попадает в docs/config.js', () => {
     assert.ok(fs.existsSync(path.join(dir, 'docs', 'index.html')), 'docs/index.html не собран');
     assert.ok(fs.existsSync(path.join(dir, 'docs', '.nojekyll')), 'docs/.nojekyll не создан');
   } finally {
-    fs.rmSync(dir, { recursive: true, force: true });
+    removeSandbox(dir);
   }
 });
 
 test('build:pages: без API_BASE docs/config.js остаётся same-origin', () => {
   const dir = makeSandbox();
   try {
-    const out = runBuild(dir, undefined);
+    const out = runBuild(dir, { API_BASE: undefined });
     const config = fs.readFileSync(path.join(dir, 'docs', 'config.js'), 'utf8');
 
     assert.match(config, /window\.__PHP2SHELL_API__ = "";/);
     assert.doesNotMatch(config, /onrender\.com/);
     assert.match(out, /API_BASE пуст/);
   } finally {
-    fs.rmSync(dir, { recursive: true, force: true });
+    removeSandbox(dir);
   }
 });
 
@@ -108,10 +83,10 @@ test('deploy:site: npm-скрипт публикует в оба remote и пр�
   assert.match(script, /build:pages/, 'publish-site.js: должен подсказывать про сборку docs/');
 });
 
-test('docs/: собран целиком и совпадает с public/, кроме config.js', () => {
+test('docs/: ресурсы совпадают с public/, три страницы и og-image на месте', () => {
   const docs = path.join(ROOT, 'docs');
   for (const entry of fs.readdirSync(PUBLIC_DIR, { withFileTypes: true })) {
-    if (!entry.isFile()) continue;
+    if (!entry.isFile() || entry.name === 'index.html') continue;
     const source = path.join(PUBLIC_DIR, entry.name);
     const target = path.join(docs, entry.name);
     assert.ok(fs.existsSync(target), `в docs/ нет ${entry.name}`);
@@ -122,7 +97,30 @@ test('docs/: собран целиком и совпадает с public/, кр�
       `docs/${entry.name} отличается от public/${entry.name} — пересоберите docs/`,
     );
   }
+
+  for (const page of ['index.html', 'en/index.html', 'fr/index.html', 'og-image.png']) {
+    assert.ok(fs.existsSync(path.join(docs, page)), `в docs/ нет ${page}`);
+  }
   assert.ok(fs.existsSync(path.join(docs, '.nojekyll')), 'в docs/ нет .nojekyll');
+
+  // index.html генерируется заново и намеренно отличается от шаблона public/:
+  // в нём уже есть текст, title, canonical и OG.
+  const index = fs.readFileSync(path.join(docs, 'index.html'), 'utf8');
+  assert.match(index, /<html[^>]+lang="ru"/);
+  assert.match(index, /rel="canonical"/);
+  assert.doesNotMatch(index, /<h1[^>]*>\s*<\/h1>/);
+
+  // Языковые копии для локального server/Render лежат и в public/.
+  for (const lang of ['en', 'fr']) {
+    const from = path.join(PUBLIC_DIR, lang, 'index.html');
+    const to = path.join(docs, lang, 'index.html');
+    assert.ok(fs.existsSync(from), `в public/ нет ${lang}/index.html`);
+    assert.equal(
+      fs.readFileSync(to).equals(fs.readFileSync(from)),
+      true,
+      `docs/${lang}/index.html отличается от public/${lang}/index.html`,
+    );
+  }
 });
 
 test('docs/config.js: пустой API_BASE или https-адрес, без заглушки example', () => {

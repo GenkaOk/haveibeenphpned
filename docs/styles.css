@@ -426,6 +426,91 @@ a {
   font-size: 0.8125rem;
 }
 
+/* Статический текст для поиска: как проверяем, вердикты, FAQ */
+
+.info-section {
+  margin: 34px 0 8px;
+}
+
+.info-section h2 {
+  font-size: 1.25rem;
+  font-weight: 650;
+}
+
+.section-intro {
+  max-width: 70ch;
+  margin-top: 10px;
+  color: var(--muted);
+}
+
+.how-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 28px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.how-list li {
+  position: relative;
+  padding-left: 20px;
+  color: var(--muted);
+}
+
+.how-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.verdict-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0 0;
+}
+
+.verdict-item {
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.verdict-item dt {
+  font-size: 0.9375rem;
+  font-weight: 650;
+}
+
+.verdict-item dd {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.faq-list {
+  display: grid;
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.faq-item h3 {
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+.faq-item p {
+  max-width: 76ch;
+  margin-top: 5px;
+  color: var(--muted);
+}
+
 /* Загрузка */
 
 .loading {
@@ -995,6 +1080,15 @@ a {
   .idle-grid {
     grid-template-columns: 1fr;
     gap: 18px;
+  }
+
+  .how-list,
+  .verdict-list {
+    grid-template-columns: 1fr;
+  }
+
+  .info-section {
+    margin-top: 28px;
   }
 
   .verdict {

@@ -163,6 +163,37 @@ test('статика: index.html отдаётся с /', async () => {
   }
 });
 
+test('статика: /en/ и /fr/ отдают языковые страницы, /en → 301', async () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+
+  const dir = fs.mkdtempSync(path.join(__dirname, '.tmp-lang-'));
+  fs.mkdirSync(path.join(dir, 'en'));
+  fs.mkdirSync(path.join(dir, 'fr'));
+  fs.writeFileSync(path.join(dir, 'index.html'), '<!doctype html><title>ru</title>');
+  fs.writeFileSync(path.join(dir, 'en', 'index.html'), '<!doctype html><title>en</title>');
+  fs.writeFileSync(path.join(dir, 'fr', 'index.html'), '<!doctype html><title>fr</title>');
+
+  const app = await startApp({ staticDir: dir });
+  try {
+    for (const lang of ['en', 'fr']) {
+      const page = await fetch(`${app.url}/${lang}/`);
+      assert.equal(page.status, 200);
+      assert.match(await page.text(), new RegExp(`<title>${lang}</title>`));
+
+      const redirect = await fetch(`${app.url}/${lang}`, { redirect: 'manual' });
+      assert.equal(redirect.status, 301);
+      assert.equal(redirect.headers.get('location'), `/${lang}/`);
+    }
+
+    const missing = await fetch(`${app.url}/de/`);
+    assert.equal(missing.status, 404);
+  } finally {
+    await app.close();
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 /* ---------- CORS ---------- */
 
 const SITE_ORIGIN = 'https://genkaok.github.io';

@@ -20,9 +20,9 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   const DICTS = {
     ru: {
-      'meta.title': 'PHP2Shell — проверка сервера на CVE-2026-109618 и CVE-2026-109619',
+      'meta.title': 'PHP2Shell — проверка сервера на CVE-2026-109618',
       'meta.description':
-        'Пассивная проверка: подвержен ли ваш сервер критическим RCE в ядре PHP CVE-2026-109618 и CVE-2026-109619.',
+        'Пассивная проверка сервера на критические RCE в ядре PHP CVE-2026-109618 и CVE-2026-109619: один запрос, только публичные заголовки, без эксплуатации.',
 
       'ui.skip': 'Перейти к содержимому',
       'ui.brandNote': 'проверка серверов',
@@ -128,6 +128,34 @@
       'ui.how.3':
         'Только публичное: заголовки Server, X-Powered-By, Set-Cookie и маркеры PHP в теле.',
       'ui.how.4': 'Без перебора: никаких портов, путей, словарей и фаззинга.',
+
+      'ui.verdict.title': 'Что означает вердикт',
+      'ui.verdict.intro':
+        'Проверка использует только то, что сервер раскрывает публично, поэтому вердикт — оценка риска, а не доказательство эксплуатации.',
+      'ui.statusExplain.vulnerable':
+        'Раскрытая версия PHP ниже исправленной для обеих CVE или для одной из них.',
+      'ui.statusExplain.likely_vulnerable':
+        'Версия относится к уязвимой ветке, но точный уровень патча подтвердить нельзя.',
+      'ui.statusExplain.not_vulnerable':
+        'Раскрытая версия не ниже исправленной — обновление не требуется.',
+      'ui.statusExplain.not_applicable':
+        'Признаков PHP не найдено — эти CVE к серверу не относятся.',
+      'ui.statusExplain.unknown':
+        'Версию PHP определить не удалось: нужен ручной аудит.',
+
+      'ui.faq.title': 'Частые вопросы',
+      'ui.faq.q1': 'Проверка что-то меняет на сервере?',
+      'ui.faq.a1':
+        'Нет. Это пассивный запрос: мы читаем публичные заголовки и не запускаем уязвимый код.',
+      'ui.faq.q2': 'Можно ли проверить чужой сервер?',
+      'ui.faq.a2':
+        'Только с разрешения владельца. Форма требует подтвердить, что сервер ваш или что вы имеете право его проверять.',
+      'ui.faq.q3': 'Насколько точен результат?',
+      'ui.faq.a3':
+        'Вердикт основан на раскрытой версии PHP. Дистрибутивы часто переносят патчи в старые версии, поэтому возможны ложные срабатывания: сомнительный случай проверьте вручную.',
+      'ui.faq.q4': 'Что делать, если сервер уязвим?',
+      'ui.faq.a4':
+        'Обновите PHP до 8.5.12, 8.4.27, 8.3.36 или 8.2.35 в зависимости от ветки. Если обновление невозможно, примените временные меры из отчёта.',
 
       'ui.request.one': 'запрос',
       'ui.request.few': 'запроса',
@@ -447,9 +475,9 @@
     },
 
     en: {
-      'meta.title': 'PHP2Shell — check your server for CVE-2026-109618 and CVE-2026-109619',
+      'meta.title': 'PHP2Shell — check your server for CVE-2026-109618',
       'meta.description':
-        'Passive check: is your server affected by the critical PHP core RCEs CVE-2026-109618 and CVE-2026-109619?',
+        'Passive check for the critical PHP core RCEs CVE-2026-109618 and CVE-2026-109619: one request, public headers only, no exploitation and no scanning.',
 
       'ui.skip': 'Skip to content',
       'ui.brandNote': 'server checks',
@@ -557,6 +585,34 @@
       'ui.how.3':
         'Public data only: Server, X-Powered-By and Set-Cookie headers and PHP markers in the body.',
       'ui.how.4': 'No scanning: no ports, paths, wordlists or fuzzing.',
+
+      'ui.verdict.title': 'What the verdict means',
+      'ui.verdict.intro':
+        'The check uses only what the server discloses publicly, so the verdict is a risk estimate, not proof of exploitation.',
+      'ui.statusExplain.vulnerable':
+        'The disclosed PHP version is below the fixed release for both CVEs or for one of them.',
+      'ui.statusExplain.likely_vulnerable':
+        'The version belongs to an affected branch, but the exact patch level cannot be confirmed.',
+      'ui.statusExplain.not_vulnerable':
+        'The disclosed version is at or above the fixed release — no update is needed.',
+      'ui.statusExplain.not_applicable':
+        'No PHP signs were found — these CVEs do not apply to the server.',
+      'ui.statusExplain.unknown':
+        'The PHP version could not be determined: a manual audit is needed.',
+
+      'ui.faq.title': 'Frequently asked questions',
+      'ui.faq.q1': 'Does the check change anything on the server?',
+      'ui.faq.a1':
+        'No. It is a passive request: we read public headers and never run vulnerable code.',
+      'ui.faq.q2': 'Can I check a server that I do not own?',
+      'ui.faq.a2':
+        "Only with the owner's permission. The form requires you to confirm that the server is yours or that you are allowed to check it.",
+      'ui.faq.q3': 'How accurate is the result?',
+      'ui.faq.a3':
+        'The verdict is based on the disclosed PHP version. Distributions often backport patches, so false positives are possible: verify doubtful cases manually.',
+      'ui.faq.q4': 'What should I do if the server is vulnerable?',
+      'ui.faq.a4':
+        'Update PHP to 8.5.12, 8.4.27, 8.3.36 or 8.2.35 for your branch. If you cannot update, apply the temporary mitigations from the report.',
 
       'ui.request.one': 'request',
       'ui.request.few': 'requests',
@@ -875,9 +931,9 @@
     },
 
     fr: {
-      'meta.title': 'PHP2Shell — vérifier votre serveur pour CVE-2026-109618 et CVE-2026-109619',
+      'meta.title': 'PHP2Shell — vérifier votre serveur (CVE-2026-109618)',
       'meta.description':
-        'Vérification passive : votre serveur est-il vulnérable aux RCE critiques du cœur de PHP CVE-2026-109618 et CVE-2026-109619 ?',
+        'Contrôle passif des RCE critiques du cœur PHP CVE-2026-109618 et CVE-2026-109619 : une requête, en-têtes publics uniquement, sans exploitation ni balayage.',
 
       'ui.skip': 'Aller au contenu',
       'ui.brandNote': 'vérification de serveurs',
@@ -988,6 +1044,34 @@
       'ui.how.3':
         'Uniquement des données publiques : en-têtes Server, X-Powered-By, Set-Cookie et marqueurs PHP dans le corps.',
       'ui.how.4': 'Sans balayage : aucun port, chemin, dictionnaire ni fuzzing.',
+
+      'ui.verdict.title': 'Ce que signifie le verdict',
+      'ui.verdict.intro':
+        "Le contrôle n'utilise que ce que le serveur divulgue publiquement : le verdict est une estimation du risque, pas une preuve d'exploitation.",
+      'ui.statusExplain.vulnerable':
+        'La version de PHP divulguée est inférieure à la version corrigée pour les deux CVE ou pour l’une d’elles.',
+      'ui.statusExplain.likely_vulnerable':
+        'La version appartient à une branche affectée, mais le niveau de correctif exact ne peut pas être confirmé.',
+      'ui.statusExplain.not_vulnerable':
+        'La version divulguée est égale ou supérieure à la version corrigée — aucune mise à jour n’est nécessaire.',
+      'ui.statusExplain.not_applicable':
+        'Aucun signe de PHP n’a été trouvé — ces CVE ne concernent pas le serveur.',
+      'ui.statusExplain.unknown':
+        'La version de PHP n’a pas pu être déterminée : un audit manuel est nécessaire.',
+
+      'ui.faq.title': 'Questions fréquentes',
+      'ui.faq.q1': 'Le contrôle modifie-t-il quelque chose sur le serveur ?',
+      'ui.faq.a1':
+        'Non. Il s’agit d’une requête passive : nous lisons les en-têtes publics et n’exécutons jamais de code vulnérable.',
+      'ui.faq.q2': 'Puis-je vérifier un serveur qui ne m’appartient pas ?',
+      'ui.faq.a2':
+        "Uniquement avec l'accord du propriétaire. Le formulaire exige de confirmer que le serveur vous appartient ou que vous êtes autorisé à le vérifier.",
+      'ui.faq.q3': 'Quelle est la précision du résultat ?',
+      'ui.faq.a3':
+        'Le verdict repose sur la version de PHP divulguée. Les distributions rétroportent souvent des correctifs, des faux positifs sont donc possibles : vérifiez les cas douteux manuellement.',
+      'ui.faq.q4': 'Que faire si le serveur est vulnérable ?',
+      'ui.faq.a4':
+        'Mettez à jour PHP vers 8.5.12, 8.4.27, 8.3.36 ou 8.2.35 selon votre branche. Si la mise à jour est impossible, appliquez les mesures temporaires du rapport.',
 
       'ui.request.one': 'requête',
       'ui.request.few': 'requêtes',

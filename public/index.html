@@ -44,7 +44,7 @@
   <main id="main" class="wrap">
     <section class="hero" aria-labelledby="hero-title">
       <h1 id="hero-title" data-i18n="ui.hero.title"></h1>
-      <p class="lede" id="hero-lede"></p>
+      <p class="lede" id="hero-lede" data-i18n="ui.hero.lede"></p>
     </section>
 
     <section class="checker" aria-labelledby="checker-title">
@@ -120,6 +120,65 @@
       <button id="copy-link" class="btn btn--quiet" type="button" data-i18n="ui.actions.copy"></button>
       <span id="copy-status" class="copy-status" role="status" aria-live="polite"></span>
     </div>
+
+    <section class="info-section" aria-labelledby="how-title">
+      <h2 id="how-title" data-i18n="ui.how.title"></h2>
+      <ul class="how-list">
+        <li data-i18n="ui.how.1"></li>
+        <li data-i18n="ui.how.2"></li>
+        <li data-i18n="ui.how.3"></li>
+        <li data-i18n="ui.how.4"></li>
+      </ul>
+    </section>
+
+    <section class="info-section" aria-labelledby="verdict-title">
+      <h2 id="verdict-title" data-i18n="ui.verdict.title"></h2>
+      <p class="section-intro" data-i18n="ui.verdict.intro"></p>
+      <dl class="verdict-list">
+        <div class="verdict-item">
+          <dt data-i18n="ui.status.vulnerable"></dt>
+          <dd data-i18n="ui.statusExplain.vulnerable"></dd>
+        </div>
+        <div class="verdict-item">
+          <dt data-i18n="ui.status.likely_vulnerable"></dt>
+          <dd data-i18n="ui.statusExplain.likely_vulnerable"></dd>
+        </div>
+        <div class="verdict-item">
+          <dt data-i18n="ui.status.not_vulnerable"></dt>
+          <dd data-i18n="ui.statusExplain.not_vulnerable"></dd>
+        </div>
+        <div class="verdict-item">
+          <dt data-i18n="ui.status.not_applicable"></dt>
+          <dd data-i18n="ui.statusExplain.not_applicable"></dd>
+        </div>
+        <div class="verdict-item">
+          <dt data-i18n="ui.status.unknown"></dt>
+          <dd data-i18n="ui.statusExplain.unknown"></dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="info-section" aria-labelledby="faq-title">
+      <h2 id="faq-title" data-i18n="ui.faq.title"></h2>
+      <div class="faq-list">
+        <article class="faq-item">
+          <h3 data-i18n="ui.faq.q1"></h3>
+          <p data-i18n="ui.faq.a1"></p>
+        </article>
+        <article class="faq-item">
+          <h3 data-i18n="ui.faq.q2"></h3>
+          <p data-i18n="ui.faq.a2"></p>
+        </article>
+        <article class="faq-item">
+          <h3 data-i18n="ui.faq.q3"></h3>
+          <p data-i18n="ui.faq.a3"></p>
+        </article>
+        <article class="faq-item">
+          <h3 data-i18n="ui.faq.q4"></h3>
+          <p data-i18n="ui.faq.a4"></p>
+        </article>
+      </div>
+    </section>
   </main>
 
   <footer class="site-footer">

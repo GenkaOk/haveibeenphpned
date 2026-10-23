@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="fr" data-prerendered="true" data-site-lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PHP2Shell — vérifier votre serveur (CVE-2026-109618)</title>
+  <meta name="description" content="Contrôle passif des RCE critiques du cœur PHP CVE-2026-109618 et CVE-2026-109619 : une requête, en-têtes publics uniquement, sans exploitation ni balayage.">
+  <meta name="color-scheme" content="light">
+  <link rel="canonical" href="https://haveibeenphpned.github.io/fr/">
+  <link rel="alternate" hreflang="ru" href="https://haveibeenphpned.github.io/">
+  <link rel="alternate" hreflang="en" href="https://haveibeenphpned.github.io/en/">
+  <link rel="alternate" hreflang="fr" href="https://haveibeenphpned.github.io/fr/">
+  <link rel="alternate" hreflang="x-default" href="https://haveibeenphpned.github.io/">
+  <meta name="robots" content="index,follow">
+  <meta name="theme-color" content="#1c4ed8">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="PHP2Shell">
+  <meta property="og:title" content="PHP2Shell — vérifier votre serveur (CVE-2026-109618)">
+  <meta property="og:description" content="Contrôle passif des RCE critiques du cœur PHP CVE-2026-109618 et CVE-2026-109619 : une requête, en-têtes publics uniquement, sans exploitation ni balayage.">
+  <meta property="og:url" content="https://haveibeenphpned.github.io/fr/">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:locale:alternate" content="ru_RU">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta property="og:image" content="https://haveibeenphpned.github.io/og-image.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="PHP2Shell — vérifier votre serveur (CVE-2026-109618)">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="PHP2Shell — vérifier votre serveur (CVE-2026-109618)">
+  <meta name="twitter:description" content="Contrôle passif des RCE critiques du cœur PHP CVE-2026-109618 et CVE-2026-109619 : une requête, en-têtes publics uniquement, sans exploitation ni balayage.">
+  <meta name="twitter:image" content="https://haveibeenphpned.github.io/og-image.png">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M12%202.5%204.5%205.6v5.7c0%204.6%203.1%208.6%207.5%2010.2%204.4-1.6%207.5-5.6%207.5-10.2V5.6L12%202.5Z'%20fill='%231c4ed8'/%3E%3C/svg%3E">
+  <!-- config.js: API base (injected by the Pages workflow from API_BASE).
+       i18n.js is the single source of strings for ru/en/fr. Both load
+       synchronously so app.js sees them before the first paint. -->
+  <script src="../config.js"></script>
+  <script src="../i18n.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main" data-i18n="ui.skip">Aller au contenu</a>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <span class="brand">
+        <svg class="brand-mark" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M12 2.5 4.5 5.6v5.7c0 4.6 3.1 8.6 7.5 10.2 4.4-1.6 7.5-5.6 7.5-10.2V5.6L12 2.5Z"
+                fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+          <path d="m8.6 11.9 2.3 2.4 4.5-4.9" fill="none" stroke="currentColor"
+                stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="brand-name">PHP2Shell</span>
+        <span class="brand-note" data-i18n="ui.brandNote">vérification de serveurs</span>
+      </span>
+
+      <div class="header-right">
+        <span class="header-cves">CVE-2026-109618 · CVE-2026-109619</span>
+        <div id="lang-switch" class="lang-switch" role="group" aria-label="Langue de l&#39;interface" data-i18n-aria-label="ui.lang.label">
+          <button type="button" class="lang-btn" data-lang="ru" lang="ru" aria-pressed="false">RU</button>
+          <button type="button" class="lang-btn" data-lang="en" lang="en" aria-pressed="false">EN</button>
+          <button type="button" class="lang-btn" data-lang="fr" lang="fr" aria-pressed="false">FR</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+    <section class="hero" aria-labelledby="hero-title">
+      <h1 id="hero-title" data-i18n="ui.hero.title">Vérifiez si votre serveur est vulnérable à PHP2Shell</h1>
+      <p class="lede" id="hero-lede" data-i18n="ui.hero.lede">Deux RCE critiques dans le cœur de PHP — CVE-2026-109618 et CVE-2026-109619. Corrigées le 21 octobre 2026 dans les versions 8.5.12, 8.4.27, 8.3.36 et 8.2.35. La vérification est passive : une requête vers le site et uniquement les en-têtes publics.</p>
+    </section>
+
+    <section class="checker" aria-labelledby="checker-title">
+      <h2 id="checker-title" class="visually-hidden" data-i18n="ui.checker.title">Vérification du serveur</h2>
+      <form id="check-form" novalidate>
+        <div class="field">
+          <label for="target-url" data-i18n="ui.form.label">Adresse du serveur</label>
+          <div class="input-row">
+            <input id="target-url" name="url" type="text" inputmode="url" autocomplete="url"
+                   spellcheck="false" autocapitalize="off"
+                   placeholder="example.com ou https://example.com" data-i18n-placeholder="ui.form.placeholder"
+                   aria-describedby="url-hint form-error">
+            <button id="check-button" type="submit" disabled data-i18n="ui.form.submit">Vérifier le serveur</button>
+          </div>
+          <p id="url-hint" class="hint" data-i18n="ui.form.hint">Le schéma est facultatif — nous ajoutons https://. Seuls http et https sont pris en charge.</p>
+          <p id="link-hint" class="hint hint--link" hidden data-i18n="ui.form.linkHint">Adresse issue d&#39;un lien. Confirmez que le serveur est le vôtre, puis cliquez sur « Vérifier le serveur ».</p>
+        </div>
+
+        <label class="consent" for="consent">
+          <input id="consent" type="checkbox">
+          <span data-i18n="ui.form.consent">Je possède ce serveur ou j&#39;ai l&#39;autorisation de le vérifier</span>
+        </label>
+
+        <div class="deep-opt">
+          <label class="consent consent--deep" for="deep">
+            <input id="deep" type="checkbox">
+            <span data-i18n="ui.form.deep">Analyse approfondie (deep scan)</span>
+          </label>
+          <p id="deep-hint" class="hint" data-i18n="ui.form.deepHint">Jusqu’à 10 requêtes séquentielles, uniquement sur une liste blanche : /phpinfo.php, /info.php, /test.php, /php.php, /?phpinfo=1, /status?full, /ping et 3 easter eggs PHP. Uniquement pour les serveurs dont vous êtes propriétaire.</p>
+        </div>
+
+        <p id="form-error" class="form-error" role="alert" hidden></p>
+      </form>
+    </section>
+
+    <section id="result" class="result" data-state="idle" aria-live="polite" aria-busy="false">
+      <div class="idle">
+        <h2 data-i18n="ui.idle.title">Ce que montre la vérification</h2>
+        <div class="idle-grid">
+          <div class="idle-item">
+            <svg class="idle-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M4 6.5h16M4 12h16M4 17.5h9" fill="none" stroke="currentColor"
+                    stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            <h3 data-i18n="ui.idle.php.title">Version de PHP</h3>
+            <p data-i18n-html="ui.idle.php.text">Les en-têtes <code>Server</code> et <code>X-Powered-By</code>, si le serveur les expose.</p>
+          </div>
+          <div class="idle-item">
+            <svg class="idle-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12 3.2 21 19.2H3L12 3.2Z" fill="none" stroke="currentColor"
+                    stroke-width="1.8" stroke-linejoin="round"/>
+              <path d="M12 9.4v4.2M12 16.8v.1" fill="none" stroke="currentColor"
+                    stroke-width="1.9" stroke-linecap="round"/>
+            </svg>
+            <h3 data-i18n="ui.idle.cve.title">Deux CVE</h3>
+            <p data-i18n="ui.idle.cve.text">Statut pour chacune : vulnérable, probablement vulnérable, non vulnérable ou inconnu.</p>
+          </div>
+          <div class="idle-item">
+            <svg class="idle-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12 4v10m0 0 4-4m-4 4-4-4M5 19h14" fill="none" stroke="currentColor"
+                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <h3 data-i18n="ui.idle.actions.title">Que faire</h3>
+            <p data-i18n="ui.idle.actions.text">Versions cibles de mise à jour et mesures temporaires qui réduisent le risque.</p>
+          </div>
+        </div>
+        <p class="idle-note" data-i18n="ui.idle.note">La vulnérabilité n&#39;est pas exploitée : aucune requête vers d&#39;autres ports ou chemins.</p>
+      </div>
+    </section>
+
+    <div id="result-actions" class="result-actions" hidden>
+      <button id="check-again" class="btn btn--quiet" type="button" data-i18n="ui.actions.again">Vérifier à nouveau</button>
+      <button id="copy-link" class="btn btn--quiet" type="button" data-i18n="ui.actions.copy">Copier le lien du résultat</button>
+      <span id="copy-status" class="copy-status" role="status" aria-live="polite"></span>
+    </div>
+
+    <section class="info-section" aria-labelledby="how-title">
+      <h2 id="how-title" data-i18n="ui.how.title">Comment nous vérifions</h2>
+      <ul class="how-list">
+        <li data-i18n="ui.how.1">De façon passive : une ou deux requêtes GET/HEAD ordinaires vers la racine du site.</li>
+        <li data-i18n="ui.how.2">Sans exploitation : la vulnérabilité n&#39;est pas déclenchée, l&#39;état du serveur ne change pas.</li>
+        <li data-i18n="ui.how.3">Uniquement des données publiques : en-têtes Server, X-Powered-By, Set-Cookie et marqueurs PHP dans le corps.</li>
+        <li data-i18n="ui.how.4">Sans balayage : aucun port, chemin, dictionnaire ni fuzzing.</li>
+      </ul>
+    </section>
+
+    <section class="info-section" aria-labelledby="verdict-title">
+      <h2 id="verdict-title" data-i18n="ui.verdict.title">Ce que signifie le verdict</h2>
+      <p class="section-intro" data-i18n="ui.verdict.intro">Le contrôle n&#39;utilise que ce que le serveur divulgue publiquement : le verdict est une estimation du risque, pas une preuve d&#39;exploitation.</p>
+      <dl class="verdict-list">
+        <div class="verdict-item">
+          <dt data-i18n="ui.status.vulnerable">Vulnérable</dt>
+          <dd data-i18n="ui.statusExplain.vulnerable">La version de PHP divulguée est inférieure à la version corrigée pour les deux CVE ou pour l’une d’elles.</dd>
+        </div>
+        <div class="verdict-item">
+          <dt data-i18n="ui.status.likely_vulnerable">Probablement vulnérable</dt>
+          <dd data-i18n="ui.statusExplain.likely_vulnerable">La version appartient à une branche affectée, mais le niveau de correctif exact ne peut pas être confirmé.</dd>
+        </div>
+        <div class="verdict-item">
+          <dt data-i18n="ui.status.not_vulnerable">Non vulnérable</dt>
+          <dd data-i18n="ui.statusExplain.not_vulnerable">La version divulguée est égale ou supérieure à la version corrigée — aucune mise à jour n’est nécessaire.</dd>
+        </div>
+        <div class="verdict-item">
+          <dt data-i18n="ui.status.not_applicable">PHP non détecté</dt>
+          <dd data-i18n="ui.statusExplain.not_applicable">Aucun signe de PHP n’a été trouvé — ces CVE ne concernent pas le serveur.</dd>
+        </div>
+        <div class="verdict-item">
+          <dt data-i18n="ui.status.unknown">Inconnu</dt>
+          <dd data-i18n="ui.statusExplain.unknown">La version de PHP n’a pas pu être déterminée : un audit manuel est nécessaire.</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="info-section" aria-labelledby="faq-title">
+      <h2 id="faq-title" data-i18n="ui.faq.title">Questions fréquentes</h2>
+      <div class="faq-list">
+        <article class="faq-item">
+          <h3 data-i18n="ui.faq.q1">Le contrôle modifie-t-il quelque chose sur le serveur ?</h3>
+          <p data-i18n="ui.faq.a1">Non. Il s’agit d’une requête passive : nous lisons les en-têtes publics et n’exécutons jamais de code vulnérable.</p>
+        </article>
+        <article class="faq-item">
+          <h3 data-i18n="ui.faq.q2">Puis-je vérifier un serveur qui ne m’appartient pas ?</h3>
+          <p data-i18n="ui.faq.a2">Uniquement avec l&#39;accord du propriétaire. Le formulaire exige de confirmer que le serveur vous appartient ou que vous êtes autorisé à le vérifier.</p>
+        </article>
+        <article class="faq-item">
+          <h3 data-i18n="ui.faq.q3">Quelle est la précision du résultat ?</h3>
+          <p data-i18n="ui.faq.a3">Le verdict repose sur la version de PHP divulguée. Les distributions rétroportent souvent des correctifs, des faux positifs sont donc possibles : vérifiez les cas douteux manuellement.</p>
+        </article>
+        <article class="faq-item">
+          <h3 data-i18n="ui.faq.q4">Que faire si le serveur est vulnérable ?</h3>
+          <p data-i18n="ui.faq.a4">Mettez à jour PHP vers 8.5.12, 8.4.27, 8.3.36 ou 8.2.35 selon votre branche. Si la mise à jour est impossible, appliquez les mesures temporaires du rapport.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p data-i18n="ui.footer.disclaimer">Le rapport repose sur la version de PHP que le serveur expose publiquement et peut être inexact : les paquets des distributions contiennent souvent des correctifs rétroportés. Ne vérifiez que vos propres serveurs ou ceux pour lesquels vous avez une autorisation.</p>
+      <p class="footer-meta" data-i18n="ui.footer.meta">Vérification passive · sans exploitation · sans dépendances externes</p>
+    </div>
+  </footer>
+
+  <script src="../app.js" defer></script>
+</body>
+</html>
