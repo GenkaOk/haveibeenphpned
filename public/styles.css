@@ -1041,9 +1041,139 @@ a {
   font-size: 0.75rem;
 }
 
+/* Таблица веток, первоисточники и дата обновления (SEO-2) */
+
+.table-wrap {
+  margin-top: 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.versions-table {
+  width: 100%;
+  min-width: 480px;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.versions-table th {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.03em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.versions-table td {
+  padding: 11px 16px;
+  border-top: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+.versions-table tbody tr:first-child td {
+  border-top: 0;
+}
+
+.versions-table code {
+  font-family: var(--mono);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.versions-table__row--none td {
+  color: var(--muted);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 650;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.badge--fixed {
+  border-color: var(--safe-line);
+  background: var(--safe-bg);
+  color: var(--safe-ink);
+}
+
+.badge--none {
+  border-color: var(--vuln-line);
+  background: var(--vuln-bg);
+  color: var(--vuln-ink);
+}
+
+.sources-list {
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.sources-list li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  padding: 11px 16px;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.sources-list li + li {
+  border-top: 1px solid var(--line);
+}
+
+.sources-list a {
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  word-break: break-word;
+}
+
+.sources-list a:hover {
+  text-decoration: underline;
+}
+
+.footer-updated {
+  margin-top: 6px;
+  font-size: 0.75rem;
+}
+
+/* Десять вопросов читаются лучше в две колонки на широком экране. */
+@media (min-width: 900px) {
+  .faq-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 32px;
+    align-items: start;
+  }
+}
+
 /* Адаптив */
 
 @media (max-width: 760px) {
+  .versions-table {
+    min-width: 420px;
+  }
+
+  .versions-table th,
+  .versions-table td {
+    padding: 10px 12px;
+  }
   .wrap {
     padding: 0 16px;
   }

@@ -14,7 +14,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const I18N = require('../public/i18n.js');
-const { makeSandbox, runBuild, removeSandbox } = require('./helpers/build-pages');
+const { ROOT, makeSandbox, runBuild, removeSandbox } = require('./helpers/build-pages');
+
+const PUBLIC = path.join(ROOT, 'public');
+const SOURCE_DATE_EPOCH = '1761264000'; // 2025-10-24, фиксированный lastmod в тестах
 
 const SITE_URL = 'https://haveibeenphpned.github.io';
 const PAGES = [
@@ -39,6 +42,46 @@ function property(html, name) {
 
 function sha(buffer) {
   return crypto.createHash('sha256').update(buffer).digest('hex');
+}
+
+function jsonLd(html) {
+  const match = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(html);
+  assert.ok(match, 'на странице нет JSON-LD');
+  return JSON.parse(match[1].replace(/\\u003c/g, '<'));
+}
+
+function graph(html) {
+  const data = jsonLd(html);
+  assert.equal(data['@context'], 'https://schema.org');
+  return data['@graph'];
+}
+
+function nodeOf(html, type) {
+  const found = graph(html).filter((node) => node['@type'] === type);
+  assert.equal(found.length, 1, `ожидался ровно один ${type}`);
+  return found[0];
+}
+
+function visible(html, tag, key) {
+  const pattern = new RegExp(`<${tag}[^>]*data-i18n="${key}"[^>]*>([\\s\\S]*?)</${tag}>`, 'g');
+  return [...html.matchAll(pattern)].map((match) => match[1].trim());
+}
+
+/** Минимальная проверка well-formedness: теги сбалансированы, амперсанды экранированы. */
+function assertWellFormedXml(xml) {
+  assert.match(xml, /^<\?xml version="1\.0" encoding="UTF-8"\?>\n/);
+  assert.doesNotMatch(xml.replace(/&(?:amp|lt|gt|quot|apos|#\d+);/g, ''), /&/, 'неэкранированный &');
+  const stack = [];
+  for (const match of xml.matchAll(/<(\/?)([a-zA-Z][\w:-]*)([^>]*?)(\/?)>/g)) {
+    const [, closing, name, , selfClosing] = match;
+    if (selfClosing) continue;
+    if (closing) {
+      assert.equal(stack.pop(), name, `несбалансированный тег </${name}>`);
+    } else {
+      stack.push(name);
+    }
+  }
+  assert.deepEqual(stack, [], 'остались незакрытые теги');
 }
 
 test('i18n: title ≤ 60 символов, description 140–160 символов во всех языках', () => {
@@ -165,6 +208,219 @@ test('build:pages: повторная сборка даёт тот же HTML', (
     const after = PAGES.map((page) => sha(Buffer.from(readPage(dir, page))));
 
     assert.deepEqual(after, before, 'HTML страниц должен быть воспроизводимым');
+  } finally {
+    removeSandbox(dir);
+  }
+});
+
+test('robots.txt: обычные и AI-краулеры разрешены, sitemap указан', () => {
+  const robots = fs.readFileSync(path.join(PUBLIC, 'robots.txt'), 'utf8');
+  const agents = [
+    'GPTBot',
+    'OAI-SearchBot',
+    'ChatGPT-User',
+    'ClaudeBot',
+    'Claude-User',
+    'PerplexityBot',
+    'Google-Extended',
+    'CCBot',
+    'Bingbot',
+    'Applebot-Extended',
+  ];
+  for (const agent of agents) {
+    assert.match(
+      robots,
+      new RegExp(`User-agent: ${agent}\\nAllow: /`),
+      `robots.txt не разрешает ${agent}`,
+    );
+  }
+  assert.match(robots, /^User-agent: \*\nAllow: \/$/m, 'robots.txt не разрешает обычные краулеры');
+  assert.match(
+    robots,
+    /^Sitemap: https:\/\/haveibeenphpned\.github\.io\/sitemap\.xml$/m,
+    'robots.txt не указывает sitemap',
+  );
+});
+
+test('sitemap.xml: три URL, hreflang-альтернативы, lastmod, валидный XML', () => {
+  const dir = makeSandbox();
+  try {
+    const out = runBuild(dir, {
+      API_BASE: 'https://haveapi.example',
+      SITE_URL: undefined,
+      SOURCE_DATE_EPOCH,
+    });
+    assert.match(out, /sitemap\.xml/);
+
+    const docsXml = fs.readFileSync(path.join(dir, 'docs', 'sitemap.xml'), 'utf8');
+    const publicXml = fs.readFileSync(path.join(dir, 'public', 'sitemap.xml'), 'utf8');
+    assert.equal(publicXml, docsXml, 'public/ и docs/ должны получать одинаковый sitemap');
+
+    assert.match(docsXml, /<urlset\b[^>]*xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9"/);
+    assert.match(docsXml, /xmlns:xhtml="http:\/\/www\.w3\.org\/1999\/xhtml"/);
+    assertWellFormedXml(docsXml);
+
+    const locs = [...docsXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
+    assert.deepEqual(locs, [`${SITE_URL}/`, `${SITE_URL}/en/`, `${SITE_URL}/fr/`]);
+    assert.equal((docsXml.match(/<url>/g) || []).length, 3);
+    assert.equal((docsXml.match(/<xhtml:link /g) || []).length, 12, 'по 4 альтернативы на URL');
+
+    const lastmod = new Date(Number(SOURCE_DATE_EPOCH) * 1000).toISOString().slice(0, 10);
+    assert.equal((docsXml.match(new RegExp(`<lastmod>${lastmod}</lastmod>`, 'g')) || []).length, 3);
+
+    for (const [hreflang, href] of [
+      ['ru', `${SITE_URL}/`],
+      ['en', `${SITE_URL}/en/`],
+      ['fr', `${SITE_URL}/fr/`],
+      ['x-default', `${SITE_URL}/`],
+    ]) {
+      assert.ok(docsXml.includes(`hreflang="${hreflang}" href="${href}"`), `нет hreflang ${hreflang}`);
+    }
+  } finally {
+    removeSandbox(dir);
+  }
+});
+
+test('build:pages: robots.txt, sitemap.xml, llms.txt и llms-full.txt попадают в docs/', () => {
+  const dir = makeSandbox();
+  try {
+    runBuild(dir, { API_BASE: undefined, SITE_URL: undefined });
+    for (const file of ['robots.txt', 'sitemap.xml', 'llms.txt', 'llms-full.txt']) {
+      assert.ok(fs.existsSync(path.join(dir, 'docs', file)), `в docs/ нет ${file}`);
+      assert.ok(fs.existsSync(path.join(dir, 'public', file)), `в public/ нет ${file}`);
+    }
+  } finally {
+    removeSandbox(dir);
+  }
+});
+
+test('llms.txt: заголовок, сводка, 5–8 ссылок и ключевые факты', () => {
+  const short = fs.readFileSync(path.join(PUBLIC, 'llms.txt'), 'utf8');
+  assert.match(short, /^# PHP2Shell$/m);
+  assert.match(short, /^> .+\S/m, 'нет строки-описания в формате llmstxt.org');
+
+  const links = [...short.matchAll(/\]\((https?:\/\/[^)]+)\)/g)];
+  assert.ok(links.length >= 5 && links.length <= 8, `ссылок ${links.length}, нужно 5–8`);
+
+  for (const fact of ['CVE-2026-109618', 'CVE-2026-109619', '8.5.12', '8.4.27', '8.3.36', '8.2.35']) {
+    assert.ok(short.includes(fact), `llms.txt: нет ${fact}`);
+  }
+  assert.match(short, /passive/i);
+  assert.match(short, /free/i);
+});
+
+test('llms-full.txt: механика проверки, вердикты, API, ограничения и источники', () => {
+  const full = fs.readFileSync(path.join(PUBLIC, 'llms-full.txt'), 'utf8');
+  for (const source of ['GHSA-w8hw-w9fx-j79w', 'GHSA-6wmf-4rv5-p3rp', 'isc.sans.edu/diary/33440']) {
+    assert.ok(full.includes(source), `llms-full.txt: нет источника ${source}`);
+  }
+  for (const verdict of ['likely_vulnerable', 'not_vulnerable', 'not_applicable', 'unknown']) {
+    assert.ok(full.includes(verdict), `llms-full.txt: нет вердикта ${verdict}`);
+  }
+  assert.match(full, /POST \/api\/check/);
+  assert.match(full, /GET \/api\/health/);
+  assert.match(full, /8\.1, 8\.0, 7\.x, 5\.x/, 'нет списка веток без фиксов');
+  assert.match(full, /How to cite/i);
+});
+
+test('JSON-LD: WebApplication, Organization, FAQPage, HowTo, BreadcrumbList на трёх страницах', () => {
+  const dir = makeSandbox();
+  try {
+    runBuild(dir, { API_BASE: 'https://haveapi.example', SITE_URL: undefined });
+
+    for (const page of PAGES) {
+      const html = readPage(dir, page);
+      const canonical = SITE_URL + page.sitePath;
+      const types = graph(html).map((node) => node['@type']);
+      assert.deepEqual(types, [
+        'WebApplication',
+        'Organization',
+        'FAQPage',
+        'HowTo',
+        'BreadcrumbList',
+      ], `${page.file}: неполный JSON-LD`);
+
+      const app = nodeOf(html, 'WebApplication');
+      assert.equal(app.name, 'PHP2Shell');
+      assert.equal(app.url, canonical);
+      assert.equal(app.applicationCategory, 'SecurityApplication');
+      assert.equal(app.isAccessibleForFree, true);
+      assert.equal(app.inLanguage, page.lang);
+      assert.equal(app.offers['@type'], 'Offer');
+      assert.equal(app.offers.price, '0');
+      assert.equal(app.dateModified, '2026-10-23');
+
+      const org = nodeOf(html, 'Organization');
+      assert.equal(org.name, 'PHP2Shell');
+      assert.equal(org['@id'], `${SITE_URL}/#organization`);
+
+      // Вопросы FAQ в разметке совпадают с видимыми на странице.
+      const faq = nodeOf(html, 'FAQPage');
+      const visibleQuestions = visible(html, 'h3', 'ui\\.faq\\.q\\d+');
+      assert.equal(visibleQuestions.length, 10, `${page.file}: должно быть 10 вопросов FAQ`);
+      assert.equal(faq.mainEntity.length, visibleQuestions.length, `${page.file}: FAQPage ≠ видимый FAQ`);
+      faq.mainEntity.forEach((item, index) => {
+        assert.equal(item['@type'], 'Question');
+        assert.equal(item.name, visibleQuestions[index], `${page.file}: вопрос ${index + 1} расходится`);
+        assert.ok(item.acceptedAnswer.text.length > 20, `${page.file}: пустой ответ ${index + 1}`);
+      });
+
+      const howTo = nodeOf(html, 'HowTo');
+      assert.equal(howTo.step.length, visible(html, 'li', 'ui\\.how\\.\\d+').length);
+      assert.equal(howTo.step.length, 4);
+      howTo.step.forEach((step, index) => {
+        assert.equal(step['@type'], 'HowToStep');
+        assert.equal(step.position, index + 1);
+      });
+
+      const crumbs = nodeOf(html, 'BreadcrumbList');
+      assert.ok(crumbs.itemListElement.length >= 1);
+      assert.equal(crumbs.itemListElement[0].position, 1);
+      assert.equal(crumbs.itemListElement[0].item, `${SITE_URL}/`);
+      if (page.lang !== 'ru') {
+        assert.equal(crumbs.itemListElement.length, 2);
+        assert.equal(crumbs.itemListElement[1].item, canonical);
+      }
+    }
+  } finally {
+    removeSandbox(dir);
+  }
+});
+
+test('контент для цитирования: таблица веток, первоисточники и дата обновления', () => {
+  const dir = makeSandbox();
+  try {
+    runBuild(dir, { API_BASE: 'https://haveapi.example', SITE_URL: undefined });
+
+    for (const page of PAGES) {
+      const html = readPage(dir, page);
+
+      const rows = [...html.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/g)]
+        .map((match) => match[1])
+        .filter((row) => row.includes('<code>'));
+      assert.equal(rows.length, 5, `${page.file}: в таблице должно быть 5 строк веток`);
+
+      for (const version of ['8.5.12', '8.4.27', '8.3.36', '8.2.35']) {
+        assert.ok(html.includes(`<code>${version}</code>`), `${page.file}: нет версии ${version}`);
+      }
+
+      for (const source of [
+        'https://github.com/advisories/GHSA-w8hw-w9fx-j79w',
+        'https://github.com/advisories/GHSA-6wmf-4rv5-p3rp',
+        'https://isc.sans.edu/diary/33440',
+      ]) {
+        assert.ok(html.includes(`href="${source}"`), `${page.file}: нет ссылки ${source}`);
+      }
+
+      assert.ok(
+        visible(html, 'p', 'ui\\.footer\\.updated').length === 1,
+        `${page.file}: нет даты обновления`,
+      );
+      assert.ok(
+        /Обновлено|Updated|Mis à jour/.test(html),
+        `${page.file}: дата обновления не отрендерена`,
+      );
+    }
   } finally {
     removeSandbox(dir);
   }

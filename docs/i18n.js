@@ -156,6 +156,43 @@
       'ui.faq.q4': 'Что делать, если сервер уязвим?',
       'ui.faq.a4':
         'Обновите PHP до 8.5.12, 8.4.27, 8.3.36 или 8.2.35 в зависимости от ветки. Если обновление невозможно, примените временные меры из отчёта.',
+      'ui.faq.q5': 'Что такое CVE-2026-109618 и CVE-2026-109619?',
+      'ui.faq.a5':
+        'Это две критические RCE в ядре PHP с одинаковой оценкой 9.2: одна возникает после нехватки памяти, вторая — из-за устаревшего состояния воркера PHP-FPM между запросами.',
+      'ui.faq.q6': 'Какие версии PHP исправлены?',
+      'ui.faq.a6':
+        'Исправленные версии: 8.5.12, 8.4.27, 8.3.36 и 8.2.35. Ветки 8.1, 8.0, 7.x и 5.x фиксов не получили, поэтому в них уязвимы все версии.',
+      'ui.faq.q7': 'Что именно отправляет проверка?',
+      'ui.faq.a7':
+        'Один-два обычных GET- или HEAD-запроса на корень сайта. Проверка читает только публичные заголовки и не обращается к другим портам и путям.',
+      'ui.faq.q8': 'Сервис бесплатный?',
+      'ui.faq.a8':
+        'Да. Проверка бесплатная, регистрация не нужна, исходный код открыт на GitHub.',
+      'ui.faq.q9': 'Вы храните адреса, которые я проверяю?',
+      'ui.faq.a9':
+        'Нет. Базы данных и истории проверок нет. В лог API попадают только метод и путь запроса, а результат возвращается в браузер и не сохраняется.',
+      'ui.faq.q10': 'Что делать, если сайт скрывает версию PHP?',
+      'ui.faq.a10':
+        'Вердикт будет unknown: удалённо определить подверженность нельзя. Проверьте версию на самом сервере или обновите PHP до исправленной версии.',
+
+      'ui.versions.title': 'Уязвимые ветки и исправленные версии',
+      'ui.versions.intro':
+        'Исправления вышли 21 октября 2026 года. Версия ниже исправленной для своей ветки остаётся уязвимой.',
+      'ui.versions.branch': 'Ветка PHP',
+      'ui.versions.fixed': 'Исправленная версия',
+      'ui.versions.status': 'Статус',
+      'ui.versions.fixedStatus': 'исправлена',
+      'ui.versions.noneStatus': 'фикса нет',
+
+      'ui.sources.title': 'Первоисточники',
+      'ui.sources.intro':
+        'Сверяйте факты и версии исправлений с первоисточниками, а не только с этим сайтом.',
+      'ui.sources.ghsa1': 'GitHub Advisory по CVE-2026-109618: состояние после нехватки памяти.',
+      'ui.sources.ghsa2': 'GitHub Advisory по CVE-2026-109619: устаревшее состояние воркера PHP-FPM.',
+      'ui.sources.isc': 'SANS Internet Storm Center: разбор атак на ошибку в ядре PHP.',
+
+      'ui.footer.updated': 'Обновлено {updated}',
+      'ui.crumb.page': 'Проверка CVE-2026-109618 и CVE-2026-109619',
 
       'ui.request.one': 'запрос',
       'ui.request.few': 'запроса',
@@ -613,6 +650,43 @@
       'ui.faq.q4': 'What should I do if the server is vulnerable?',
       'ui.faq.a4':
         'Update PHP to 8.5.12, 8.4.27, 8.3.36 or 8.2.35 for your branch. If you cannot update, apply the temporary mitigations from the report.',
+      'ui.faq.q5': 'What are CVE-2026-109618 and CVE-2026-109619?',
+      'ui.faq.a5':
+        'They are two critical RCE flaws in the PHP core, both rated 9.2: one follows an out-of-memory error, the other comes from stale PHP-FPM worker state between requests.',
+      'ui.faq.q6': 'Which PHP versions are fixed?',
+      'ui.faq.a6':
+        'The fixed releases are 8.5.12, 8.4.27, 8.3.36 and 8.2.35. Branches 8.1, 8.0, 7.x and 5.x received no fix, so every version in them is vulnerable.',
+      'ui.faq.q7': 'What exactly does the check send?',
+      'ui.faq.a7':
+        'One or two ordinary GET or HEAD requests to the site root. The check reads public headers only and never touches other ports or paths.',
+      'ui.faq.q8': 'Is the service free?',
+      'ui.faq.a8':
+        'Yes. The check is free, needs no account, and the source code is open on GitHub.',
+      'ui.faq.q9': 'Do you store the addresses I check?',
+      'ui.faq.a9':
+        'No. There is no database and no check history. The API log records only the HTTP method and path, and the result goes back to your browser without being saved.',
+      'ui.faq.q10': 'What if the site hides its PHP version?',
+      'ui.faq.a10':
+        'The verdict is then unknown: exposure cannot be determined remotely. Check the version on the server itself or update PHP to a fixed release.',
+
+      'ui.versions.title': 'Affected branches and fixed versions',
+      'ui.versions.intro':
+        'The fixes shipped on 21 October 2026. A version below the fixed release for its branch stays vulnerable.',
+      'ui.versions.branch': 'PHP branch',
+      'ui.versions.fixed': 'Fixed version',
+      'ui.versions.status': 'Status',
+      'ui.versions.fixedStatus': 'fixed',
+      'ui.versions.noneStatus': 'no fix',
+
+      'ui.sources.title': 'Primary sources',
+      'ui.sources.intro':
+        'Verify the facts and fixed versions against the primary sources, not only against this site.',
+      'ui.sources.ghsa1': 'GitHub Advisory for CVE-2026-109618: state after an out-of-memory error.',
+      'ui.sources.ghsa2': 'GitHub Advisory for CVE-2026-109619: stale PHP-FPM worker state.',
+      'ui.sources.isc': 'SANS Internet Storm Center: analysis of attacks on the PHP core flaw.',
+
+      'ui.footer.updated': 'Updated {updated}',
+      'ui.crumb.page': 'CVE-2026-109618 and CVE-2026-109619 check',
 
       'ui.request.one': 'request',
       'ui.request.few': 'requests',
@@ -1072,6 +1146,46 @@
       'ui.faq.q4': 'Que faire si le serveur est vulnérable ?',
       'ui.faq.a4':
         'Mettez à jour PHP vers 8.5.12, 8.4.27, 8.3.36 ou 8.2.35 selon votre branche. Si la mise à jour est impossible, appliquez les mesures temporaires du rapport.',
+      'ui.faq.q5': 'Que sont CVE-2026-109618 et CVE-2026-109619 ?',
+      'ui.faq.a5':
+        'Deux failles RCE critiques dans le cœur de PHP, toutes deux notées 9.2 : l’une suit une erreur de mémoire insuffisante, l’autre vient d’un état obsolète du worker PHP-FPM entre deux requêtes.',
+      'ui.faq.q6': 'Quelles versions de PHP sont corrigées ?',
+      'ui.faq.a6':
+        'Les versions corrigées sont 8.5.12, 8.4.27, 8.3.36 et 8.2.35. Les branches 8.1, 8.0, 7.x et 5.x n’ont reçu aucun correctif : toutes leurs versions sont vulnérables.',
+      'ui.faq.q7': 'Qu’envoie exactement le contrôle ?',
+      'ui.faq.a7':
+        'Une ou deux requêtes GET ou HEAD ordinaires vers la racine du site. Le contrôle ne lit que les en-têtes publics et ne touche ni aux autres ports ni aux autres chemins.',
+      'ui.faq.q8': 'Le service est-il gratuit ?',
+      'ui.faq.a8':
+        'Oui. Le contrôle est gratuit, sans inscription, et le code source est ouvert sur GitHub.',
+      'ui.faq.q9': 'Conservez-vous les adresses que je vérifie ?',
+      'ui.faq.a9':
+        'Non. Il n’y a ni base de données ni historique. Le journal de l’API ne note que la méthode et le chemin HTTP, et le résultat revient dans votre navigateur sans être enregistré.',
+      'ui.faq.q10': 'Et si le site masque sa version de PHP ?',
+      'ui.faq.a10':
+        'Le verdict est alors unknown : l’exposition ne peut pas être déterminée à distance. Vérifiez la version sur le serveur lui-même ou mettez PHP à jour vers une version corrigée.',
+
+      'ui.versions.title': 'Branches vulnérables et versions corrigées',
+      'ui.versions.intro':
+        'Les correctifs sont sortis le 21 octobre 2026. Une version inférieure au correctif de sa branche reste vulnérable.',
+      'ui.versions.branch': 'Branche PHP',
+      'ui.versions.fixed': 'Version corrigée',
+      'ui.versions.status': 'Statut',
+      'ui.versions.fixedStatus': 'corrigée',
+      'ui.versions.noneStatus': 'pas de correctif',
+
+      'ui.sources.title': 'Sources primaires',
+      'ui.sources.intro':
+        'Vérifiez les faits et les versions corrigées dans les sources primaires, pas uniquement sur ce site.',
+      'ui.sources.ghsa1':
+        'GitHub Advisory pour CVE-2026-109618 : état après une erreur de mémoire insuffisante.',
+      'ui.sources.ghsa2':
+        'GitHub Advisory pour CVE-2026-109619 : état obsolète du worker PHP-FPM.',
+      'ui.sources.isc':
+        'SANS Internet Storm Center : analyse des attaques sur la faille du cœur de PHP.',
+
+      'ui.footer.updated': 'Mis à jour le {updated}',
+      'ui.crumb.page': 'Contrôle CVE-2026-109618 et CVE-2026-109619',
 
       'ui.request.one': 'requête',
       'ui.request.few': 'requêtes',

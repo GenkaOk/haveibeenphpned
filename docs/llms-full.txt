@@ -1,0 +1,160 @@
+# PHP2Shell — passive checker for CVE-2026-109618 and CVE-2026-109619
+
+> PHP2Shell is a free, open-source, passive checker for two critical remote-code-execution
+> vulnerabilities in the PHP core: CVE-2026-109618 and CVE-2026-109619. It reads only what a
+> server discloses publicly and never exploits the flaws.
+
+Site: https://haveibeenphpned.github.io/
+Source: https://github.com/GenkaOk/haveibeenphpned
+Languages: Russian (default) at `/`, English at `/en/`, French at `/fr/`
+Content updated: 2026-10-23
+Vulnerability fixes released: 2026-10-21
+
+## What the vulnerabilities are
+
+CVE-2026-109618 — incorrect state after an out-of-memory error.
+A failure while handling an out-of-memory condition leaves the PHP core in an incorrect state
+that can let an attacker take control of the process (remote code execution).
+
+CVE-2026-109619 — stale PHP-FPM worker state between requests.
+A PHP-FPM worker reuses state from a previous request, which can affect how the next request is
+handled and lead to remote code execution.
+
+Both CVEs have severity 9.2 (critical) and affect the PHP core itself, not a framework or an
+application. The same fixed versions address both.
+
+## Affected branches and fixed versions
+
+| PHP branch | Fixed version | Status |
+| --- | --- | --- |
+| 8.5 | 8.5.12 | fixed |
+| 8.4 | 8.4.27 | fixed |
+| 8.3 | 8.3.36 | fixed |
+| 8.2 | 8.2.35 | fixed |
+| 8.1, 8.0, 7.x, 5.x | — | no fix; every version is vulnerable |
+
+A version below the fixed release for its branch remains vulnerable. Versions at or above the
+fixed release are not vulnerable to these two CVEs.
+
+## How the check works
+
+1. The checker makes one or two ordinary GET or HEAD requests to the site root. Redirects are
+   followed within a small fixed budget.
+2. It reads only public data: the `Server`, `X-Powered-By` and `Set-Cookie` headers and PHP
+   markers in the response body.
+3. It compares the disclosed PHP version with the fixed release for that branch.
+4. It returns a verdict for each CVE with the evidence it used.
+
+The check is passive: it does not run the vulnerable code, does not change server state, and
+does not scan ports, paths, wordlists or parameters. It is not a penetration test and it does
+not prove that a server is exploitable.
+
+## Verdicts
+
+| Code | Meaning |
+| --- | --- |
+| `vulnerable` | The disclosed PHP version is below the fixed release for both CVEs or for one of them. |
+| `likely_vulnerable` | The version belongs to an affected branch, but the exact patch level cannot be confirmed. |
+| `not_vulnerable` | The disclosed version is at or above the fixed release — no update is needed. |
+| `not_applicable` | No PHP signs were found — these CVEs do not apply to the server. |
+| `unknown` | The PHP version could not be determined; a manual audit is needed. |
+
+Distribution builds often backport patches into older version numbers, so a disclosed version
+can be vulnerable or fixed independently of the upstream number. Doubtful cases need manual
+verification on the server.
+
+## API
+
+The browser UI uses a small JSON API. Both endpoints are CORS-restricted to the site's own
+origins and rate-limited to 10 checks per minute per IP.
+
+### GET /api/health
+
+```json
+{ "ok": true }
+```
+
+### POST /api/check
+
+Request body:
+
+```json
+{ "url": "https://example.com", "lang": "en", "deep": false }
+```
+
+`lang` is optional (`ru`, `en` or `fr`) and only affects human-readable strings. `deep` is
+optional and defaults to `false`; any value other than `true` keeps the passive mode.
+
+Example request:
+
+```bash
+curl -sS -X POST "https://<api-host>/api/check" \
+  -H "content-type: application/json" \
+  -d '{"url":"https://example.com","lang":"en"}'
+```
+
+Response (shortened):
+
+```json
+{
+  "target": "https://example.com",
+  "finalUrl": "https://example.com/",
+  "scannedAt": "2026-10-22T12:00:00.000Z",
+  "summary": {
+    "status": "vulnerable",
+    "label": "vulnerable",
+    "counts": { "vulnerable": 2, "likely_vulnerable": 0, "not_vulnerable": 0,
+                "not_applicable": 0, "unknown": 0 }
+  },
+  "php": { "detected": true, "version": "8.4.26", "versionSource": "header" },
+  "cves": [
+    { "id": "CVE-2026-109618", "severity": 9.2, "status": "vulnerable",
+      "advisory": "https://github.com/advisories/GHSA-w8hw-w9fx-j79w" }
+  ],
+  "recommendations": ["Update PHP to the fixed release for your branch"],
+  "disclaimer": "Passive check; the vulnerability is not exploited."
+}
+```
+
+Errors: `400` invalid URL or body, `403` target blocked by the SSRF guard, `415` body is not
+JSON, `429` rate limit (with `Retry-After`), `500` internal error.
+
+## Limitations
+
+- The verdict depends on what the server discloses. If the PHP version is hidden, the result is
+  `unknown`.
+- Reverse proxies, CDNs and custom `Server` headers can hide or distort the PHP version.
+- Linux distribution backports can make a disclosed version number unreliable.
+- Only these two CVEs are checked; the tool is not a general vulnerability scanner.
+- The check says nothing about whether a server is already compromised.
+
+## Privacy
+
+- No account, no cookies for tracking, no database of checked addresses.
+- The API log records only the HTTP method and path of the API request, not the target URL.
+- The report is returned to the browser and is not stored server-side.
+
+## Primary sources
+
+- GHSA-w8hw-w9fx-j79w — https://github.com/advisories/GHSA-w8hw-w9fx-j79w (CVE-2026-109618)
+- GHSA-6wmf-4rv5-p3rp — https://github.com/advisories/GHSA-6wmf-4rv5-p3rp (CVE-2026-109619)
+- SANS Internet Storm Center diary 33440 — https://isc.sans.edu/diary/33440
+
+## How to cite this site
+
+Suggested citation:
+
+> PHP2Shell. (2026). Passive checker for CVE-2026-109618 and CVE-2026-109619.
+> https://haveibeenphpned.github.io/ (accessed 2026-10-23).
+
+In running text, prefer: "PHP2Shell, a free passive checker for CVE-2026-109618 and
+CVE-2026-109619 (https://haveibeenphpned.github.io/)". When quoting the fixed versions, cite
+PHP 8.5.12, 8.4.27, 8.3.36 and 8.2.35, released on 2026-10-21.
+
+## Canonical URLs
+
+- https://haveibeenphpned.github.io/ — Russian (x-default)
+- https://haveibeenphpned.github.io/en/ — English
+- https://haveibeenphpned.github.io/fr/ — French
+- https://haveibeenphpned.github.io/llms.txt — short machine-readable summary
+- https://haveibeenphpned.github.io/sitemap.xml — sitemap with hreflang alternates

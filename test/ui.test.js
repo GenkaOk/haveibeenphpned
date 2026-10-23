@@ -119,6 +119,26 @@ test('npm start-сервер отдаёт страницу и ассеты', asy
   }
 });
 
+test('npm start-сервер отдаёт robots.txt, sitemap.xml и llms-файлы', async () => {
+  const app = await startApp();
+  try {
+    const expected = [
+      ['/robots.txt', /text\/plain/],
+      ['/sitemap.xml', /application\/xml/],
+      ['/llms.txt', /text\/plain/],
+      ['/llms-full.txt', /text\/plain/],
+    ];
+    for (const [pathname, type] of expected) {
+      const response = await fetch(app.url + pathname);
+      assert.equal(response.status, 200, `${pathname}: статус ${response.status}`);
+      assert.match(response.headers.get('content-type'), type, `${pathname}: content-type`);
+    }
+    assert.match(await (await fetch(`${app.url}/robots.txt`)).text(), /^Sitemap: /m);
+  } finally {
+    await app.close();
+  }
+});
+
 test('config.js: пустой адрес API = same-origin', () => {
   const source = fs.readFileSync(CONFIG, 'utf8');
   assert.doesNotThrow(() => execFileSync(process.execPath, ['--check', CONFIG], { stdio: 'pipe' }));

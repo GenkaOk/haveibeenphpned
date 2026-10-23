@@ -14,16 +14,22 @@
  *      `public/i18n.js`: `/` (ru, x-default), `/en/`, `/fr/`. Текст, title,
  *      description, canonical, hreflang, Open Graph и Twitter попадают в HTML
  *      до JS, поэтому краулер видит осмысленную страницу;
- *   4. генерирует `og-image.png` 1200×630 без внешних зависимостей;
- *   5. создаёт `docs/.nojekyll` — отключает Jekyll целиком (иначе GitHub
+ *   4. добавляет JSON-LD (`WebApplication`, `Organization`, `FAQPage`,
+ *      `HowTo`, `BreadcrumbList`) в `<head>` каждой страницы; вопросы и шаги
+ *      берутся из тех же строк `i18n.js`, что и видимый текст, поэтому
+ *      разметка не расходится с контентом;
+ *   5. генерирует `sitemap.xml` (три URL, hreflang-альтернативы, `lastmod`);
+ *   6. генерирует `og-image.png` 1200×630 без внешних зависимостей;
+ *   7. создаёт `docs/.nojekyll` — отключает Jekyll целиком (иначе GitHub
  *      пытается собрать SCSS и падает без `assets/css/style.scss`);
- *   6. пишет `docs/config.js` со значением `API_BASE` из окружения.
+ *   8. пишет `docs/config.js` со значением `API_BASE` из окружения.
  *
  * Запуск: `npm run build:pages` (`API_BASE` и `SITE_URL` необязательны).
  */
 
 const fs = require('node:fs');
 const path = require('node:path');
+const { execFileSync } = require('node:child_process');
 
 const { render: renderOgImage } = require('./og-image');
 
@@ -35,6 +41,7 @@ const I18N = require(path.join(source, 'i18n.js'));
 
 const SITE_URL = (process.env.SITE_URL || 'https://haveibeenphpned.github.io').replace(/\/+$/, '');
 const RELEASE_DATE = '2026-10-21';
+const UPDATED_DATE = '2026-10-23';
 
 const PAGES = [
   { lang: 'ru', dir: '', sitePath: '/', locale: 'ru_RU' },
@@ -56,7 +63,39 @@ function escapeHtml(value) {
 function text(lang, key) {
   return I18N.t(lang, key, {
     date: I18N.formatDate(RELEASE_DATE, lang, { dateStyle: 'long' }),
+    updated: I18N.formatDate(UPDATED_DATE, lang, { dateStyle: 'long' }),
   });
+}
+
+/** Текст без HTML-тегов — для JSON-LD и текстовых файлов. */
+function plain(value) {
+  return String(value)
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** Вопросы FAQ из словаря: видимый текст и JSON-LD берут одни и те же ключи. */
+function faqItems(lang) {
+  const items = [];
+  for (let index = 1; ; index += 1) {
+    if (!(`ui.faq.q${index}` in I18N.DICTS[lang])) break;
+    items.push({
+      question: plain(text(lang, `ui.faq.q${index}`)),
+      answer: plain(text(lang, `ui.faq.a${index}`)),
+    });
+  }
+  return items;
+}
+
+/** Шаги проверки из `ui.how.N` — те же строки, что видны в блоке «Как мы проверяем». */
+function howSteps(lang) {
+  const steps = [];
+  for (let index = 1; ; index += 1) {
+    if (!(`ui.how.${index}` in I18N.DICTS[lang])) break;
+    steps.push(plain(text(lang, `ui.how.${index}`)));
+  }
+  return steps;
 }
 
 /** Подставляет текст в элементы с data-i18n / data-i18n-html. */
@@ -117,6 +156,151 @@ function metaBlock(page) {
   return lines.join('\n  ');
 }
 
+/** JSON-LD одной страницы: одно приложение, организация, FAQ, HowTo, хлебные крошки. */
+function jsonLd(page) {
+  const canonical = SITE_URL + page.sitePath;
+  const organizationId = SITE_URL + '/#organization';
+  const description = plain(text(page.lang, 'meta.description'));
+
+  const breadcrumbs = [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: 'PHP2Shell',
+      item: SITE_URL + '/',
+    },
+  ];
+  if (page.dir) {
+    breadcrumbs.push({
+      '@type': 'ListItem',
+      position: 2,
+      name: plain(text(page.lang, 'ui.crumb.page')),
+      item: canonical,
+    });
+  }
+
+  const graph = [
+    {
+      '@type': 'WebApplication',
+      '@id': canonical + '#app',
+      name: 'PHP2Shell',
+      url: canonical,
+      description,
+      applicationCategory: 'SecurityApplication',
+      operatingSystem: 'Any',
+      browserRequirements: 'Requires JavaScript',
+      isAccessibleForFree: true,
+      inLanguage: page.lang,
+      dateModified: UPDATED_DATE,
+      image: SITE_URL + '/og-image.png',
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+      publisher: { '@id': organizationId },
+    },
+    {
+      '@type': 'Organization',
+      '@id': organizationId,
+      name: 'PHP2Shell',
+      url: SITE_URL + '/',
+      logo: { '@type': 'ImageObject', url: SITE_URL + '/og-image.png' },
+      sameAs: ['https://github.com/GenkaOk/haveibeenphpned'],
+    },
+    {
+      '@type': 'FAQPage',
+      '@id': canonical + '#faq',
+      inLanguage: page.lang,
+      mainEntity: faqItems(page.lang).map((item) => ({
+        '@type': 'Question',
+        name: item.question,
+        acceptedAnswer: { '@type': 'Answer', text: item.answer },
+      })),
+    },
+    {
+      '@type': 'HowTo',
+      '@id': canonical + '#howto',
+      name: plain(text(page.lang, 'ui.how.title')),
+      description,
+      inLanguage: page.lang,
+      step: howSteps(page.lang).map((step, index) => ({
+        '@type': 'HowToStep',
+        position: index + 1,
+        name: step,
+        text: step,
+      })),
+    },
+    {
+      '@type': 'BreadcrumbList',
+      '@id': canonical + '#breadcrumb',
+      itemListElement: breadcrumbs,
+    },
+  ];
+
+  // `\u003c` защищает от преждевременного закрытия <script>.
+  return JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replace(/</g, '\\u003c');
+}
+
+function escapeXml(value) {
+  return String(value).replace(/[&<>"']/g, (char) => ESCAPES[char]);
+}
+
+/**
+ * Дата последнего изменения по ISO: `SOURCE_DATE_EPOCH` → дата коммита →
+ * дата обновления контента (когда сборка идёт вне git-репозитория).
+ */
+function lastModifiedDate() {
+  const epoch = (process.env.SOURCE_DATE_EPOCH || '').trim();
+  if (/^\d+$/.test(epoch)) {
+    return new Date(Number(epoch) * 1000).toISOString().slice(0, 10);
+  }
+  try {
+    const out = execFileSync('git', ['-C', root, 'log', '-1', '--format=%cs'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(out)) return out;
+  } catch {
+    // Не git-репозиторий (например, песочница теста) — берём дату контента.
+  }
+  return UPDATED_DATE;
+}
+
+/** sitemap.xml: три URL, self-referencing hreflang-альтернативы и lastmod. */
+function sitemapXml() {
+  const lastmod = lastModifiedDate();
+  const alternates = [
+    ['ru', SITE_URL + '/'],
+    ['en', SITE_URL + '/en/'],
+    ['fr', SITE_URL + '/fr/'],
+    ['x-default', SITE_URL + '/'],
+  ];
+  const links = alternates
+    .map(
+      ([hreflang, href]) =>
+        `    <xhtml:link rel="alternate" hreflang="${hreflang}" href="${escapeXml(href)}"/>`,
+    )
+    .join('\n');
+
+  const urls = PAGES.map((page) => {
+    const loc = escapeXml(SITE_URL + page.sitePath);
+    return [
+      '  <url>',
+      `    <loc>${loc}</loc>`,
+      `    <lastmod>${lastmod}</lastmod>`,
+      '    <changefreq>weekly</changefreq>',
+      `    <priority>${page.dir ? '0.8' : '1.0'}</priority>`,
+      links,
+      '  </url>',
+    ].join('\n');
+  }).join('\n');
+
+  return [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
+    urls,
+    '</urlset>',
+    '',
+  ].join('\n');
+}
+
 /** Рендерит HTML одной языковой страницы из общего шаблона public/index.html. */
 function renderPage(template, page) {
   let html = template;
@@ -149,6 +333,12 @@ function renderPage(template, page) {
     html = html.replace(/(\s(?:src|href))="\.\/([^"]+)"/g, '$1="../$2"');
   }
 
+  // JSON-LD — последним в <head>: разметка описывает уже готовый видимый текст.
+  html = html.replace(
+    '</head>',
+    `  <script type="application/ld+json">${jsonLd(page)}</script>\n</head>`,
+  );
+
   return html;
 }
 
@@ -166,6 +356,12 @@ fs.cpSync(source, target, {
 });
 fs.writeFileSync(path.join(target, '.nojekyll'), '');
 fs.writeFileSync(path.join(target, 'og-image.png'), ogImage);
+
+// sitemap.xml генерируется и в public/ (его отдаёт `npm start`/Render),
+// и в docs/ (GitHub Pages). Содержимое одинаковое — тест deploy это проверяет.
+const sitemap = sitemapXml();
+fs.writeFileSync(path.join(target, 'sitemap.xml'), sitemap);
+fs.writeFileSync(path.join(source, 'sitemap.xml'), sitemap);
 
 // Держим public/og-image.png в репозитории как исходник: тесты и локальный
 // сервер не должны зависеть от запущенной сборки.
@@ -208,6 +404,10 @@ for (const required of [
   'i18n.js',
   'styles.css',
   '.nojekyll',
+  'robots.txt',
+  'sitemap.xml',
+  'llms.txt',
+  'llms-full.txt',
 ]) {
   if (!fs.existsSync(path.join(target, required))) {
     fail('после сборки нет docs/' + required);
@@ -215,6 +415,6 @@ for (const required of [
 }
 
 console.log(
-  'build:pages: docs/ готова — 3 страницы (/ , /en/, /fr/), og-image.png; API_BASE ' +
+  'build:pages: docs/ готова — 3 страницы (/ , /en/, /fr/) с JSON-LD, sitemap.xml, og-image.png; API_BASE ' +
     (base ? '= ' + base : 'пуст — same-origin'),
 );

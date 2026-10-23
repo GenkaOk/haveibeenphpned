@@ -1,0 +1,43 @@
+# https://haveibeenphpned.github.io — free passive check for
+# CVE-2026-109618 / CVE-2026-109619 in the PHP core.
+# The site is meant to be read and cited by search engines and AI crawlers.
+
+User-agent: *
+Allow: /
+
+# Search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# AI crawlers and answer engines
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+Sitemap: https://haveibeenphpned.github.io/sitemap.xml

@@ -1,0 +1,24 @@
+# PHP2Shell
+
+> PHP2Shell is a free, passive checker that tells you whether a web server is exposed to the critical PHP core remote-code-execution flaws CVE-2026-109618 and CVE-2026-109619.
+
+## Key facts
+
+- **CVEs:** CVE-2026-109618 (incorrect state after an out-of-memory error) and CVE-2026-109619 (stale PHP-FPM worker state between requests). Both are RCE in the PHP core, severity 9.2.
+- **Fixed versions:** PHP 8.5.12, 8.4.27, 8.3.36 and 8.2.35 (released 2026-10-21).
+- **No fix:** branches 8.1, 8.0, 7.x and 5.x received no fixed release, so every version in them is vulnerable.
+- **Passive:** one or two ordinary GET or HEAD requests to the site root. The check reads only public headers (Server, X-Powered-By, Set-Cookie) and PHP markers in the body. No exploitation, no port or path scanning.
+- **Free:** no account, no database of checked addresses, MIT-licensed source code.
+- **Verdicts:** `vulnerable`, `likely_vulnerable`, `not_vulnerable`, `not_applicable`, `unknown`.
+- **API:** `POST /api/check` with `{"url":"https://example.com","lang":"en"}` returns a JSON report; `GET /api/health` returns `{"ok":true}`.
+
+## Links
+
+- [PHP2Shell — Russian (default)](https://haveibeenphpned.github.io/): checker, 10-question FAQ, affected-branch table, primary sources.
+- [PHP2Shell — English](https://haveibeenphpned.github.io/en/): the same content in English.
+- [PHP2Shell — French](https://haveibeenphpned.github.io/fr/): the same content in French.
+- [Full machine-readable description](https://haveibeenphpned.github.io/llms-full.txt): how the check works, API examples, limitations, citation format.
+- [Sitemap](https://haveibeenphpned.github.io/sitemap.xml): all indexable URLs with hreflang alternates.
+- [Source code](https://github.com/GenkaOk/haveibeenphpned): Node.js implementation with no external dependencies.
+- [GHSA-w8hw-w9fx-j79w](https://github.com/advisories/GHSA-w8hw-w9fx-j79w): advisory for CVE-2026-109618.
+- [GHSA-6wmf-4rv5-p3rp](https://github.com/advisories/GHSA-6wmf-4rv5-p3rp): advisory for CVE-2026-109619.
