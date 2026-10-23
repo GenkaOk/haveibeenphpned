@@ -164,6 +164,42 @@ test('build:pages: три статические страницы решения
   }
 });
 
+test('fix: каждая версия в таблице Sury ссылается на свой debian/changelog', () => {
+  const dir = makeSandbox();
+  try {
+    runBuild(dir, { API_BASE: undefined, SITE_URL: undefined });
+
+    const changelogs = {
+      '8.5.12-1': 'php8.5/php8.5_8.5.12-1+0~20261021.27+debian12~1.gbp1a3e8a.debian.tar.xz',
+      '8.4.27-1': 'php8.4/php8.4_8.4.27-1+0~20261021.57+debian12~1.gbp7636b9.debian.tar.xz',
+      '8.3.36-1': 'php8.3/php8.3_8.3.36-1+0~20261021.88+debian12~1.gbp250f7c.debian.tar.xz',
+      '8.2.35-1': 'php8.2/php8.2_8.2.35-1+0~20261021.94+debian12~1.gbp8bff78.debian.tar.xz',
+      '8.1.34-9': 'php8.1/php8.1_8.1.34-9+0~20261021.82+debian12~1.gbp4e430a.debian.tar.xz',
+      '8.0.30-25': 'php8.0/php8.0_8.0.30-25+0~20261021.88+debian12~1.gbpabebea.debian.tar.xz',
+      '7.4.33-31': 'php7.4/php7.4_7.4.33-31+0~20261021.121+debian12~1.gbpe9c428.debian.tar.xz',
+      '7.3.33-35': 'php7.3/php7.3_7.3.33-35+0~20261021.144+debian12~1.gbpecf76f.debian.tar.xz',
+      '7.2.34-66': 'php7.2/php7.2_7.2.34-66+0~20261021.122+debian12~1.gbpe0bcd4.debian.tar.xz',
+      '7.1.33-81': 'php7.1/php7.1_7.1.33-81+0~20261022.128+debian12~1.gbpa88ccf.debian.tar.xz',
+      '7.0.33-93': 'php7.0/php7.0_7.0.33-93+0~20261022.119+debian12~1.gbp952195.debian.tar.xz',
+      '5.6.40-105': 'php5.6/php5.6_5.6.40-105+0~20261022.135+debian12~1.gbp37a17e.debian.tar.xz',
+    };
+
+    for (const page of PAGES) {
+      const html = readPage(dir, page);
+      for (const [version, file] of Object.entries(changelogs)) {
+        const link =
+          `<a href="https://packages.sury.org/php/pool/main/p/${file}" rel="noopener">` +
+          `${version}</a>`;
+        assert.ok(html.includes(link), `${page.file}: ${version} без ссылки на changelog`);
+      }
+      const total = (html.match(/packages\.sury\.org\/php\/pool\/main/g) || []).length;
+      assert.ok(total >= 12, `${page.file}: ссылок на changelog ${total}, ожидалось ≥ 12`);
+    }
+  } finally {
+    removeSandbox(dir);
+  }
+});
+
 test('fix JSON-LD: WebPage, Organization, FAQPage и BreadcrumbList', () => {
   const dir = makeSandbox();
   try {
