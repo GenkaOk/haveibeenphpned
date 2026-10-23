@@ -579,14 +579,9 @@ Debian/Ubuntu. После обновления выполните `php -v` и **
 сайт не создаёт ссылок «поделиться результатом», а вердикт и версия PHP не попадают
 в URL, `document.title`, OG-теги и внешние запросы.
 
-- `content/article-ru.md` — статья для Habr;
-- `content/article-en.md` — английская версия;
-- `content/one-pager-ru.md`, `content/one-pager-en.md` — «php2shell за 60 секунд»;
-- `content/launch-kit.md` — 13 готовых текстов (HN, Reddit, X, Telegram, LinkedIn,
-  Mastodon, dev.to, Habr, внутренний чат);
-- `content/utm.md` — UTM-таблица по каналам.
-
-Порядок публикации и правила приватности — в `content/README.md`.
+Статьи, одностраничники, launch kit и UTM-таблица — внутренние материалы. Они лежат
+локально в `tmp/content-drafts/` (папка в `.gitignore`) и в публичный репозиторий не попадают.
+Порядок публикации и правила приватности — в `README.md` внутри той же локальной папки.
 Перед публикацией: `npm test && npm run build:pages`.
 
 ## Структура
@@ -607,7 +602,7 @@ public/app.js           валидация, запрос к API, рендер, �
 public/i18n.js          единый словарь строк ru/en/fr (браузер и Node)
 public/config.js        адрес API (пустой = same-origin)
 public/.nojekyll        отключает Jekyll на GitHub Pages
-content/                статья RU/EN, одностраничники, launch kit и UTM-таблица
+tmp/content-drafts/     внутренние черновики контента, не в git (GHO-139)
 docs/                   сгенерированная копия public/ — её отдаёт Pages
 scripts/build-pages.js  сборка docs/ (npm run build:pages)
 cli.js                  CLI
