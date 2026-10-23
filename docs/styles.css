@@ -1060,64 +1060,39 @@ a {
   white-space: nowrap;
 }
 
-/* Карточки фактов: делятся как новостью, без вердикта */
+/* Блок «У меня старый PHP»: ведёт на страницу решения */
 
-.facts {
-  margin-top: 34px;
-}
-
-.fact-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 14px;
-  margin-top: 18px;
-}
-
-.fact-card {
+.decision-band {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 20px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 34px;
+  padding: 18px 22px;
   border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
   border-radius: var(--radius);
   background: var(--surface);
-  box-shadow: var(--shadow);
 }
 
-.fact-kicker {
-  color: var(--accent);
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.fact-quote {
-  margin: 0;
-  font-size: 1.125rem;
+.decision-copy h2 {
+  font-size: 1.0625rem;
   font-weight: 650;
-  letter-spacing: -0.01em;
-  line-height: 1.3;
-  text-wrap: balance;
 }
 
-.fact-card > p:not(.fact-kicker) {
-  flex: 1 1 auto;
+.decision-copy p {
+  max-width: 70ch;
+  margin-top: 4px;
   color: var(--muted);
   font-size: 0.9rem;
 }
 
-.fact-copy {
-  align-self: flex-start;
-  height: 36px;
-  margin-top: 4px;
-  font-size: 0.8125rem;
+.decision-action {
+  flex: none;
 }
 
-.facts-note {
-  margin-top: 10px;
-  color: var(--muted);
-  font-size: 0.75rem;
+.decision-action .fix-cta {
+  white-space: nowrap;
 }
 
 /* Нейтральный бейдж и приватность в футере */
@@ -1437,7 +1412,8 @@ a {
   }
 
   .warn-band,
-  .badge-box {
+  .badge-box,
+  .decision-band {
     align-items: stretch;
     flex-direction: column;
   }
@@ -1452,8 +1428,9 @@ a {
     width: 100%;
   }
 
-  .fact-grid {
-    grid-template-columns: 1fr;
+  .decision-action .fix-cta {
+    width: 100%;
+    justify-content: center;
   }
 }
 

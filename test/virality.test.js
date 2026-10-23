@@ -1,11 +1,11 @@
 'use strict';
 
 /**
- * Виральность без самодисклоуза: нейтральный чеклист и факты, а не вердикт.
+ * Виральность без самодисклоуза: нейтральный чеклист и ссылка на решение.
  *
  * Проверяем:
- *   - тексты «Предупредить команду» и факт-карточек на ru/en/fr;
- *   - отсутствие ссылки «поделиться результатом» и записи цели проверки в URL;
+ *   - тексты «Предупредить команду» и блока «У меня старый PHP» на ru/en/fr;
+ *   - отсутствие копирования фактов/версий и приёма цели проверки из URL;
  *   - отсутствие вердикта в meta/OG/JSON-LD сгенерированных страниц;
  *   - нейтральный бейдж и контент-артефакты (статья, одностраничник, launch kit, UTM).
  */
@@ -55,28 +55,34 @@ test('i18n: чеклист предупреждения на ru/en/fr содер
   assert.equal(texts.size, 3, 'чеклист должен отличаться для каждого языка');
 });
 
-test('i18n: три факт-карточки и бейдж есть на всех языках', () => {
+test('i18n: ссылка на страницу решения и бейдж есть на всех языках', () => {
   for (const lang of LANGS) {
-    for (const id of ['php81', 'versions', 'check60']) {
-      for (const suffix of ['title', 'text', 'copy', 'aria']) {
-        const key = `ui.facts.${id}.${suffix}`;
-        assert.ok(I18N.DICTS[lang][key], `${lang}: нет ключа ${key}`);
-      }
+    for (const key of ['ui.decision.title', 'ui.decision.intro', 'ui.decision.link', 'ui.decision.aria']) {
+      assert.ok(I18N.DICTS[lang][key], `${lang}: нет ключа ${key}`);
     }
     assert.ok(I18N.DICTS[lang]['ui.badge.copy']);
     assert.ok(I18N.DICTS[lang]['ui.privacy.note']);
+
+    // Механика «поделиться фактами» удалена вместе со строками (GHO-142).
+    const leftovers = Object.keys(I18N.DICTS[lang]).filter((key) => key.startsWith('ui.facts'));
+    assert.deepEqual(leftovers, [], `${lang}: остались строки ${leftovers.join(', ')}`);
   }
 });
 
-test('index.html: кнопка предупреждения, три карточки и нейтральный бейдж', () => {
+test('index.html: кнопка предупреждения, ссылка на решение и нейтральный бейдж', () => {
   const html = fs.readFileSync(INDEX, 'utf8');
 
   assert.match(html, /id="warn-team"/);
   assert.match(html, /data-i18n="ui\.actions\.warn"/);
   assert.match(html, /data-i18n-aria-label="ui\.actions\.warnAria"/);
 
-  const facts = [...html.matchAll(/data-copy-fact="([^"]+)"/g)].map((match) => match[1]);
-  assert.deepEqual(facts.sort(), ['check60', 'php81', 'versions']);
+  assert.match(html, /id="decision"/);
+  assert.match(html, /data-i18n="ui\.decision\.link"/);
+  assert.match(html, /data-i18n-aria-label="ui\.decision\.aria"/);
+  assert.match(html, /<a[^>]*\shref="\.\/fix\/"[^>]*\sdata-fix-link/);
+  // Копирование таблицы версий и фактов убрано.
+  assert.doesNotMatch(html, /data-copy-fact/);
+  assert.doesNotMatch(html, /ui\.facts\./);
 
   assert.match(html, /class="php2shell-badge">Checked with PHP2Shell</);
   assert.match(
@@ -85,7 +91,7 @@ test('index.html: кнопка предупреждения, три карточ
   );
   assert.match(html, /id="copy-badge"/);
 
-  for (const id of ['warn-status', 'facts-status', 'badge-status']) {
+  for (const id of ['warn-status', 'badge-status']) {
     assert.match(html, new RegExp(`id="${id}"[^>]*role="status"`), `нет статуса ${id}`);
   }
 });
@@ -119,9 +125,10 @@ test('app.js: результат не пишется в URL, историю и �
 
   // Новые механики на месте.
   assert.match(source, /ui\.warn\.text/);
-  assert.match(source, /data-copy-fact/);
+  assert.match(source, /data-fix-link/);
   assert.match(source, /badge-markdown/);
-  assert.match(source, /utm_source/);
+  // Копирования фактов и таблицы версий больше нет.
+  assert.doesNotMatch(source, /data-copy-fact|ui\.facts\./);
 });
 
 test('app.js и index.html: нет live-счётчика проверок', () => {
@@ -164,11 +171,12 @@ test('build:pages: вердикт не попадает в title, meta, OG и JS
 test('CSS: мобильная раскладка, видимый фокус и aria-стили для новых блоков', () => {
   const css = fs.readFileSync(CSS, 'utf8');
   assert.match(css, /:focus-visible/);
-  assert.match(css, /\.fact-grid/);
+  assert.match(css, /\.decision-band/);
   assert.match(css, /\.warn-band/);
   assert.match(css, /\.badge-box/);
   assert.match(css, /@media \(max-width: 760px\)/);
-  assert.match(css, /\.fact-grid\s*\{\s*grid-template-columns: 1fr;/);
+  assert.match(css, /\.decision-action \.fix-cta\s*\{[^}]*width: 100%/);
+  assert.doesNotMatch(css, /\.fact-/);
   assert.match(css, /\.btn--quiet/);
 });
 

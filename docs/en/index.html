@@ -158,34 +158,15 @@
       <button id="check-again" class="btn btn--quiet" type="button" data-i18n="ui.actions.again">Check again</button>
     </div>
 
-    <section id="facts" class="info-section facts" aria-labelledby="facts-title">
-      <h2 id="facts-title" data-i18n="ui.facts.title">Share facts, not results</h2>
-      <p class="section-intro" data-i18n="ui.facts.intro">These cards contain no data about your server. You can publish them as news.</p>
-      <div class="fact-grid">
-        <article class="fact-card">
-          <p class="fact-kicker" data-i18n="ui.facts.kicker">Fact</p>
-          <blockquote class="fact-quote" data-i18n="ui.facts.php81.title">PHP 8.1: no official fix</blockquote>
-          <p data-i18n="ui.facts.php81.text">There will be no official PHP release for 8.1, 8.0, 7.x and 5.x. But distributions and Sury publish backported packages: check the package version before you treat the server as vulnerable.</p>
-          <button class="btn btn--quiet fact-copy" type="button" data-copy-fact="php81"
-                  data-i18n="ui.facts.php81.copy" aria-label="Copy the fact: PHP 8.1 has no official fix" data-i18n-aria-label="ui.facts.php81.aria">Copy the PHP 8.1 fact</button>
-        </article>
-        <article class="fact-card">
-          <p class="fact-kicker" data-i18n="ui.facts.kicker">Fact</p>
-          <blockquote class="fact-quote" data-i18n="ui.facts.versions.title">Fixed versions</blockquote>
-          <p data-i18n="ui.facts.versions.text">8.5.12 · 8.4.27 · 8.3.36 · 8.2.35 — upgrade to the fixed release for your branch or newer. Branches below 8.2 will not get a fix.</p>
-          <button class="btn btn--quiet fact-copy" type="button" data-copy-fact="versions"
-                  data-i18n="ui.facts.versions.copy" aria-label="Copy the fact: fixed php2shell versions" data-i18n-aria-label="ui.facts.versions.aria">Copy the versions</button>
-        </article>
-        <article class="fact-card">
-          <p class="fact-kicker" data-i18n="ui.facts.kicker">Fact</p>
-          <blockquote class="fact-quote" data-i18n="ui.facts.check60.title">Check your PHP version in 60 seconds</blockquote>
-          <p data-i18n="ui.facts.check60.text">Run php -v. If the branch is 8.2–8.5 and the version is below the fixed release, upgrade. Only the server itself can show the exact version.</p>
-          <button class="btn btn--quiet fact-copy" type="button" data-copy-fact="check60"
-                  data-i18n="ui.facts.check60.copy" aria-label="Copy the fact: how to check the PHP version in 60 seconds" data-i18n-aria-label="ui.facts.check60.aria">Copy the check</button>
-        </article>
+    <section id="decision" class="decision-band" aria-labelledby="decision-title">
+      <div class="decision-copy">
+        <h2 id="decision-title" data-i18n="ui.decision.title">I’m stuck on old PHP</h2>
+        <p data-i18n="ui.decision.intro">A step-by-step guide for branches 8.1 and older: upgrades, Sury packages, managed hosting and a re-check. No data about your server.</p>
       </div>
-      <p id="facts-status" class="copy-status" role="status" aria-live="polite"></p>
-      <p class="facts-note" data-i18n="ui.facts.shareNote">Only the fact text and the tool link are copied.</p>
+      <div class="decision-action">
+        <a class="fix-cta" data-fix-link
+           data-i18n="ui.decision.link" aria-label="What to do about old PHP — open the fix page" data-i18n-aria-label="ui.decision.aria" href="./fix/">What to do</a>
+      </div>
     </section>
 
     <section class="info-section" aria-labelledby="how-title">

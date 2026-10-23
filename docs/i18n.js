@@ -72,29 +72,11 @@
         'Пассивная проверка версии: https://haveibeenphpned.github.io/?utm_source=warning&utm_medium=copy&utm_campaign=php2shell\n' +
         'Инструмент не эксплуатирует уязвимость и не публикует данные о сервере.',
 
-      'ui.facts.title': 'Поделитесь фактами, а не результатом',
-      'ui.facts.intro':
-        'Эти карточки не содержат данных о вашем сервере. Их можно публиковать как новость.',
-      'ui.facts.kicker': 'Факт',
-      'ui.facts.php81.title': 'PHP 8.1: официального фикса нет',
-      'ui.facts.php81.text':
-        'Официального релиза PHP для 8.1, 8.0, 7.x и 5.x не будет. Но дистрибутивы и Sury выпускают пакеты с бэкпортом: проверьте версию пакета, прежде чем считать сервер уязвимым.',
-      'ui.facts.php81.copy': 'Скопировать факт о PHP 8.1',
-      'ui.facts.php81.aria': 'Скопировать факт: у PHP 8.1 нет официального фикса',
-      'ui.facts.versions.title': 'Исправленные версии',
-      'ui.facts.versions.text':
-        '8.5.12 · 8.4.27 · 8.3.36 · 8.2.35 — обновитесь до версии своей ветки или выше. Ветки ниже 8.2 исправлений не получат.',
-      'ui.facts.versions.copy': 'Скопировать версии',
-      'ui.facts.versions.aria': 'Скопировать факт: исправленные версии php2shell',
-      'ui.facts.check60.title': 'Проверьте версию PHP за 60 секунд',
-      'ui.facts.check60.text':
-        'Выполните php -v. Если ветка 8.2–8.5 и версия ниже исправленной, обновитесь. Точную версию покажет только сам сервер.',
-      'ui.facts.check60.copy': 'Скопировать инструкцию',
-      'ui.facts.check60.aria':
-        'Скопировать факт: как проверить версию PHP за 60 секунд',
-      'ui.facts.copyDone': 'Текст скопирован',
-      'ui.facts.copyFailed': 'Не удалось скопировать текст',
-      'ui.facts.shareNote': 'Копируется только текст факта и ссылка на инструмент.',
+      'ui.decision.title': 'У меня старый PHP',
+      'ui.decision.intro':
+        'Пошаговый разбор для веток 8.1 и ниже: обновление, пакеты Sury, managed-хостинг и повторная проверка. Без данных о вашем сервере.',
+      'ui.decision.link': 'Что делать',
+      'ui.decision.aria': 'Что делать со старым PHP — открыть страницу решения',
 
       'ui.badge.title': 'Бейдж для README',
       'ui.badge.intro':
@@ -614,29 +596,11 @@
         'Passive version check: https://haveibeenphpned.github.io/?utm_source=warning&utm_medium=copy&utm_campaign=php2shell\n' +
         'The tool does not exploit the vulnerability and does not publish server data.',
 
-      'ui.facts.title': 'Share facts, not results',
-      'ui.facts.intro':
-        'These cards contain no data about your server. You can publish them as news.',
-      'ui.facts.kicker': 'Fact',
-      'ui.facts.php81.title': 'PHP 8.1: no official fix',
-      'ui.facts.php81.text':
-        'There will be no official PHP release for 8.1, 8.0, 7.x and 5.x. But distributions and Sury publish backported packages: check the package version before you treat the server as vulnerable.',
-      'ui.facts.php81.copy': 'Copy the PHP 8.1 fact',
-      'ui.facts.php81.aria': 'Copy the fact: PHP 8.1 has no official fix',
-      'ui.facts.versions.title': 'Fixed versions',
-      'ui.facts.versions.text':
-        '8.5.12 · 8.4.27 · 8.3.36 · 8.2.35 — upgrade to the fixed release for your branch or newer. Branches below 8.2 will not get a fix.',
-      'ui.facts.versions.copy': 'Copy the versions',
-      'ui.facts.versions.aria': 'Copy the fact: fixed php2shell versions',
-      'ui.facts.check60.title': 'Check your PHP version in 60 seconds',
-      'ui.facts.check60.text':
-        'Run php -v. If the branch is 8.2–8.5 and the version is below the fixed release, upgrade. Only the server itself can show the exact version.',
-      'ui.facts.check60.copy': 'Copy the check',
-      'ui.facts.check60.aria':
-        'Copy the fact: how to check the PHP version in 60 seconds',
-      'ui.facts.copyDone': 'Text copied',
-      'ui.facts.copyFailed': 'Could not copy the text',
-      'ui.facts.shareNote': 'Only the fact text and the tool link are copied.',
+      'ui.decision.title': 'I’m stuck on old PHP',
+      'ui.decision.intro':
+        'A step-by-step guide for branches 8.1 and older: upgrades, Sury packages, managed hosting and a re-check. No data about your server.',
+      'ui.decision.link': 'What to do',
+      'ui.decision.aria': 'What to do about old PHP — open the fix page',
 
       'ui.badge.title': 'README badge',
       'ui.badge.intro':
@@ -1157,29 +1121,11 @@
         'Vérification passive de la version : https://haveibeenphpned.github.io/?utm_source=warning&utm_medium=copy&utm_campaign=php2shell\n' +
         "L'outil n'exploite pas la vulnérabilité et ne publie aucune donnée du serveur.",
 
-      'ui.facts.title': 'Partagez des faits, pas un résultat',
-      'ui.facts.intro':
-        "Ces fiches ne contiennent aucune donnée sur votre serveur. Vous pouvez les publier comme une nouvelle.",
-      'ui.facts.kicker': 'Fait',
-      'ui.facts.php81.title': 'PHP 8.1 : pas de correctif officiel',
-      'ui.facts.php81.text':
-        "Il n’y aura pas de version officielle de PHP pour 8.1, 8.0, 7.x et 5.x. Mais les distributions et Sury publient des paquets rétroportés : vérifiez la version du paquet avant de considérer le serveur comme vulnérable.",
-      'ui.facts.php81.copy': 'Copier le fait sur PHP 8.1',
-      'ui.facts.php81.aria': 'Copier le fait : PHP 8.1 n’a pas de correctif officiel',
-      'ui.facts.versions.title': 'Versions corrigées',
-      'ui.facts.versions.text':
-        "8.5.12 · 8.4.27 · 8.3.36 · 8.2.35 — mettez à jour vers la version corrigée de votre branche ou plus récent. Les branches inférieures à 8.2 ne recevront pas de correctif.",
-      'ui.facts.versions.copy': 'Copier les versions',
-      'ui.facts.versions.aria': 'Copier le fait : versions corrigées de php2shell',
-      'ui.facts.check60.title': 'Vérifiez la version de PHP en 60 secondes',
-      'ui.facts.check60.text':
-        "Exécutez php -v. Si la branche est 8.2–8.5 et la version inférieure à la version corrigée, mettez à jour. Seul le serveur lui-même peut afficher la version exacte.",
-      'ui.facts.check60.copy': 'Copier la vérification',
-      'ui.facts.check60.aria':
-        'Copier le fait : comment vérifier la version de PHP en 60 secondes',
-      'ui.facts.copyDone': 'Texte copié',
-      'ui.facts.copyFailed': 'Impossible de copier le texte',
-      'ui.facts.shareNote': "Seuls le texte du fait et le lien vers l'outil sont copiés.",
+      'ui.decision.title': 'Mon PHP est ancien',
+      'ui.decision.intro':
+        'Un guide pas à pas pour les branches 8.1 et antérieures : mise à jour, paquets Sury, hébergement géré et nouvelle vérification. Aucune donnée sur votre serveur.',
+      'ui.decision.link': 'Que faire',
+      'ui.decision.aria': 'Que faire avec un PHP ancien — ouvrir la page de solution',
 
       'ui.badge.title': 'Badge pour README',
       'ui.badge.intro':

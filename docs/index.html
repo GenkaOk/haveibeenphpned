@@ -158,34 +158,15 @@
       <button id="check-again" class="btn btn--quiet" type="button" data-i18n="ui.actions.again">Проверить снова</button>
     </div>
 
-    <section id="facts" class="info-section facts" aria-labelledby="facts-title">
-      <h2 id="facts-title" data-i18n="ui.facts.title">Поделитесь фактами, а не результатом</h2>
-      <p class="section-intro" data-i18n="ui.facts.intro">Эти карточки не содержат данных о вашем сервере. Их можно публиковать как новость.</p>
-      <div class="fact-grid">
-        <article class="fact-card">
-          <p class="fact-kicker" data-i18n="ui.facts.kicker">Факт</p>
-          <blockquote class="fact-quote" data-i18n="ui.facts.php81.title">PHP 8.1: официального фикса нет</blockquote>
-          <p data-i18n="ui.facts.php81.text">Официального релиза PHP для 8.1, 8.0, 7.x и 5.x не будет. Но дистрибутивы и Sury выпускают пакеты с бэкпортом: проверьте версию пакета, прежде чем считать сервер уязвимым.</p>
-          <button class="btn btn--quiet fact-copy" type="button" data-copy-fact="php81"
-                  data-i18n="ui.facts.php81.copy" aria-label="Скопировать факт: у PHP 8.1 нет официального фикса" data-i18n-aria-label="ui.facts.php81.aria">Скопировать факт о PHP 8.1</button>
-        </article>
-        <article class="fact-card">
-          <p class="fact-kicker" data-i18n="ui.facts.kicker">Факт</p>
-          <blockquote class="fact-quote" data-i18n="ui.facts.versions.title">Исправленные версии</blockquote>
-          <p data-i18n="ui.facts.versions.text">8.5.12 · 8.4.27 · 8.3.36 · 8.2.35 — обновитесь до версии своей ветки или выше. Ветки ниже 8.2 исправлений не получат.</p>
-          <button class="btn btn--quiet fact-copy" type="button" data-copy-fact="versions"
-                  data-i18n="ui.facts.versions.copy" aria-label="Скопировать факт: исправленные версии php2shell" data-i18n-aria-label="ui.facts.versions.aria">Скопировать версии</button>
-        </article>
-        <article class="fact-card">
-          <p class="fact-kicker" data-i18n="ui.facts.kicker">Факт</p>
-          <blockquote class="fact-quote" data-i18n="ui.facts.check60.title">Проверьте версию PHP за 60 секунд</blockquote>
-          <p data-i18n="ui.facts.check60.text">Выполните php -v. Если ветка 8.2–8.5 и версия ниже исправленной, обновитесь. Точную версию покажет только сам сервер.</p>
-          <button class="btn btn--quiet fact-copy" type="button" data-copy-fact="check60"
-                  data-i18n="ui.facts.check60.copy" aria-label="Скопировать факт: как проверить версию PHP за 60 секунд" data-i18n-aria-label="ui.facts.check60.aria">Скопировать инструкцию</button>
-        </article>
+    <section id="decision" class="decision-band" aria-labelledby="decision-title">
+      <div class="decision-copy">
+        <h2 id="decision-title" data-i18n="ui.decision.title">У меня старый PHP</h2>
+        <p data-i18n="ui.decision.intro">Пошаговый разбор для веток 8.1 и ниже: обновление, пакеты Sury, managed-хостинг и повторная проверка. Без данных о вашем сервере.</p>
       </div>
-      <p id="facts-status" class="copy-status" role="status" aria-live="polite"></p>
-      <p class="facts-note" data-i18n="ui.facts.shareNote">Копируется только текст факта и ссылка на инструмент.</p>
+      <div class="decision-action">
+        <a class="fix-cta" data-fix-link
+           data-i18n="ui.decision.link" aria-label="Что делать со старым PHP — открыть страницу решения" data-i18n-aria-label="ui.decision.aria" href="./fix/">Что делать</a>
+      </div>
     </section>
 
     <section class="info-section" aria-labelledby="how-title">

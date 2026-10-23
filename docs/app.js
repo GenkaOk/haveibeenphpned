@@ -32,12 +32,11 @@
   const againButton = document.getElementById('check-again');
   const warnButton = document.getElementById('warn-team');
   const warnStatus = document.getElementById('warn-status');
-  const factsStatus = document.getElementById('facts-status');
   const copyBadgeButton = document.getElementById('copy-badge');
   const badgeStatus = document.getElementById('badge-status');
   const heroLede = document.getElementById('hero-lede');
   const langSwitch = document.getElementById('lang-switch');
-  const fixCta = document.querySelector('.fix-cta');
+  const fixLinks = document.querySelectorAll('[data-fix-link]');
 
   if (!form || !input || !consent || !button || !result) return;
 
@@ -108,7 +107,7 @@
 
   function applyStaticLanguage() {
     I18N.applyStatic(document, currentLang);
-    if (fixCta) fixCta.setAttribute('href', fixPageHref());
+    for (const link of fixLinks) link.setAttribute('href', fixPageHref());
     if (heroLede) {
       heroLede.textContent = t('ui.hero.lede', {
         date: I18N.formatDate(RELEASE_DATE, currentLang, { dateStyle: 'long' }),
@@ -786,24 +785,9 @@
     }
   }
 
-  /* ---------- копирование фактов, а не результата ---------- */
+  /* ---------- копирование нейтрального текста, а не результата ---------- */
 
-  const SITE_URL = 'https://haveibeenphpned.github.io/';
   const statusTimers = new WeakMap();
-
-  /**
-   * Текст факта: заголовок, сам факт и ссылка на инструмент с UTM.
-   * Ни вердикт, ни версия, ни адрес проверенного сервера сюда не попадают.
-   * @param {'php81'|'versions'|'check60'} id
-   */
-  function factText(id) {
-    const params = new URLSearchParams({
-      utm_source: `fact-${id}`,
-      utm_medium: 'copy',
-      utm_campaign: 'php2shell',
-    });
-    return `${t(`ui.facts.${id}.title`)}\n\n${t(`ui.facts.${id}.text`)}\n\n${SITE_URL}?${params.toString()}`;
-  }
 
   function legacyCopy(text) {
     const area = document.createElement('textarea');
@@ -929,17 +913,6 @@
         warnStatus,
         'ui.actions.warnDone',
         'ui.actions.warnFailed',
-      );
-    });
-  }
-
-  for (const button of document.querySelectorAll('[data-copy-fact]')) {
-    button.addEventListener('click', () => {
-      copyText(
-        factText(button.getAttribute('data-copy-fact')),
-        factsStatus,
-        'ui.facts.copyDone',
-        'ui.facts.copyFailed',
       );
     });
   }

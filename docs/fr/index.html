@@ -158,34 +158,15 @@
       <button id="check-again" class="btn btn--quiet" type="button" data-i18n="ui.actions.again">Vérifier à nouveau</button>
     </div>
 
-    <section id="facts" class="info-section facts" aria-labelledby="facts-title">
-      <h2 id="facts-title" data-i18n="ui.facts.title">Partagez des faits, pas un résultat</h2>
-      <p class="section-intro" data-i18n="ui.facts.intro">Ces fiches ne contiennent aucune donnée sur votre serveur. Vous pouvez les publier comme une nouvelle.</p>
-      <div class="fact-grid">
-        <article class="fact-card">
-          <p class="fact-kicker" data-i18n="ui.facts.kicker">Fait</p>
-          <blockquote class="fact-quote" data-i18n="ui.facts.php81.title">PHP 8.1 : pas de correctif officiel</blockquote>
-          <p data-i18n="ui.facts.php81.text">Il n’y aura pas de version officielle de PHP pour 8.1, 8.0, 7.x et 5.x. Mais les distributions et Sury publient des paquets rétroportés : vérifiez la version du paquet avant de considérer le serveur comme vulnérable.</p>
-          <button class="btn btn--quiet fact-copy" type="button" data-copy-fact="php81"
-                  data-i18n="ui.facts.php81.copy" aria-label="Copier le fait : PHP 8.1 n’a pas de correctif officiel" data-i18n-aria-label="ui.facts.php81.aria">Copier le fait sur PHP 8.1</button>
-        </article>
-        <article class="fact-card">
-          <p class="fact-kicker" data-i18n="ui.facts.kicker">Fait</p>
-          <blockquote class="fact-quote" data-i18n="ui.facts.versions.title">Versions corrigées</blockquote>
-          <p data-i18n="ui.facts.versions.text">8.5.12 · 8.4.27 · 8.3.36 · 8.2.35 — mettez à jour vers la version corrigée de votre branche ou plus récent. Les branches inférieures à 8.2 ne recevront pas de correctif.</p>
-          <button class="btn btn--quiet fact-copy" type="button" data-copy-fact="versions"
-                  data-i18n="ui.facts.versions.copy" aria-label="Copier le fait : versions corrigées de php2shell" data-i18n-aria-label="ui.facts.versions.aria">Copier les versions</button>
-        </article>
-        <article class="fact-card">
-          <p class="fact-kicker" data-i18n="ui.facts.kicker">Fait</p>
-          <blockquote class="fact-quote" data-i18n="ui.facts.check60.title">Vérifiez la version de PHP en 60 secondes</blockquote>
-          <p data-i18n="ui.facts.check60.text">Exécutez php -v. Si la branche est 8.2–8.5 et la version inférieure à la version corrigée, mettez à jour. Seul le serveur lui-même peut afficher la version exacte.</p>
-          <button class="btn btn--quiet fact-copy" type="button" data-copy-fact="check60"
-                  data-i18n="ui.facts.check60.copy" aria-label="Copier le fait : comment vérifier la version de PHP en 60 secondes" data-i18n-aria-label="ui.facts.check60.aria">Copier la vérification</button>
-        </article>
+    <section id="decision" class="decision-band" aria-labelledby="decision-title">
+      <div class="decision-copy">
+        <h2 id="decision-title" data-i18n="ui.decision.title">Mon PHP est ancien</h2>
+        <p data-i18n="ui.decision.intro">Un guide pas à pas pour les branches 8.1 et antérieures : mise à jour, paquets Sury, hébergement géré et nouvelle vérification. Aucune donnée sur votre serveur.</p>
       </div>
-      <p id="facts-status" class="copy-status" role="status" aria-live="polite"></p>
-      <p class="facts-note" data-i18n="ui.facts.shareNote">Seuls le texte du fait et le lien vers l&#39;outil sont copiés.</p>
+      <div class="decision-action">
+        <a class="fix-cta" data-fix-link
+           data-i18n="ui.decision.link" aria-label="Que faire avec un PHP ancien — ouvrir la page de solution" data-i18n-aria-label="ui.decision.aria" href="./fix/">Que faire</a>
+      </div>
     </section>
 
     <section class="info-section" aria-labelledby="how-title">
